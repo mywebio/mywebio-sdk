@@ -59,20 +59,7 @@ public class Service extends ${importPrefix}android.app.Service {
 					LocalSocket localSocket = new LocalSocket();
 					try {
 						localSocket.connect(new LocalSocketAddress("/tmp/io.myweb.server"));
-						//OutputStream outputStream = new BufferedOutputStream(localSocket.getOutputStream(), 32 * 1024);
 						endpoint.invoke(uri, request, localSocket, reqId);
-						//PrintStream pw = new PrintStream(outputStream);
-						//pw.print(reqId + "\n");
-						//pw.print("HTTP/1.1 200 OK\r\n");
-						//pw.print("Content-Type: " + response.contentType() + "\r\n");
-						//if (response.length() > 0) {
-						//	pw.print("Content-Length: " + response.length() + "\r\n");
-						//}
-						//pw.print("Connection: keep-alive\r\n\r\n");
-						//pw.flush();
-						//copy(response.inputStream(), outputStream);
-						//pw.close();
-						//outputStream.close();
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
