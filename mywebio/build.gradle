@@ -1,0 +1,43 @@
+apply plugin: 'java'
+
+dependencies {
+    repositories {
+        mavenCentral()
+    }
+    compile project(':mywebio-api')
+    compile 'org.apache.velocity:velocity:1.7'
+    compile 'org.apache.velocity:velocity-tools:2.0'
+    compile 'com.google.guava:guava:17.0'
+    compile 'com.google.android:android:4.0.1.2'
+    compile 'org.apache.commons:commons-lang3:3.3.2'
+    testCompile 'junit:junit:4.11'
+    testCompile 'org.springframework:spring-core:4.0.4.RELEASE'
+    testCompile 'com.google.android:android-test:4.0.1.2'
+}
+
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+
+sourceSets {
+    generated {
+        java { srcDirs = [
+                "$buildDir/generated-test-src/test/java"
+        ] }
+        compileClasspath += sourceSets.main.output
+    }
+}
+
+task copyGen(type: Copy) {
+    from 'src/main/java/io/myweb/gen'
+    into 'src/main/resources/io/myweb/gen'
+    rename { String fileName ->
+        fileName + '_'
+    }
+}
+
+task copyGenWithDeps {
+    inputs.file copyGen
+    outputs.dir "src/main/resources/io/myweb/gen"
+}
+
+compileJava.dependsOn copyGenWithDeps

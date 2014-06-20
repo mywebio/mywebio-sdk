@@ -1,0 +1,6 @@
+include ':mywebio-api',
+        ':mywebio',
+        ':mywebio-example-module',
+        ':mywebio-gallery',
+        ':mywebio-camera',
+        ':mywebio-filemanager'
