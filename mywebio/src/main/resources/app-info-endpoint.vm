@@ -1,0 +1,92 @@
+#* @vtlvariable name="esc" type="org.apache.commons.lang3.StringEscapeUtils" *#
+#* @vtlvariable name="methods" type="java.util.List<io.myweb.model.ParsedMethod>" *#
+package io.myweb;
+
+#set( $json="#parse('app-info-json.vm')")
+
+import android.content.Context;
+import android.net.LocalSocket;
+import android.util.Log;
+
+import java.io.*;
+import java.util.regex.Pattern;
+
+import io.myweb.gen.Endpoint;
+
+public class AppInfoEndpoint extends Endpoint {
+
+    private Context ctx;
+
+    public AppInfoEndpoint(Context ctx) {
+        this.ctx = ctx;
+    }
+
+	@Override
+	public String httpMethod() {
+		return "GET";
+	}
+
+	@Override
+	public String originalPath() {
+		return "/";
+	}
+
+	@Override
+	public Pattern matcher() {
+		return null;
+	}
+
+	@Override
+	public boolean match(String method, String uri) {
+        Log.d("AppInfoEndpoint", "trying to match: " + uri);
+		return ("GET".equals(method) && "/services.json".equals(uri));
+	}
+
+	@Override
+	public FormalParam[] formalParams() {
+		return new FormalParam[0];
+	}
+
+	@Override
+	public ActualParam[] actualParams(String uri, String request) {
+		return new ActualParam[0];
+	}
+
+    private String pkgName() {
+        return ctx.getPackageName();
+    }
+
+    private String appName() {
+        CharSequence charSequence = ctx.getApplicationInfo().loadLabel(ctx.getPackageManager());
+        return charSequence.toString();
+    }
+
+    private final String SERVICES_TEMPL = "$esc.escapeJava($json)";
+
+    private String servicesJson = null;
+
+    private String servicesJson() {
+        synchronized (this) {
+            if (servicesJson == null) {
+                servicesJson = String.format(SERVICES_TEMPL, pkgName(), appName());
+            }
+            return servicesJson;
+        }
+    }
+
+	@Override
+	public void invoke(String uri, String request, LocalSocket localSocket, String reqId) {
+        try {
+            OutputStream outputStream = new BufferedOutputStream(localSocket.getOutputStream(), 32 * 1024);
+            PrintStream pw = new PrintStream(outputStream);
+            writeResponseHeaders(pw, reqId);
+            pw.print("Content-Type: " + "application/json" + "\r\n\r\n");
+            pw.print(servicesJson());
+            pw.flush();
+            pw.close();
+            outputStream.close();
+        } catch (Exception e) {
+            Log.d("AppInfoEndpoint", "", e);
+        }
+	}
+}
