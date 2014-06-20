@@ -1,0 +1,28 @@
+apply plugin: 'java'
+
+sourceCompatibility = 1.6
+targetCompatibility = 1.6
+
+dependencies {
+    repositories {
+        mavenCentral()
+    }
+    compile (project(':mywebio-api')) {
+        exclude group: 'com.google.android', module: 'android'
+    }
+    compile (project(':mywebio')) {
+        exclude group: 'com.google.android', module: 'android'
+    }
+    testCompile 'com.google.guava:guava:17.0'
+    testCompile 'junit:junit:4.11'
+    testCompile 'org.springframework:spring-core:4.0.4.RELEASE'
+    testCompile 'commons-io:commons-io:2.4'
+}
+
+test {
+    // with this you can run gradle test -DDEBUG=true and attach debugger
+    if (System.getProperty('DEBUG', 'false') == 'true') {
+        jvmArgs '-Xdebug', '-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005'
+        testLogging.showStandardStreams = true
+    }
+}
