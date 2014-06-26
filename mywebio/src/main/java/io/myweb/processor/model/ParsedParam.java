@@ -1,4 +1,4 @@
-package io.myweb.model;
+package io.myweb.processor.model;
 
 public class ParsedParam {
 

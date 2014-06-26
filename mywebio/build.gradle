@@ -28,16 +28,19 @@ sourceSets {
 }
 
 task copyGen(type: Copy) {
-    from 'src/main/java/io/myweb/gen'
-    into 'src/main/resources/io/myweb/gen'
+    from('src/main/java/io/myweb/') {
+        include '*.java'
+    }
+    into 'src/main/resources/io/myweb/'
     rename { String fileName ->
         fileName + '_'
     }
+//    includeEmptyDirs = false
 }
 
 task copyGenWithDeps {
     inputs.file copyGen
-    outputs.dir "src/main/resources/io/myweb/gen"
+    outputs.dir "src/main/resources/io/myweb/"
 }
 
 compileJava.dependsOn copyGenWithDeps

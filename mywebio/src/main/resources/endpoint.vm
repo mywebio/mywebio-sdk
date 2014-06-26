@@ -1,4 +1,4 @@
-#* @vtlvariable name="i" type="io.myweb.model.ParsedMethod" *#
+#* @vtlvariable name="i" type="io.myweb.processor.model.ParsedMethod" *#
 /*
  * GENERATED FILE
  */
@@ -13,7 +13,7 @@ import java.io.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import io.myweb.gen.Endpoint;
+import io.myweb.Endpoint;
 
 ## to z zewnątrz
 ###set( $params = new Param("java.lang.String", "cos"))

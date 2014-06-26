@@ -1,4 +1,4 @@
-#* @vtlvariable name="methods" type="java.util.List<io.myweb.model.ParsedMethod>" *#
+#* @vtlvariable name="methods" type="java.util.List<io.myweb.processor.model.ParsedMethod>" *#
 {
     "id": "%s",
     "name": "%s",

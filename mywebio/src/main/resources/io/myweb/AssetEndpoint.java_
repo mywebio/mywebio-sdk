@@ -1,4 +1,4 @@
-package io.myweb.gen;
+package io.myweb;
 
 import android.content.Context;
 import android.content.res.AssetManager;
@@ -42,7 +42,7 @@ public class AssetEndpoint extends Endpoint {
 				Log.d("AssetEndpoint", "matched: " + uri);
 				return true;
 			} catch (IOException e) {
-				Log.d("AssetEndpoint", "not matched: " + uri + " ", e);
+				Log.d("AssetEndpoint", "not matched: " + uri + " (" + e + ")");
 				return false;
 			}
 		}
