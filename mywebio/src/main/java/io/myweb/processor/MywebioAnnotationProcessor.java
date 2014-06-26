@@ -1,8 +1,8 @@
-package io.myweb;
+package io.myweb.processor;
 
 import com.google.common.io.ByteStreams;
-import io.myweb.model.ParsedMethod;
-import io.myweb.model.ParsedParam;
+import io.myweb.processor.model.ParsedMethod;
+import io.myweb.processor.model.ParsedParam;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
@@ -106,8 +106,7 @@ public class MywebioAnnotationProcessor extends AbstractProcessor implements Log
 	}
 
 	private void generateCode(List<ParsedMethod> parsedMethods) {
-		generateEndpointInterface();
-		generateAssetEndpoint();
+		generateSourcesFromResource();
 		VelocityEngine ve = new VelocityEngine();
 		ve.setProperty(VelocityEngine.RUNTIME_LOG_LOGSYSTEM, this);
 		ve.setProperty(RuntimeConstants.RESOURCE_LOADER, "classpath");
@@ -130,33 +129,23 @@ public class MywebioAnnotationProcessor extends AbstractProcessor implements Log
 				return;
 			}
 		}
-
-		List<String> ls = new LinkedList<String>();
-		for (ParsedMethod parsedMethod : parsedMethods) {
-			ls.add("io.myweb." + parsedMethod.getGeneratedClassName());
-		}
-		Template t2 = ve.getTemplate("service.vm");
-		VelocityContext ctx2 = new VelocityContext();
-		ctx2.put("endpoints", ls);
-		ctx2.put("importPrefix", "");
-		Writer w = null;
-		try {
-			Filer filer = processingEnv.getFiler();
-			OutputStream os = filer.createSourceFile("io.myweb.Service").openOutputStream();
-			w = new PrintWriter(os);
-		} catch (IOException e) {
-//				error("Cannot create file: " + e.toString());
-			return;
-		}
-//			log(" template : " + w);
-			t2.merge(ctx2, w);
-//			log(" string : " + w);
-		try {
-			w.close();
-		} catch (IOException e) {
-//			error(e.toString());
-		}
 		generateAppInfoEndpoint(ve, parsedMethods);
+		generateEndpointContainer(ve, parsedMethods);
+	}
+
+	private void generateSourcesFromResource() {
+		String prefix = "/io/myweb/";
+		String[] files = new String[] {
+				prefix + "AssetEndpoint.java_",
+				prefix + "Endpoint.java_",
+				prefix + "RequestTask.java_",
+				prefix + "Server.java_",
+				prefix + "Service.java_",
+				prefix + "ThreadFactories.java_",
+		};
+		for (String file : files) {
+			generateSourceFileFromResource(file, classNameFromResourcePath(file));
+		}
 	}
 
 	private void generateAppInfoEndpoint(VelocityEngine ve, List<ParsedMethod> parsedMethods) {
@@ -181,22 +170,41 @@ public class MywebioAnnotationProcessor extends AbstractProcessor implements Log
 		}
 	}
 
-	private void generateEndpointInterface() {
+	private void generateEndpointContainer(VelocityEngine ve, List<ParsedMethod> parsedMethods) {
+		Template t = ve.getTemplate("endpoint-container.vm");
+		VelocityContext ctx = new VelocityContext();
+		List<String> ls = new LinkedList<String>();
+		for (ParsedMethod parsedMethod : parsedMethods) {
+			ls.add("io.myweb." + parsedMethod.getGeneratedClassName());
+		}
+		ctx.put("endpoints", ls);
+		Writer w = null;
 		try {
-			InputStream is = this.getClass().getResourceAsStream("/io/myweb/gen/Endpoint.java_");
-			OutputStream os = processingEnv.getFiler().createSourceFile("io.myweb.gen.Endpoint").openOutputStream();
-			ByteStreams.copy(is, os);
-			os.close();
-			is.close();
+			OutputStream os = processingEnv.getFiler().createSourceFile("io.myweb.EndpointContainer").openOutputStream();
+			w = new PrintWriter(os);
+//			OutputStream os = filer.createSourceFile("io.web.Service").openOutputStream();
+//			w = new PrintWriter(os);
 		} catch (IOException e) {
-//			error(e.toString());
+//				error("Cannot create file: " + e.toString());
+			return;
+		}
+		t.merge(ctx, w);
+		try {
+			w.close();
+		} catch (IOException e) {
 		}
 	}
 
-	private void generateAssetEndpoint() {
+	private String classNameFromResourcePath(String resourePath) {
+		String noTrailingSlash = resourePath.substring(1);
+		String noJava_ = noTrailingSlash.replace(".java_", "");
+		return noJava_.replaceAll("/", ".");
+	}
+
+	private void generateSourceFileFromResource(String resourcePath, String className) {
 		try {
-			InputStream is = this.getClass().getResourceAsStream("/io/myweb/gen/AssetEndpoint.java_");
-			OutputStream os = processingEnv.getFiler().createSourceFile("io.myweb.gen.AssetEndpoint").openOutputStream();
+			InputStream is = this.getClass().getResourceAsStream(resourcePath);
+			OutputStream os = processingEnv.getFiler().createSourceFile(className).openOutputStream();
 			ByteStreams.copy(is, os);
 			os.close();
 			is.close();

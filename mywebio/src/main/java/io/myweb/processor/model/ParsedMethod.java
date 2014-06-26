@@ -1,4 +1,4 @@
-package io.myweb.model;
+package io.myweb.processor.model;
 
 import android.content.Context;
 import com.google.common.base.Joiner;

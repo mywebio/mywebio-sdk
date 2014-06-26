@@ -1,4 +1,4 @@
-package io.myweb.gen;
+package io.myweb;
 
 import android.net.LocalSocket;
 

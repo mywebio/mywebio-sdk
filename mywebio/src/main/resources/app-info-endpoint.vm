@@ -1,5 +1,5 @@
 #* @vtlvariable name="esc" type="org.apache.commons.lang3.StringEscapeUtils" *#
-#* @vtlvariable name="methods" type="java.util.List<io.myweb.model.ParsedMethod>" *#
+#* @vtlvariable name="methods" type="java.util.List<io.myweb.processor.model.ParsedMethod>" *#
 package io.myweb;
 
 #set( $json="#parse('app-info-json.vm')")
@@ -11,7 +11,7 @@ import android.util.Log;
 import java.io.*;
 import java.util.regex.Pattern;
 
-import io.myweb.gen.Endpoint;
+import io.myweb.Endpoint;
 
 public class AppInfoEndpoint extends Endpoint {
 
@@ -77,14 +77,11 @@ public class AppInfoEndpoint extends Endpoint {
 	@Override
 	public void invoke(String uri, String request, LocalSocket localSocket, String reqId) {
         try {
-            OutputStream outputStream = new BufferedOutputStream(localSocket.getOutputStream(), 32 * 1024);
-            PrintStream pw = new PrintStream(outputStream);
-            writeResponseHeaders(pw, reqId);
-            pw.print("Content-Type: " + "application/json" + "\r\n\r\n");
-            pw.print(servicesJson());
-            pw.flush();
-            pw.close();
-            outputStream.close();
+            OutputStream os = new BufferedOutputStream(localSocket.getOutputStream(), 32 * 1024);
+            writeResponseHeaders(os, reqId);
+            os.write(("Content-Type: " + "application/json" + "\r\n\r\n").getBytes());
+            os.write(servicesJson().getBytes());
+            os.flush();
         } catch (Exception e) {
             Log.d("AppInfoEndpoint", "", e);
         }
