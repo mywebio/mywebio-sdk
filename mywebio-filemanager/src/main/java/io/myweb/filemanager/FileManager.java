@@ -12,7 +12,7 @@ import java.io.IOException;
 
 public class FileManager {
 
-	@GET("/sd/*filename")
+	@GET("/*filename")
 	public HttpResponse file(String filename) throws IOException {
 		File sdCard = Environment.getExternalStorageDirectory();
 		String sdCardPath = sdCard.getAbsolutePath() + "/";
