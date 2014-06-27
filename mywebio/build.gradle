@@ -1,4 +1,5 @@
 apply plugin: 'java'
+apply plugin: 'maven-publish'
 
 dependencies {
     repositories {
@@ -11,9 +12,6 @@ dependencies {
     compile 'com.google.android:android:4.0.1.2'
     compile 'org.apache.commons:commons-lang3:3.3.2'
 }
-
-sourceCompatibility = 1.6
-targetCompatibility = 1.6
 
 task copyGen(type: Copy) {
     from('src/main/java/io/myweb/') {
@@ -32,3 +30,15 @@ task copyGenWithDeps {
 }
 
 compileJava.dependsOn copyGenWithDeps
+
+group = projectIds.group
+version = projectIds.version
+
+publishing {
+    publications {
+        plugin(MavenPublication) {
+            from components.java
+            artifactId 'mywebio'
+        }
+    }
+}
