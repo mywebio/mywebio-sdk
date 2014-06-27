@@ -27,12 +27,6 @@ public abstract class Endpoint {
 		os.write("Connection: keep-alive\r\n".getBytes());
 	}
 
-	public abstract class Response {
-		public abstract String contentType();
-		public abstract long length();
-		public abstract InputStream inputStream();
-	}
-
 	public interface FormalParam {
 		int id();
 		String type();
