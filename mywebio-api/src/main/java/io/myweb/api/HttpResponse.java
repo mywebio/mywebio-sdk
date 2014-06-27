@@ -1,13 +1,14 @@
 package io.myweb.api;
 
-import java.io.ByteArrayInputStream;
+import org.json.JSONObject;
+
 import java.io.InputStream;
 
 public class HttpResponse {
 
 	private String mimeType;
 
-	private InputStream inputStream;
+	private Object body;
 
 	private int statusCode;
 
@@ -27,8 +28,8 @@ public class HttpResponse {
 		return mimeType;
 	}
 
-	public InputStream getInputStream() {
-		return inputStream;
+	public Object getBody() {
+		return body;
 	}
 
 	public HttpResponse withMimeType(String mimeType) {
@@ -40,23 +41,23 @@ public class HttpResponse {
 		return withMimeType(MimeTypes.getMimeType(filename));
 	}
 
-	public HttpResponse ok(InputStream inputStream) {
-		this.inputStream = inputStream;
-		return this;
-	}
-
 	public HttpResponse withStatusCode(int code) {
 		this.statusCode = code;
 		return this;
 	}
 
 	public HttpResponse withBody(String s) {
-		this.inputStream = new ByteArrayInputStream(s.getBytes());
+		this.body = s;
 		return this;
 	}
 
 	public HttpResponse withBody(InputStream is) {
-		this.inputStream = is;
+		this.body = is;
+		return this;
+	}
+
+	public HttpResponse withBody(JSONObject jsonObject) {
+		this.body = jsonObject;
 		return this;
 	}
 
@@ -72,9 +73,4 @@ public class HttpResponse {
 	public long getContentLength() {
 		return contentLength;
 	}
-
-	// ok(String)
-
-	//withCustomHeader()
-	//withContentLength()
 }

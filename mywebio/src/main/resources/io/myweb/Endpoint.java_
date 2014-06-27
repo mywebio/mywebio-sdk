@@ -42,18 +42,4 @@ public abstract class Endpoint {
 	public interface ActualParam {
 		Object val();
 	}
-
-	protected long copy(InputStream from, OutputStream to) throws IOException {
-		byte[] buf = new byte[32 * 1024];
-		long total = 0;
-		while (true) {
-			int r = from.read(buf);
-			if (r == -1) {
-				break;
-			}
-			to.write(buf, 0, r);
-			total += r;
-		}
-		return total;
-	}
 }

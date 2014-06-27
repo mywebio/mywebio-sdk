@@ -14,6 +14,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import io.myweb.Endpoint;
+import io.myweb.ResponseBuilder;
 
 ## to z zewnątrz
 ###set( $params = new Param("java.lang.String", "cos"))
@@ -137,33 +138,8 @@ public class $i.generatedClassName extends Endpoint {
             OutputStream os = new BufferedOutputStream(localSocket.getOutputStream(), 32 * 1024);
             writeResponseHeaders(os, reqId);
             final ${i.destMethodRetType} resp = new ${i.destClass}().${i.destMethod}($i.paramsJavaSrc);
-            String mime;
-            long length;
-#if($i.destMethodRetType == "java.lang.String")
-            length = resp.length();
-            InputStream is = new ByteArrayInputStream(resp.getBytes());
-            mime = "$i.produces";
-#elseif($i.destMethodRetType == "java.io.InputStream")
-            length = 0;
-            InputStream is = resp;
-            mime = "$i.produces";
-#elseif($i.destMethodRetType == "io.myweb.api.HttpResponse")
-            length = resp.getContentLength();
-            InputStream is = resp.getInputStream();
-            if (resp.getMimeType() == null) {
-                mime = "$i.produces";
-            } else {
-                mime = resp.getMimeType();
-            }
-#end
-            if (length > 0) {
-                os.write(("Content-Length: " + length + "\r\n").getBytes());
-            }
-            os.write(("Content-Type: " + mime + "\r\n").getBytes());
-            os.write("\r\n".getBytes());
-            os.flush();
-            copy(is, os);
-            os.close();
+            ResponseBuilder responseBuilder = new ResponseBuilder();
+            responseBuilder.writeResponse(resp, "${i.produces}", os);
         } catch (Exception e) {
             Log.d("Endpoint", "error during invoke", e);
         }
