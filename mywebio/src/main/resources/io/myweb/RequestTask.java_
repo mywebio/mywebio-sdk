@@ -14,6 +14,8 @@ public class RequestTask implements Runnable {
 
 	private static final String TAG = "myweb.io";
 
+	private static final String INDEX_HTML = "/index.html";
+
 	private LocalSocket socket;
 
 	private Context context;
@@ -105,10 +107,16 @@ public class RequestTask implements Runnable {
 	public void findAndInvokeEndpoint(final String request, final String reqId) {
 		String firstLine = request.substring(0, request.indexOf("\n"));
 		String[] split = firstLine.split(" ");
-		final String method = split[0];
-		final String uri = split[1];
-		Endpoint endpoint = findEndpoint(method, uri);
-		endpoint.invoke(uri, request, socket, reqId);
+		String method = split[0];
+		String uri = split[1];
+		String effectiveUri = uri;
+		Endpoint endpoint = findEndpoint(method, effectiveUri);
+		// TODO think how to handle better default requests (like "/index.html" on "/")
+		if (("/".equals(uri) || "".equals(uri)) && endpoint == null) {
+			effectiveUri = INDEX_HTML;
+			endpoint = findEndpoint(method, effectiveUri);
+		}
+		endpoint.invoke(effectiveUri, request, socket, reqId);
 		// TODO HTTP 500
 	}
 
@@ -118,41 +126,6 @@ public class RequestTask implements Runnable {
 				return endpoint;
 			}
 		}
-		return new Endpoint() {
-			@Override
-			public String httpMethod() {
-				return "GET";
-			}
-
-			@Override
-			public String originalPath() {
-				return "/";
-			}
-
-			@Override
-			public Pattern matcher() {
-				return Pattern.compile(originalPath());
-			}
-
-			@Override
-			public boolean match(String method, String uri) {
-				return false;
-			}
-
-			@Override
-			public FormalParam[] formalParams() {
-				return new FormalParam[0];
-			}
-
-			@Override
-			public ActualParam[] actualParams(String uri, String request) {
-				return new ActualParam[0];
-			}
-
-			@Override
-			public void invoke(String uri, String request, LocalSocket localSocket, String reqId) {
-				throw new RuntimeException("implement!");
-			}
-		};
+		return null;
 	}
 }
