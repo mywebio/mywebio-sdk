@@ -19,4 +19,10 @@ public class Ex1 {
 	public InputStream inputStream(Context ctx) throws IOException {
 		return ctx.getAssets().open("webio/thumbs/IMG_20140503_073604.jpg");
 	}
+
+	@GET("/")
+	public String slash() {
+		return "served from @GET(\"/\")";
+	}
+
 }
