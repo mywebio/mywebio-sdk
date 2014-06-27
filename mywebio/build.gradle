@@ -24,6 +24,9 @@ task copyGen(type: Copy) {
 //    includeEmptyDirs = false
 }
 
+sourceCompatibility = 1.6
+targetCompatibility = 1.6
+
 task copyGenWithDeps {
     inputs.file copyGen
     outputs.dir "src/main/resources/io/myweb/"
