@@ -64,17 +64,21 @@ public class ParsedMethod {
 		String pathNoParams = cutParamsFromUrl(getHttpUri());
 		String[] pathSplit = pathNoParams.split("/");
 		StringBuilder patternSb = new StringBuilder();
-		for (String pathElm : pathSplit) {
-			if ("".equals(pathElm)) {
-				// NOP
-			} else if (pathElm.startsWith(":")) {
-				// TODO store group names
-				patternSb.append("/([^/]+)");
-			} else if (pathElm.startsWith("*")) {
-				// TODO store group names
-				patternSb.append("/(.*?)");
-			} else {
-				patternSb.append("/").append(pathElm);
+		if (pathSplit.length == 0) {
+			patternSb.append("/");
+		} else {
+			for (String pathElm : pathSplit) {
+				if ("".equals(pathElm)) {
+					// NOP
+				} else if (pathElm.startsWith(":")) {
+					// TODO store group names
+					patternSb.append("/([^/]+)");
+				} else if (pathElm.startsWith("*")) {
+					// TODO store group names
+					patternSb.append("/(.*?)");
+				} else {
+					patternSb.append("/").append(pathElm);
+				}
 			}
 		}
 		return patternSb.toString();
