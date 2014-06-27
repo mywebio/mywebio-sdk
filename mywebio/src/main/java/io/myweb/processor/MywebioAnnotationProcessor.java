@@ -139,6 +139,7 @@ public class MywebioAnnotationProcessor extends AbstractProcessor implements Log
 				prefix + "AssetEndpoint.java_",
 				prefix + "Endpoint.java_",
 				prefix + "RequestTask.java_",
+				prefix + "ResponseBuilder.java_",
 				prefix + "Server.java_",
 				prefix + "Service.java_",
 				prefix + "ThreadFactories.java_",

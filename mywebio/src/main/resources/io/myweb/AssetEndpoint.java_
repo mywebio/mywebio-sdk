@@ -66,11 +66,9 @@ public class AssetEndpoint extends Endpoint {
 			String contentType = MimeTypes.getMimeType(uri);
 			OutputStream os = new BufferedOutputStream(localSocket.getOutputStream(), 32 * 1024);
 			writeResponseHeaders(os, reqId);
-			os.write(("Content-Type: " + contentType + "\r\n\r\n").getBytes());
-			os.flush();
 			InputStream is = assetManager.open("webio" + uri);
-			copy(is, os);
-			os.close();
+			ResponseBuilder responseBuilder = new ResponseBuilder();
+			responseBuilder.writeResponse(is, contentType, os);
 		} catch (IOException e) {
 			Log.e("AssetEndpoint", "error during invoke", e);
 		}
