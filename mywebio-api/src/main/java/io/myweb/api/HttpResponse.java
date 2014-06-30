@@ -14,14 +14,20 @@ public class HttpResponse {
 
 	private long contentLength;
 
-	private HttpResponse() {}
-
-	public static HttpResponse create() {
-		return new HttpResponse();
+	private HttpResponse(int statusCode) {
+		this.statusCode = statusCode;
 	}
 
-	public HttpResponse ok() {
-		return withStatusCode(200);
+	private static HttpResponse newWithStatusCode(int statusCode) {
+		return new HttpResponse(statusCode);
+	}
+
+	public static HttpResponse ok() {
+		return HttpResponse.newWithStatusCode(200);
+	}
+
+	public static HttpResponse notFound() {
+		return HttpResponse.newWithStatusCode(404);
 	}
 
 	public String getMimeType() {
@@ -39,11 +45,6 @@ public class HttpResponse {
 
 	public HttpResponse withMimeTypeFromFilename(String filename) {
 		return withMimeType(MimeTypes.getMimeType(filename));
-	}
-
-	public HttpResponse withStatusCode(int code) {
-		this.statusCode = code;
-		return this;
 	}
 
 	public HttpResponse withBody(String s) {
