@@ -81,6 +81,7 @@ public class MimeTypes {
 	public static final String MIME_IMAGE_X_PORTABLE_GRAYMAP  = "image/x-portable-graymap";
 	public static final String MIME_IMAGE_X_PORTABLE_PIXMAP   = "image/x-portable-pixmap";
 	public static final String MIME_IMAGE_X_RGB         = "image/x-rgb";
+	public static final String MIME_INODE_DIRECTORY = "inode/directory";
 	public static final String MIME_AUDIO_BASIC         = "audio/basic";
 	public static final String MIME_AUDIO_MIDI          = "audio/midi";
 	public static final String MIME_AUDIO_MPEG          = "audio/mpeg";
@@ -113,6 +114,7 @@ public class MimeTypes {
 	public static final String MIME_VIDEO_X_MS_WMV        = "video/x-ms-wmv";
 	public static final String MIME_VIDEO_X_SGI_MOVIE     = "video/x-sgi-movie";
 	public static final String MIME_X_CONFERENCE_X_COOLTALK   = "x-conference/x-cooltalk";
+
 
 	private static HashMap<String, String> mimeTypeMapping;
 
