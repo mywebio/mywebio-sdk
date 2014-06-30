@@ -44,37 +44,37 @@ public class ResponseBuilder {
 		os.close();
 	}
 
-	private void writeLengthAndBody(long explicitLength, Object body, OutputStream os) throws IOException, JSONException {
+	private void writeLengthAndBody(long userDefinedLength, Object body, OutputStream os) throws IOException, JSONException {
 		if (body instanceof String) {
-			writeLengthAndBody(explicitLength, (String) body, os);
+			writeLengthAndBody(userDefinedLength, (String) body, os);
 		} else if (body instanceof InputStream) {
-			writeLengthAndBody(explicitLength, (InputStream) body, os);
+			writeLengthAndBody(userDefinedLength, (InputStream) body, os);
 		} else if (body instanceof JSONObject) {
-			writeLengthAndBody(explicitLength, (JSONObject) body, os);
+			writeLengthAndBody(userDefinedLength, (JSONObject) body, os);
 		} else {
 			throw new RuntimeException("unsupported type: " + body.getClass());
 		}
 	}
 
-	private void writeLengthAndBody(long explicitLength, String body, OutputStream os) throws IOException {
-		writeLengthAndCrlf(explicitLength, body.length(), os);
+	private void writeLengthAndBody(long userDefinedLength, String body, OutputStream os) throws IOException {
+		writeLengthAndCrlf(userDefinedLength, body.length(), os);
 		os.write(body.getBytes());
 	}
 
-	private void writeLengthAndBody(long explicitLength, InputStream body, OutputStream os) throws IOException {
-		writeLengthAndCrlf(explicitLength, 0, os);
+	private void writeLengthAndBody(long userDefinedLength, InputStream body, OutputStream os) throws IOException {
+		writeLengthAndCrlf(userDefinedLength, 0, os);
 		copy(body, os);
 	}
 
-	private void writeLengthAndBody(long explicitLength, JSONObject body, OutputStream os) throws IOException, JSONException {
+	private void writeLengthAndBody(long userDefinedLength, JSONObject body, OutputStream os) throws IOException, JSONException {
 		String bodyStr = body.toString(2);
-		writeLengthAndCrlf(explicitLength, bodyStr.length(), os);
+		writeLengthAndCrlf(userDefinedLength, bodyStr.length(), os);
 		os.write(bodyStr.getBytes());
 	}
 
-	private void writeLengthAndCrlf(long explicitLength, long bodyLength, OutputStream os) throws IOException {
-		if (explicitLength > 0) {
-			os.write((CONTENT_LENGTH + explicitLength + CRLF).getBytes());
+	private void writeLengthAndCrlf(long userDefinedLength, long bodyLength, OutputStream os) throws IOException {
+		if (userDefinedLength > 0) {
+			os.write((CONTENT_LENGTH + userDefinedLength + CRLF).getBytes());
 		} else {
 			os.write((CONTENT_LENGTH + bodyLength + CRLF).getBytes());
 		}
