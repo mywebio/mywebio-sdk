@@ -15,6 +15,7 @@ public class RequestTask implements Runnable {
 	private static final String TAG = "myweb.io";
 
 	private static final String INDEX_HTML = "/index.html";
+	private static final String SERVICES_JSON = "/services.json";
 
 	private LocalSocket socket;
 
@@ -114,6 +115,10 @@ public class RequestTask implements Runnable {
 		// TODO think how to handle better default requests (like "/index.html" on "/")
 		if (("/".equals(uri) || "".equals(uri)) && endpoint == null) {
 			effectiveUri = INDEX_HTML;
+			endpoint = findEndpoint(method, effectiveUri);
+		}
+		if (("/".equals(uri) || "".equals(uri)) && endpoint == null) {
+			effectiveUri = SERVICES_JSON;
 			endpoint = findEndpoint(method, effectiveUri);
 		}
 		endpoint.invoke(effectiveUri, request, socket, reqId);
