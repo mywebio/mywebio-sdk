@@ -58,7 +58,7 @@ public class HttpResponse {
 
 	public HttpResponse withBody(JSONObject jsonObject) {
 		this.body = jsonObject;
-		return this;
+		return withMimeType(MimeTypes.MIME_APPLICATION_JSON);
 	}
 
 	public HttpResponse withContentLength(long length) {
