@@ -15,6 +15,6 @@ public class Ex7 {
 
 //	@GET("/response")
 	public HttpResponse response() {
-		return HttpResponse.create().ok();
+		return HttpResponse.ok();
 	}
 }

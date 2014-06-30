@@ -38,8 +38,7 @@ public class FileManager {
 	private HttpResponse fileContent(File file) throws FileNotFoundException {
 		FileInputStream fis = new FileInputStream(file);
 		long length = file.length();
-		return HttpResponse.create()
-				.ok()
+		return HttpResponse.ok()
 				.withBody(fis)
 				.withContentLength(length)
 				.withMimeTypeFromFilename(file.getName());
@@ -49,8 +48,7 @@ public class FileManager {
 		JSONObject dirJson = new JSONObject();
 		dirJson.put(JSON_PWD, dir);
 		dirJson.put(JSON_LS, listFilesInJson(dir, file));
-		return HttpResponse.create()
-				.ok()
+		return HttpResponse.ok()
 				.withBody(dirJson);
 	}
 

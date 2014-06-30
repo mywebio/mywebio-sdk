@@ -62,7 +62,7 @@ public class ExampleWebModuleService {
 
 //	@GET("/response")
 	public HttpResponse response() {
-		return HttpResponse.create().ok();
+		return HttpResponse.ok();
 	}
 
 //	@GET("/chunked-response")
