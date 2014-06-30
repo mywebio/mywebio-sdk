@@ -17,7 +17,7 @@ public class ResponseBuilder {
 
 	public static final int BUFFER_LENGTH = 32 * 1024;
 
-	public void writeResponse(String srcString, String produces, OutputStream os) throws IOException {
+	public void writeResponse(String produces, String srcString, OutputStream os) throws IOException {
 		os.write((CONTENT_TYPE + produces + CRLF).getBytes());
 		os.write((CONTENT_LENGTH + srcString.length() + CRLF).getBytes());
 		os.write(CRLF.getBytes());
@@ -25,14 +25,14 @@ public class ResponseBuilder {
 		os.close();
 	}
 
-	public void writeResponse(InputStream srcInputStream, String produces, OutputStream os) throws IOException {
+	public void writeResponse(String produces, InputStream srcInputStream, OutputStream os) throws IOException {
 		os.write((CONTENT_TYPE + produces + CRLF).getBytes());
 		os.write(CRLF.getBytes());
 		copy(srcInputStream, os);
 		os.close();
 	}
 
-	public void writeResponse(HttpResponse srcHttpResponse, String produces, OutputStream os) throws IOException, JSONException {
+	public void writeResponse(String produces, HttpResponse srcHttpResponse, OutputStream os) throws IOException, JSONException {
 		String mime;
 		if (srcHttpResponse.getMimeType() == null) {
 			mime = produces;
@@ -57,32 +57,28 @@ public class ResponseBuilder {
 	}
 
 	private void writeLengthAndBody(long explicitLength, String body, OutputStream os) throws IOException {
-		if (explicitLength > 0) {
-			os.write((CONTENT_LENGTH + explicitLength + CRLF).getBytes());
-		} else {
-			os.write((CONTENT_LENGTH + body.length() + CRLF).getBytes());
-		}
-		os.write(CRLF.getBytes());
+		writeLengthAndCrlf(explicitLength, body.length(), os);
 		os.write(body.getBytes());
 	}
 
 	private void writeLengthAndBody(long explicitLength, InputStream body, OutputStream os) throws IOException {
-		if (explicitLength > 0) {
-			os.write((CONTENT_LENGTH + explicitLength + CRLF).getBytes());
-		}
-		os.write(CRLF.getBytes());
+		writeLengthAndCrlf(explicitLength, 0, os);
 		copy(body, os);
 	}
 
 	private void writeLengthAndBody(long explicitLength, JSONObject body, OutputStream os) throws IOException, JSONException {
 		String bodyStr = body.toString(2);
+		writeLengthAndCrlf(explicitLength, bodyStr.length(), os);
+		os.write(bodyStr.getBytes());
+	}
+
+	private void writeLengthAndCrlf(long explicitLength, long bodyLength, OutputStream os) throws IOException {
 		if (explicitLength > 0) {
 			os.write((CONTENT_LENGTH + explicitLength + CRLF).getBytes());
 		} else {
-			os.write((CONTENT_LENGTH + bodyStr.length() + CRLF).getBytes());
+			os.write((CONTENT_LENGTH + bodyLength + CRLF).getBytes());
 		}
 		os.write(CRLF.getBytes());
-		os.write(bodyStr.getBytes());
 	}
 
 	private long copy(InputStream from, OutputStream to) throws IOException {

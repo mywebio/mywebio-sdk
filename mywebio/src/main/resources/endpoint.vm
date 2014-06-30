@@ -139,7 +139,7 @@ public class $i.generatedClassName extends Endpoint {
             writeResponseHeaders(os, reqId);
             final ${i.destMethodRetType} resp = new ${i.destClass}().${i.destMethod}($i.paramsJavaSrc);
             ResponseBuilder responseBuilder = new ResponseBuilder();
-            responseBuilder.writeResponse(resp, "${i.produces}", os);
+            responseBuilder.writeResponse("${i.produces}", resp, os);
         } catch (Exception e) {
             Log.d("Endpoint", "error during invoke", e);
         }

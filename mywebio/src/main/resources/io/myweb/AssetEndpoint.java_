@@ -68,7 +68,7 @@ public class AssetEndpoint extends Endpoint {
 			writeResponseHeaders(os, reqId);
 			InputStream is = assetManager.open("webio" + uri);
 			ResponseBuilder responseBuilder = new ResponseBuilder();
-			responseBuilder.writeResponse(is, contentType, os);
+			responseBuilder.writeResponse(contentType, is, os);
 		} catch (IOException e) {
 			Log.e("AssetEndpoint", "error during invoke", e);
 		}
