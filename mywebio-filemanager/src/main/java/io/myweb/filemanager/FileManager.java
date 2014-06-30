@@ -53,11 +53,7 @@ public class FileManager {
 	}
 
 	private String noEndingSlashes(String str) {
-		if (str.endsWith(SLASH)) {
-			return str.substring(0, str.length() - 1);
-		} else {
-			return str;
-		}
+		return str.endsWith(SLASH) ? str.substring(0, str.length() - 1) : str;
 	}
 
 	private JSONArray listFilesInJson(String dir, File file) throws JSONException {
