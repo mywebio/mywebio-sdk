@@ -124,9 +124,9 @@ public class $i.generatedClassName extends Endpoint {
 			ActualParam[] ap = actualParams(uri, request);
             OutputStream os = outputStream(localSocket);
             writeResponseHeaders(os, reqId);
-            final ${i.destMethodRetType} resp = new ${i.destClass}().${i.destMethod}($i.paramsJavaSrc);
+            final ${i.destMethodRetType} respFromUserCode = new ${i.destClass}().${i.destMethod}($i.paramsJavaSrc);
             ResponseBuilder responseBuilder = new ResponseBuilder();
-            responseBuilder.writeResponse("${i.produces}", resp, os);
+            responseBuilder.writeResponse("${i.produces}", respFromUserCode, os);
         } catch (Exception e) {
             Log.d("Endpoint", "error during invoke", e);
         }
