@@ -59,7 +59,7 @@ public class AssetEndpoint extends Endpoint {
 		AssetManager assetManager = ctx.getAssets();
 		try {
 			String contentType = MimeTypes.getMimeType(uri);
-			OutputStream os = new BufferedOutputStream(localSocket.getOutputStream(), 32 * 1024);
+			OutputStream os = outputStream(localSocket);
 			writeResponseHeaders(os, reqId);
 			InputStream is = assetManager.open("webio" + uri);
 			ResponseBuilder responseBuilder = new ResponseBuilder();

@@ -122,7 +122,7 @@ public class $i.generatedClassName extends Endpoint {
 	public void invoke(String uri, String request, LocalSocket localSocket, String reqId) {
 		try {
 			ActualParam[] ap = actualParams(uri, request);
-            OutputStream os = new BufferedOutputStream(localSocket.getOutputStream(), 32 * 1024);
+            OutputStream os = outputStream(localSocket);
             writeResponseHeaders(os, reqId);
             final ${i.destMethodRetType} resp = new ${i.destClass}().${i.destMethod}($i.paramsJavaSrc);
             ResponseBuilder responseBuilder = new ResponseBuilder();
