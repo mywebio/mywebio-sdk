@@ -72,7 +72,7 @@ public class AppInfoEndpoint extends Endpoint {
 	@Override
 	public void invoke(String uri, String request, LocalSocket localSocket, String reqId) {
         try {
-            OutputStream os = new BufferedOutputStream(localSocket.getOutputStream(), 32 * 1024);
+            OutputStream os = outputStream(localSocket);
             writeResponseHeaders(os, reqId);
             os.write(("Content-Type: application/json\r\n\r\n").getBytes());
             os.write(servicesJson().getBytes());
