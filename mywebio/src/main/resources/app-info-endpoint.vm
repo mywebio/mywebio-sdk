@@ -74,7 +74,7 @@ public class AppInfoEndpoint extends Endpoint {
         try {
             OutputStream os = new BufferedOutputStream(localSocket.getOutputStream(), 32 * 1024);
             writeResponseHeaders(os, reqId);
-            os.write(("Content-Type: " + "application/json" + "\r\n\r\n").getBytes());
+            os.write(("Content-Type: application/json\r\n\r\n").getBytes());
             os.write(servicesJson().getBytes());
             os.flush();
         } catch (Exception e) {
