@@ -3,7 +3,6 @@ package io.myweb;
 import android.net.LocalSocket;
 
 import java.io.*;
-import java.util.regex.Pattern;
 
 public abstract class Endpoint {
 
