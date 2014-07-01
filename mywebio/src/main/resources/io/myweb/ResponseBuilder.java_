@@ -75,7 +75,7 @@ public class ResponseBuilder {
 	private void writeLengthAndCrlf(long userDefinedLength, long bodyLength, OutputStream os) throws IOException {
 		if (userDefinedLength > 0) {
 			os.write((CONTENT_LENGTH + userDefinedLength + CRLF).getBytes());
-		} else {
+		} else if (bodyLength > 0) {
 			os.write((CONTENT_LENGTH + bodyLength + CRLF).getBytes());
 		}
 		os.write(CRLF.getBytes());
