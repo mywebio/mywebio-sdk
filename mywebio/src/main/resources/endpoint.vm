@@ -31,19 +31,16 @@ public class $i.generatedClassName extends Endpoint {
         this.context = context;
     }
 
-    @Override
     public String httpMethod() {
         return "$i.httpMethod";
     }
 
-    @Override
     public String originalPath() {
         return "$i.httpUri";
     }
 
     private String patternStr = "$i.patternStr";
 
-    @Override
     public Pattern matcher() {
         return Pattern.compile(patternStr);
     }
@@ -60,8 +57,6 @@ public class $i.generatedClassName extends Endpoint {
         return matched;
     }
 
-    ## formal parameters of method $delegateeClass().$delegateeMethod
-    @Override
 	public FormalParam[] formalParams() {
 		return new FormalParam[] {
 			new FormalParam() {
@@ -99,7 +94,6 @@ public class $i.generatedClassName extends Endpoint {
 		};
 	}
 
-    @Override
     public ActualParam[] actualParams(String uri, String request) {
 		Matcher m = matcher().matcher(uri);
 		final String[] matchedGroups;

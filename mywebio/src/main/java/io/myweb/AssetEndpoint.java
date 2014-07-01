@@ -17,17 +17,14 @@ public class AssetEndpoint extends Endpoint {
 		this.ctx = ctx;
 	}
 
-	@Override
 	public String httpMethod() {
 		return "GET";
 	}
 
-	@Override
 	public String originalPath() {
 		return "/";
 	}
 
-	@Override
 	public Pattern matcher() {
 		return null;
 	}
@@ -49,12 +46,10 @@ public class AssetEndpoint extends Endpoint {
 		return false;
 	}
 
-	@Override
 	public FormalParam[] formalParams() {
 		return new FormalParam[0];
 	}
 
-	@Override
 	public ActualParam[] actualParams(String uri, String request) {
 		return new ActualParam[0];
 	}

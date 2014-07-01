@@ -7,17 +7,7 @@ import java.util.regex.Pattern;
 
 public abstract class Endpoint {
 
-	public abstract String httpMethod();
-
-	public abstract String originalPath();
-
-	public abstract Pattern matcher();
-
 	public abstract boolean match(String method, String uri);
-
-	public abstract FormalParam[] formalParams();
-
-	public abstract ActualParam[] actualParams(String uri, String request);
 
 	public abstract void invoke(String uri, String request, LocalSocket localSocket, String reqId);
 
