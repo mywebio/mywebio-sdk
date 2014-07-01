@@ -11,10 +11,8 @@ import java.util.regex.Pattern;
 
 public class AssetEndpoint extends Endpoint {
 
-	private Context ctx;
-
-	public AssetEndpoint(Context ctx) {
-		this.ctx = ctx;
+	public AssetEndpoint(Context context) {
+		super(context);
 	}
 
 	public String httpMethod() {
@@ -33,7 +31,7 @@ public class AssetEndpoint extends Endpoint {
 	public boolean match(String method, String uri) {
 		Log.d("AssetEndpoint", "trying to match: " + uri);
 		if ("GET".equals(method)) {
-			AssetManager assetManager = ctx.getAssets();
+			AssetManager assetManager = getContext().getAssets();
 			try {
 				assetManager.open("webio" + uri).close();
 				Log.d("AssetEndpoint", "matched: " + uri);
@@ -56,7 +54,7 @@ public class AssetEndpoint extends Endpoint {
 
 	@Override
 	public void invoke(String uri, String request, LocalSocket localSocket, String reqId) {
-		AssetManager assetManager = ctx.getAssets();
+		AssetManager assetManager = getContext().getAssets();
 		try {
 			String contentType = MimeTypes.getMimeType(uri);
 			OutputStream os = outputStream(localSocket);

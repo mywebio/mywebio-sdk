@@ -1,5 +1,6 @@
 package io.myweb;
 
+import android.content.Context;
 import android.net.LocalSocket;
 
 import java.io.*;
@@ -7,6 +8,16 @@ import java.io.*;
 public abstract class Endpoint {
 
 	public static final int OUTPUT_STREAM_BUFFER_SIZE = 32 * 1024;
+
+	private Context context;
+
+	public Endpoint(Context context) {
+		this.context = context;
+	}
+
+	protected Context getContext() {
+		return context;
+	}
 
 	public abstract boolean match(String method, String uri);
 

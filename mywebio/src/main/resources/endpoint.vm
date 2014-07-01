@@ -18,10 +18,8 @@ import io.myweb.ResponseBuilder;
 
 public class $i.generatedClassName extends Endpoint {
 
-    private Context context;
-
     public ${i.generatedClassName}(Context context) {
-        this.context = context;
+        super(context);
     }
 
     public String httpMethod() {

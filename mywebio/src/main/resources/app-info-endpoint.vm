@@ -15,10 +15,8 @@ import io.myweb.Endpoint;
 
 public class AppInfoEndpoint extends Endpoint {
 
-    private Context ctx;
-
     public AppInfoEndpoint(Context ctx) {
-        this.ctx = ctx;
+        super(ctx);
     }
 
 	public String httpMethod() {
@@ -48,11 +46,11 @@ public class AppInfoEndpoint extends Endpoint {
 	}
 
     private String pkgName() {
-        return ctx.getPackageName();
+        return getContext().getPackageName();
     }
 
     private String appName() {
-        CharSequence charSequence = ctx.getApplicationInfo().loadLabel(ctx.getPackageManager());
+        CharSequence charSequence = getContext().getApplicationInfo().loadLabel(getContext().getPackageManager());
         return charSequence.toString();
     }
 
