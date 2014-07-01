@@ -16,13 +16,6 @@ import java.util.regex.Pattern;
 import io.myweb.Endpoint;
 import io.myweb.ResponseBuilder;
 
-## to z zewnątrz
-###set( $params = new Param("java.lang.String", "cos"))
-
-## comment one-line
-#*
-  comment multi-line
- *#
 public class $i.generatedClassName extends Endpoint {
 
     private Context context;
