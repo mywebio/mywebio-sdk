@@ -68,7 +68,7 @@ public class Server implements Runnable {
 	}
 
 	// describe why hack with reflection
-	public List<? extends Endpoint> instantiateEndpoints() {
+	private List<? extends Endpoint> instantiateEndpoints() {
 		String className = "io.myweb.EndpointContainer";
 		List<? extends Endpoint> endpoints;
 		try {
