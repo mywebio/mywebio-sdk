@@ -112,7 +112,7 @@ public class ParsedMethod {
 		String result;
 		// TODO refactor to some kind of handlers
 		if (Context.class.getName().equals(param.getType())) {
-			result = "context";
+			result = "getContext()";
 		} else if (FileDescriptor.class.getName().equals(param.getType())) {
 			result = "localSocket.getFileDescriptor()";
 		} else {
