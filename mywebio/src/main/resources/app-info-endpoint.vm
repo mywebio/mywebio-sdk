@@ -9,6 +9,7 @@ import android.net.LocalSocket;
 import android.util.Log;
 
 import java.io.*;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import io.myweb.Endpoint;
@@ -19,31 +20,20 @@ public class AppInfoEndpoint extends Endpoint {
         super(ctx);
     }
 
-	public String httpMethod() {
+	protected String httpMethod() {
 		return "GET";
 	}
 
-	public String originalPath() {
-		return "/";
+	protected String originalPath() {
+		return "/services.json";
 	}
 
-	public Pattern matcher() {
-		return null;
-	}
+    private Pattern pattern = Pattern.compile(originalPath());
 
-	@Override
-	public boolean match(String method, String uri) {
-        Log.d("AppInfoEndpoint", "trying to match: " + uri);
-		return ("GET".equals(method) && "/services.json".equals(uri));
-	}
-
-	public FormalParam[] formalParams() {
-		return new FormalParam[0];
-	}
-
-	public ActualParam[] actualParams(String uri, String request) {
-		return new ActualParam[0];
-	}
+    @Override
+    protected Pattern getPattern() {
+        return pattern;
+    }
 
     private String pkgName() {
         return getContext().getPackageName();

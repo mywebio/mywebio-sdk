@@ -22,99 +22,20 @@ public class $i.generatedClassName extends Endpoint {
         super(context);
     }
 
-    public String httpMethod() {
+    protected String httpMethod() {
         return "$i.httpMethod";
     }
 
-    public String originalPath() {
+    protected String originalPath() {
         return "$i.httpUri";
     }
 
-    private String patternStr = "$i.patternStr";
-
-    public Pattern matcher() {
-        return Pattern.compile(patternStr);
-    }
+    private Pattern pattern = Pattern.compile("$i.patternStr");
 
     @Override
-    public boolean match(String method, String uri) {
-        Matcher m = matcher().matcher(uri);
-        boolean matched = httpMethod().equals(method) && m.matches();
-        if (matched) {
-            Log.d("Endpoint", "matched path " + httpMethod() + " " + originalPath() + " (pattern: " + patternStr + ") request: " + method + " " + uri);
-        } else {
-            Log.d("Endpoint", "not matched path " + httpMethod() + " " + originalPath() + " (pattern: " + patternStr + ") request: " + method + " " + uri);
-        }
-        return matched;
+    protected Pattern getPattern() {
+        return pattern;
     }
-
-	public FormalParam[] formalParams() {
-		return new FormalParam[] {
-			new FormalParam() {
-				@Override
-				public int id() {
-					return 0;
-				}
-
-				@Override
-				public String type() {
-					return null;
-				}
-
-				@Override
-				public String name() {
-					return null;
-				}
-			},
-			new FormalParam() {
-				@Override
-				public int id() {
-					return 1;
-				}
-
-				@Override
-				public String type() {
-					return null;
-				}
-
-				@Override
-				public String name() {
-					return null;
-				}
-			}
-		};
-	}
-
-    public ActualParam[] actualParams(String uri, String request) {
-		Matcher m = matcher().matcher(uri);
-		final String[] matchedGroups;
-		int groupCount;
-		if (m.matches()) {
-			groupCount = m.groupCount();
-			matchedGroups = new String[groupCount];
-			if (groupCount > 0) {
-				// TODO support more groups
-				matchedGroups[0] = m.group(1);
-			}
-		} else {
-			throw new RuntimeException("Shouldn't happen");
-		}
-        return buildActualParams(matchedGroups);
-    }
-
-    private ActualParam[] buildActualParams(final String[] matchedGroups) {
-		ActualParam[] ap = new ActualParam[matchedGroups.length];
-		for (int i = 0; i < matchedGroups.length; i++) {
-			final int cur = i;
-			ap[i] = new ActualParam() {
-				@Override
-				public Object val() {
-					return matchedGroups[cur];
-				}
-			};
-		}
-		return ap;
-	}
 
     @Override
 	public void invoke(String uri, String request, LocalSocket localSocket, String reqId) {

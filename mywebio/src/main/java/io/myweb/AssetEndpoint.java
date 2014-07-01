@@ -15,15 +15,18 @@ public class AssetEndpoint extends Endpoint {
 		super(context);
 	}
 
-	public String httpMethod() {
+	@Override
+	protected String httpMethod() {
 		return "GET";
 	}
 
-	public String originalPath() {
+	@Override
+	protected String originalPath() {
 		return "/";
 	}
 
-	public Pattern matcher() {
+	@Override
+	protected Pattern getPattern() {
 		return null;
 	}
 
@@ -42,14 +45,6 @@ public class AssetEndpoint extends Endpoint {
 			}
 		}
 		return false;
-	}
-
-	public FormalParam[] formalParams() {
-		return new FormalParam[0];
-	}
-
-	public ActualParam[] actualParams(String uri, String request) {
-		return new ActualParam[0];
 	}
 
 	@Override
