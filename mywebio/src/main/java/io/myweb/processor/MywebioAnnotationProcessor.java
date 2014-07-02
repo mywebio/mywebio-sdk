@@ -71,7 +71,13 @@ public class MywebioAnnotationProcessor extends AbstractProcessor implements Log
 					List<? extends VariableElement> parameters = ee.getParameters();
 					int i = 0;
 					for (VariableElement p : parameters) {
-						ParsedParam pp = new ParsedParam(i++, p.asType().toString(), p.getSimpleName().toString());
+						ParsedParam pp = null;
+						try {
+							String type = p.asType().toString().replaceFirst("class ", "");
+							pp = new ParsedParam(i++, type, p.getSimpleName().toString());
+						} catch (ClassNotFoundException e) {
+							error("cannot load class: " + e.getMessage());
+						}
 						params.add(pp);
 					}
 					for (AnnotationMirror am : ee.getAnnotationMirrors()) {
@@ -138,6 +144,8 @@ public class MywebioAnnotationProcessor extends AbstractProcessor implements Log
 		String[] files = new String[] {
 				prefix + "AssetEndpoint.java_",
 				prefix + "Endpoint.java_",
+				prefix + "FormalParam.java_",
+				prefix + "ActualParam.java_",
 				prefix + "RequestTask.java_",
 				prefix + "ResponseBuilder.java_",
 				prefix + "Server.java_",
