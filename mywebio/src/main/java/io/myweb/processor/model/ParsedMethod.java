@@ -1,11 +1,8 @@
 package io.myweb.processor.model;
 
-import android.content.Context;
 import com.google.common.base.Joiner;
 
-import java.io.FileDescriptor;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
