@@ -1,17 +1,20 @@
 package io.myweb.filemanager;
 
+import static java.net.URLDecoder.decode;
+
 import android.os.Environment;
 import io.myweb.api.GET;
 import io.myweb.api.HttpResponse;
 import io.myweb.api.MimeTypes;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Comparator;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class FileManager {
 
@@ -22,25 +25,17 @@ public class FileManager {
 	public static final String JSON_TYPE = "type";
 	public static final String JSON_URI = "uri";
 
-	@GET("/*filename")
+	@GET("/ls/*filename")
 	public HttpResponse file(String filename) throws IOException, JSONException {
-		File sdCard = Environment.getExternalStorageDirectory();
-		String sdCardPath = sdCard.getAbsolutePath();
-		String slashAndFilename = SLASH + noEndingSlashes(filename);
-		File file = new File(sdCardPath + slashAndFilename);
-		if (file.isDirectory()) {
-			return dirJsonPage(slashAndFilename, file);
-		} else {
-			return fileContent(file);
-		}
+		String slashAndFilename = SLASH + noEndingSlashes(decode(filename, "UTF-8"));
+		File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + slashAndFilename);
+		return file.isDirectory() ? dirJsonPage(slashAndFilename, file) : fileContent(file);
 	}
 
 	private HttpResponse fileContent(File file) throws FileNotFoundException {
-		FileInputStream fis = new FileInputStream(file);
-		long length = file.length();
 		return HttpResponse.ok()
-				.withBody(fis)
-				.withContentLength(length)
+				.withBody(new FileInputStream(file))
+				.withContentLength(file.length())
 				.withMimeTypeFromFilename(file.getName());
 	}
 
@@ -48,8 +43,7 @@ public class FileManager {
 		JSONObject dirJson = new JSONObject();
 		dirJson.put(JSON_PWD, dir);
 		dirJson.put(JSON_LS, listFilesInJson(dir, file));
-		return HttpResponse.ok()
-				.withBody(dirJson);
+		return HttpResponse.ok().withBody(dirJson);
 	}
 
 	private String noEndingSlashes(String str) {
@@ -59,6 +53,7 @@ public class FileManager {
 	private JSONArray listFilesInJson(String dir, File file) throws JSONException {
 		JSONArray resultArr = new JSONArray();
 		File[] filesInDir = file.listFiles();
+		Arrays.sort(filesInDir, new FilesComparator());
 		if (filesInDir != null) {
 			for (File f : filesInDir) {
 				resultArr.put(fileAsJon(dir, f));
@@ -82,10 +77,17 @@ public class FileManager {
 	}
 
 	private String mimeType(File f) {
-		if (f.isDirectory()) {
-			return MimeTypes.MIME_INODE_DIRECTORY;
-		} else {
-			return MimeTypes.getMimeType(f.getName());
+		return f.isDirectory() ? MimeTypes.MIME_INODE_DIRECTORY : MimeTypes.getMimeType(f.getName());
+	}
+
+	class FilesComparator implements Comparator<File> {
+		@Override
+		public int compare(File f1, File f2) {
+			if (f1.isDirectory() == f2.isDirectory()) {
+				return f1.getName().compareToIgnoreCase(f2.getName());
+			} else {
+				return f1.isDirectory() && !f2.isDirectory() ? -1 : 1;
+			}
 		}
 	}
 }
