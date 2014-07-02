@@ -2,5 +2,4 @@ include ':mywebio-api',
         ':mywebio',
         ':mywebio-examples',
         ':mywebio-gallery',
-        ':mywebio-camera',
         ':mywebio-filemanager'
