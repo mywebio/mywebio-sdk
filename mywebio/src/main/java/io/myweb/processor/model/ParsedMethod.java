@@ -5,6 +5,8 @@ import com.google.common.base.Joiner;
 
 import java.io.FileDescriptor;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 
 public class ParsedMethod {
@@ -47,7 +49,7 @@ public class ParsedMethod {
 		return destMethodRetType;
 	}
 
-	public List<ParsedParam> getParams() {
+	public List<ParsedParam> getParsedParams() {
 		return params;
 	}
 
@@ -59,29 +61,33 @@ public class ParsedMethod {
 		return httpUri;
 	}
 
-	public String getPatternStr() {
+	public GeneratedPattern getGeneratedPattern() {
 		// TODO handle errors
 		String pathNoParams = cutParamsFromUrl(getHttpUri());
 		String[] pathSplit = pathNoParams.split("/");
 		StringBuilder patternSb = new StringBuilder();
+		List<GroupMapping> groupMapping = new LinkedList<GroupMapping>();
 		if (pathSplit.length == 0) {
 			patternSb.append("/");
 		} else {
+			int curGroup = 1; // group indexing in regex starts from 1
 			for (String pathElm : pathSplit) {
 				if ("".equals(pathElm)) {
 					// NOP
 				} else if (pathElm.startsWith(":")) {
-					// TODO store group names
+					groupMapping.add(new GroupMapping(pathElm.substring(1), curGroup));
 					patternSb.append("/([^/]+)");
+					curGroup++;
 				} else if (pathElm.startsWith("*")) {
-					// TODO store group names
+					groupMapping.add(new GroupMapping(pathElm.substring(1), curGroup));
 					patternSb.append("/(.*?)");
+					curGroup++;
 				} else {
 					patternSb.append("/").append(pathElm);
 				}
 			}
 		}
-		return patternSb.toString();
+		return new GeneratedPattern(patternSb.toString(), groupMapping);
 	}
 
 	private String cutParamsFromUrl(String url) {
@@ -109,15 +115,6 @@ public class ParsedMethod {
 	}
 
 	private String paramToJavaSrc(ParsedParam param) {
-		String result;
-		// TODO refactor to some kind of handlers
-		if (Context.class.getName().equals(param.getType())) {
-			result = "getContext()";
-		} else if (FileDescriptor.class.getName().equals(param.getType())) {
-			result = "localSocket.getFileDescriptor()";
-		} else {
-			result = "(" + param.getType() + ")" + "ap[0].val()";
-		}
-		return result;
+		return "(" + param.getTypeName() + ")" + "ap[" + param.getId() + "].getVal()";
 	}
 }

@@ -13,6 +13,9 @@ import java.io.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import io.myweb.Endpoint;
 import io.myweb.ResponseBuilder;
 
@@ -30,7 +33,25 @@ public class $i.generatedClassName extends Endpoint {
         return "$i.httpUri";
     }
 
-    private Pattern pattern = Pattern.compile("$i.patternStr");
+    private FormalParam[] formalParams() {
+        FormalParam[] formalParams =  new FormalParam[$i.parsedParams.size()];
+#foreach( $param in $i.parsedParams )
+        formalParams[$param.id] = new FormalParam($param.id, "$param.typeName", "$param.name");
+#end
+        return formalParams;
+    }
+
+#set( $generatedPattern = $i.generatedPattern )
+
+    private Map<String, Integer> groupMap() {
+        Map<String, Integer> groupMap = new HashMap<String, Integer>();
+#foreach( $gm in $generatedPattern.groupMappings )
+        groupMap.put("$gm.name", $gm.idx);
+#end
+        return groupMap;
+    }
+
+    private Pattern pattern = Pattern.compile("$generatedPattern.pattern");
 
     @Override
     protected Pattern getPattern() {
@@ -40,7 +61,7 @@ public class $i.generatedClassName extends Endpoint {
     @Override
 	public void invoke(String uri, String request, LocalSocket localSocket, String reqId) {
 		try {
-			ActualParam[] ap = actualParams(uri, request);
+            ActualParam[] ap = actualParams(uri, formalParams(), groupMap(), getContext());
             OutputStream os = outputStream(localSocket);
             writeResponseHeaders(os, reqId);
             final ${i.destMethodRetType} respFromUserCode = new ${i.destClass}().${i.destMethod}($i.paramsJavaSrc);

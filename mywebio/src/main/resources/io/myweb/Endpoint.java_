@@ -5,6 +5,7 @@ import android.net.LocalSocket;
 import android.util.Log;
 
 import java.io.*;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -55,81 +56,29 @@ public abstract class Endpoint {
 
 	protected abstract String httpMethod();
 
-	protected FormalParam[] formalParams() {
-		return new FormalParam[] {
-				new FormalParam() {
-					@Override
-					public int id() {
-						return 0;
-					}
-
-					@Override
-					public String type() {
-						return null;
-					}
-
-					@Override
-					public String name() {
-						return null;
-					}
-				},
-				new FormalParam() {
-					@Override
-					public int id() {
-						return 1;
-					}
-
-					@Override
-					public String type() {
-						return null;
-					}
-
-					@Override
-					public String name() {
-						return null;
-					}
-				}
-		};
-	}
-
-	protected ActualParam[] actualParams(String uri, String request) {
+	protected ActualParam[] actualParams(String uri, FormalParam[] formalParams, Map<String, Integer> groupMap, Context ctx) throws Exception {
 		Matcher m = matcher(uri);
-		final String[] matchedGroups;
-		int groupCount;
+		ActualParam[] actualParams = new ActualParam[formalParams.length];
 		if (m.matches()) {
-			groupCount = m.groupCount();
-			matchedGroups = new String[groupCount];
-			if (groupCount > 0) {
-				// TODO support more groups
-				matchedGroups[0] = m.group(1);
+			for (FormalParam fp : formalParams) {
+				int fpId = fp.getId();
+				Class<?> fpClazz = classForName(fp.getTypeName());
+				String fpName = fp.getName();
+				if (groupMap.containsKey(fpName)) {
+					int urlGroupIdx = groupMap.get(fpName);
+					String val = m.group(urlGroupIdx); // TODO conversion to other simple types (int, float, enum?...)
+					actualParams[fpId] = new ActualParam(fpClazz, val);
+				} else if (Context.class.equals(fpClazz)) {
+					actualParams[fpId] = new ActualParam(Context.class, ctx);
+				}
 			}
 		} else {
-			throw new RuntimeException("Shouldn't happen");
+			throw new Exception("couldn't match URI: '" + uri + "' with pattern '" + getPattern() + "' (BTW, this shouldn't happen...)");
 		}
-		return buildActualParams(matchedGroups);
+		return actualParams;
 	}
 
-	private ActualParam[] buildActualParams(final String[] matchedGroups) {
-		ActualParam[] ap = new ActualParam[matchedGroups.length];
-		for (int i = 0; i < matchedGroups.length; i++) {
-			final int cur = i;
-			ap[i] = new ActualParam() {
-				@Override
-				public Object val() {
-					return matchedGroups[cur];
-				}
-			};
-		}
-		return ap;
-	}
-
-	public interface FormalParam {
-		int id();
-		String type();
-		String name();
-	}
-
-	public interface ActualParam {
-		Object val();
+	private Class<?> classForName(String typeName) throws ClassNotFoundException {
+		return Class.forName(typeName);
 	}
 }

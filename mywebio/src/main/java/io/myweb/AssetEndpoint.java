@@ -7,9 +7,13 @@ import android.util.Log;
 import io.myweb.api.MimeTypes;
 
 import java.io.*;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 public class AssetEndpoint extends Endpoint {
+
+	private static final Map<String, Integer> EMPTY_MAP = new HashMap<String, Integer>(0);
 
 	public AssetEndpoint(Context context) {
 		super(context);
