@@ -66,8 +66,9 @@ public abstract class Endpoint {
 				String fpName = fp.getName();
 				if (groupMap.containsKey(fpName)) {
 					int urlGroupIdx = groupMap.get(fpName);
-					String val = m.group(urlGroupIdx); // TODO conversion to other simple types (int, float, enum?...)
-					actualParams[fpId] = new ActualParam(fpClazz, val);
+					String val = m.group(urlGroupIdx);
+					Object convertedVal = convert(val, fp.getTypeName());
+					actualParams[fpId] = new ActualParam(fpClazz, convertedVal);
 				} else if (Context.class.equals(fpClazz)) {
 					actualParams[fpId] = new ActualParam(Context.class, ctx);
 				}
@@ -78,7 +79,23 @@ public abstract class Endpoint {
 		return actualParams;
 	}
 
+	private Object convert(String val, String typeName) {
+		Object result;
+		if ("int".equals(typeName) || Integer.class.getName().equals(typeName)) {
+			result = Integer.parseInt(val);
+		} else {
+			result = val;
+		}
+		return result;
+	}
+
 	private Class<?> classForName(String typeName) throws ClassNotFoundException {
-		return Class.forName(typeName);
+		String classToLoad;
+		if ("int".equals(typeName)) {
+			classToLoad = "[I";
+		} else {
+			classToLoad = typeName;
+		}
+		return Class.forName(classToLoad);
 	}
 }

@@ -112,6 +112,17 @@ public class ParsedMethod {
 	}
 
 	private String paramToJavaSrc(ParsedParam param) {
-		return "(" + param.getTypeName() + ")" + "ap[" + param.getId() + "].getVal()";
+		return "(" + toComplexTypeName(param.getTypeName()) + ")" + "ap[" + param.getId() + "].getVal()";
+	}
+
+	private String toComplexTypeName(String typeName) {
+		// TODO add support for more types
+		String result;
+		if ("int".equals(typeName)) {
+			result = "java.lang.Integer";
+		} else {
+			result = typeName;
+		}
+		return result;
 	}
 }

@@ -14,9 +14,8 @@ public class PhotoGallery {
 
 	@GET("/thumbs/:id")
 	@Produces("image/jpeg")
-	public InputStream thumbs(Context ctx, String id) {
-		int idInt = Integer.parseInt(id);
-		Bitmap thumbnail = MediaStore.Images.Thumbnails.getThumbnail(ctx.getContentResolver(), idInt, MediaStore.Images.Thumbnails.MICRO_KIND, null);
+	public InputStream thumbs(Context ctx, int id) {
+		Bitmap thumbnail = MediaStore.Images.Thumbnails.getThumbnail(ctx.getContentResolver(), id, MediaStore.Images.Thumbnails.MICRO_KIND, null);
 		if (thumbnail != null) {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			thumbnail.compress(Bitmap.CompressFormat.JPEG, 100, baos);
