@@ -107,8 +107,10 @@ public abstract class Endpoint {
 		String[] nameAndValues = queryParamsStr.split("&");
 		Map<String, String> result = new HashMap<String, String>();
 		for (String nameAndVal : nameAndValues) {
-			String[] nv = nameAndVal.split("=");
-			result.put(nv[0], nv[1]);
+			if (!"".equals(nameAndVal)) {
+				String[] nv = nameAndVal.split("=");
+				result.put(nv[0], nv[1]);
+			}
 		}
 		return result;
 	}
