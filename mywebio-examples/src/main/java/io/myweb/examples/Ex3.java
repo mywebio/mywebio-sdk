@@ -1,15 +1,16 @@
 package io.myweb.examples;
 
+import android.content.Context;
+import io.myweb.api.GET;
+import io.myweb.api.Produces;
+
+import java.io.IOException;
+import java.io.InputStream;
+
 public class Ex3 {
 
-//	@GET("/param")
-	public String requestParams(int val) {
-		return "cos" + val;
+	@GET("/ex3/:filename")
+	public InputStream file(Context ctx, String filename) throws IOException {
+		return ctx.getAssets().open(filename);
 	}
-
-	// http://localhost/eu.javart.androidwebmodule/param?val=1
-	// http://localhost/eu.javart.androidwebmodule/param?val=a    // HTTP 400
-
-	// http://localhost/eu.javart.androidwebmodule/param?other=1  // HTTP 400
-	// http://localhost/eu.javart.androidwebmodule/param?val=1&other=1  // HTTP 200 OK
 }
