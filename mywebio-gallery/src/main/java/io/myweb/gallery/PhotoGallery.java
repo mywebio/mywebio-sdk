@@ -62,7 +62,7 @@ public class PhotoGallery {
 
 		StringBuilder sb = new StringBuilder();
 		sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-		sb.append("<juiceboxgallery galleryTitle=\"Web.io Photo Gallery\">\n");
+		sb.append("<juiceboxgallery galleryTitle=\"MyWeb IO Photo Gallery\">\n");
 		for (int imgId : imgIds) {
 			String imageTag = "  <image imageURL=\"images/%d\" thumbURL=\"thumbs/%d\" linkURL=\"images/%d\" linkTarget=\"_blank\" >";
 			sb.append(String.format(imageTag, imgId, imgId, imgId));
