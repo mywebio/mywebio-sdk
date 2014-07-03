@@ -2,22 +2,15 @@ package io.myweb.examples;
 
 
 import android.content.Context;
-import org.json.JSONException;
-import org.json.JSONObject;
+import io.myweb.api.GET;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 public class Ex2 {
 
-//	@GET("/path/json")
-	public JSONObject json(Context context) throws JSONException {
-		return new JSONObject("{count : 1}");
+	@GET("/ex2/assets.txt")
+	public InputStream file(Context ctx) throws IOException {
+		return ctx.getAssets().open("assets.txt");
 	}
-
-//	@GET("/path/json2")
-//	@Produces("application/json")
-	public String json2() {
-		return "{name : \"John\"}";
-	}
-
-	// http://localhost/eu.javart.androidwebmodule/path/json
-	// http://localhost/eu.javart.androidwebmodule/path/json2
 }
