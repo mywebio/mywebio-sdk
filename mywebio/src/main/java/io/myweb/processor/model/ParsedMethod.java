@@ -2,9 +2,7 @@ package io.myweb.processor.model;
 
 import com.google.common.base.Joiner;
 
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 public class ParsedMethod {
 
@@ -85,6 +83,31 @@ public class ParsedMethod {
 			}
 		}
 		return new GeneratedPattern(patternSb.toString(), groupMapping);
+	}
+
+	public List<DefaultQueryParams> getDefaultQueryParams() {
+		String queryString = queryParams(getHttpUri());
+		String[] nameAndValues = queryString.split("&");
+		List<DefaultQueryParams> result = new LinkedList<DefaultQueryParams>();
+		for (String nameAndVal : nameAndValues) {
+			if (!"".equals(nameAndVal)) {
+				String[] nv = nameAndVal.split("=");
+				String nvNoColon = nv[0].replaceFirst(":", "");
+				result.add(new DefaultQueryParams(nvNoColon, nv[1]));
+			}
+		}
+		return result;
+	}
+
+	private String queryParams(String url) {
+		int i = url.indexOf("?");
+		String queryParams;
+		if (i == -1) {
+			queryParams = "";
+		} else {
+			queryParams = url.substring(i + 1);
+		}
+		return queryParams;
 	}
 
 	private String cutParamsFromUrl(String url) {

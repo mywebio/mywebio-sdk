@@ -51,6 +51,14 @@ public class $i.generatedClassName extends Endpoint {
         return groupMap;
     }
 
+    private Map<String, String> defaulQueryParams() {
+        Map<String, String> defaultQueryParams = new HashMap<String, String>();
+#foreach( $dqp in $i.defaultQueryParams)
+        defaultQueryParams.put("$dqp.name", "$dqp.val");
+#end
+        return defaultQueryParams;
+    }
+
     private Pattern pattern = Pattern.compile("$generatedPattern.pattern");
 
     @Override
@@ -61,7 +69,7 @@ public class $i.generatedClassName extends Endpoint {
     @Override
 	public void invoke(String uri, String request, LocalSocket localSocket, String reqId) {
 		try {
-            ActualParam[] ap = actualParams(uri, formalParams(), groupMap(), getContext());
+            ActualParam[] ap = actualParams(uri, formalParams(), defaulQueryParams(), groupMap(), getContext());
             OutputStream os = outputStream(localSocket);
             writeResponseHeaders(os, reqId);
             final ${i.destMethodRetType} respFromUserCode = new ${i.destClass}().${i.destMethod}($i.paramsJavaSrc);

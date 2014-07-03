@@ -5,6 +5,7 @@ import android.net.LocalSocket;
 import android.util.Log;
 
 import java.io.*;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -42,7 +43,8 @@ public abstract class Endpoint {
 	}
 
 	public boolean match(String method, String uri) {
-		Matcher m = matcher(uri);
+		String urlNoQueryParams = urlNoQueryParams(uri);
+		Matcher m = matcher(urlNoQueryParams);
 		boolean matched = httpMethod().equals(method) && m.matches();
 		if (matched) {
 			Log.d("Endpoint", "matched path " + httpMethod() + " " + originalPath() + " (pattern: " + getPattern() + ") request: " + method + " " + uri);
@@ -56,8 +58,10 @@ public abstract class Endpoint {
 
 	protected abstract String httpMethod();
 
-	protected ActualParam[] actualParams(String uri, FormalParam[] formalParams, Map<String, Integer> groupMap, Context ctx) throws Exception {
-		Matcher m = matcher(uri);
+	protected ActualParam[] actualParams(String uri, FormalParam[] formalParams, Map<String, String> defaultQueryParams, Map<String, Integer> groupMap, Context ctx) throws Exception {
+		String urlNoQueryParams = urlNoQueryParams(uri);
+		Map<String, String> queryParamsMap = actualQueryParamsMap(uri);
+		Matcher m = matcher(urlNoQueryParams);
 		ActualParam[] actualParams = new ActualParam[formalParams.length];
 		if (m.matches()) {
 			for (FormalParam fp : formalParams) {
@@ -71,12 +75,53 @@ public abstract class Endpoint {
 					actualParams[fpId] = new ActualParam(fpClazz, convertedVal);
 				} else if (Context.class.equals(fpClazz)) {
 					actualParams[fpId] = new ActualParam(Context.class, ctx);
+				} else if (queryParamsMap.containsKey(fpName)) {
+					String val = queryParamsMap.get(fpName);
+					Object convertedVal = convert(val, fp.getTypeName());
+					actualParams[fpId] = new ActualParam(fpClazz, convertedVal);
+				} else if (defaultQueryParams.containsKey(fpName)) {
+					String val = defaultQueryParams.get(fpName);
+					Object convertedVal = convert(val, fp.getTypeName());
+					actualParams[fpId] = new ActualParam(fpClazz, convertedVal);
 				}
 			}
 		} else {
 			throw new Exception("couldn't match URI: '" + uri + "' with pattern '" + getPattern() + "' (BTW, this shouldn't happen...)");
 		}
 		return actualParams;
+	}
+
+	private String urlNoQueryParams(String url) {
+		int i = url.indexOf("?");
+		String result;
+		if (i == -1) {
+			result = url;
+		} else {
+			result = url.substring(0, i);
+		}
+		return result;
+	}
+
+	private Map<String, String> actualQueryParamsMap(String url) {
+		String queryParamsStr = queryParams(url);
+		String[] nameAndValues = queryParamsStr.split("&");
+		Map<String, String> result = new HashMap<String, String>();
+		for (String nameAndVal : nameAndValues) {
+			String[] nv = nameAndVal.split("=");
+			result.put(nv[0], nv[1]);
+		}
+		return result;
+	}
+
+	private String queryParams(String url) {
+		int i = url.indexOf("?");
+		String queryParams;
+		if (i == -1) {
+			queryParams = "";
+		} else {
+			queryParams = url.substring(i + 1);
+		}
+		return queryParams;
 	}
 
 	private Object convert(String val, String typeName) {

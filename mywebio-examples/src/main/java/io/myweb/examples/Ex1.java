@@ -25,8 +25,8 @@ public class Ex1 {
 		return "served from @GET(\"/\")";
 	}
 
-	@GET("/multi/:id/:id2/:name/get")
-	public String multiparams(String name, int id, Integer id2) {
-		return "name=" + name + " id=" + id + " id2=" + id2;
+	@GET("/multi/:id/:id2/:name/get?:start=0&:end=10")
+	public String multiparams(String name, int id, Integer id2, int end, String start) {
+		return "name=" + name + " id=" + id + " id2=" + id2 + " start=" + start + " end=" + end;
 	}
 }
