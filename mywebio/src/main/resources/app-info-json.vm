@@ -1,0 +1,13 @@
+#* @vtlvariable name="methods" type="java.util.List<io.myweb.processor.model.ParsedMethod>" *#
+{
+    "id": "%s",
+    "name": "%s",
+    "resources": [
+#foreach($m in $methods)
+        {
+            "url": "$m.httpUri",
+            "method": "$m.httpMethod"
+        },
+#end
+    ]
+}

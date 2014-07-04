@@ -1,0 +1,82 @@
+#* @vtlvariable name="i" type="io.myweb.processor.model.ParsedMethod" *#
+/*
+ * GENERATED FILE
+ */
+package io.myweb;
+
+import android.content.Context;
+import android.util.Log;
+import android.net.LocalSocket;
+
+import java.io.*;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import io.myweb.Endpoint;
+import io.myweb.ResponseBuilder;
+
+public class $i.generatedClassName extends Endpoint {
+
+    public ${i.generatedClassName}(Context context) {
+        super(context);
+    }
+
+    protected String httpMethod() {
+        return "$i.httpMethod";
+    }
+
+    protected String originalPath() {
+        return "$i.httpUri";
+    }
+
+    private FormalParam[] formalParams() {
+        FormalParam[] formalParams =  new FormalParam[$i.parsedParams.size()];
+#foreach( $param in $i.parsedParams )
+        formalParams[$param.id] = new FormalParam($param.id, "$param.typeName", "$param.name");
+#end
+        return formalParams;
+    }
+
+#set( $generatedPattern = $i.generatedPattern )
+
+    private Map<String, Integer> groupMap() {
+        Map<String, Integer> groupMap = new HashMap<String, Integer>();
+#foreach( $gm in $generatedPattern.groupMappings )
+        groupMap.put("$gm.name", $gm.idx);
+#end
+        return groupMap;
+    }
+
+    private Map<String, String> defaulQueryParams() {
+        Map<String, String> defaultQueryParams = new HashMap<String, String>();
+#foreach( $dqp in $i.defaultQueryParams)
+        defaultQueryParams.put("$dqp.name", "$dqp.val");
+#end
+        return defaultQueryParams;
+    }
+
+    private Pattern pattern = Pattern.compile("$generatedPattern.pattern");
+
+    @Override
+    protected Pattern getPattern() {
+        return pattern;
+    }
+
+    @Override
+	public void invoke(String uri, String request, LocalSocket localSocket, String reqId) {
+		try {
+            ActualParam[] ap = actualParams(uri, formalParams(), defaulQueryParams(), groupMap(), getContext());
+            OutputStream os = outputStream(localSocket);
+            writeResponseHeaders(os, reqId);
+            final ${i.destMethodRetType} respFromUserCode = new ${i.destClass}().${i.destMethod}($i.paramsJavaSrc);
+            ResponseBuilder responseBuilder = new ResponseBuilder();
+            responseBuilder.writeResponse("${i.produces}", respFromUserCode, os);
+        } catch (Exception e) {
+            Log.d("Endpoint", "error during invoke", e);
+        }
+    }
+}

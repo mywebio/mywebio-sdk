@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+</head>
+<body>
+    <div class="header">MyWeb IO Launcher</div>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12">
+                <div id="target" class="board"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="template">
+      {{#apps}}
+        <div class="tile">
+            <a href="/{{package}}/" target="_blank">
+                <img src="icon/{{package}}" alt="{{name}}">
+                <span>{{name}}</span>
+            </a>
+        </div>
+      {{/apps}}
+    </div>
+
+    <script type="text/javascript" src="js/jquery.js"></script>
+    <script type="text/javascript" src="js/mustache.js"></script>
+    <script type="text/javascript" src="js/launcher.js"></script>
+</body>
+</html>

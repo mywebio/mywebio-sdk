@@ -1,0 +1,74 @@
+#* @vtlvariable name="esc" type="org.apache.commons.lang3.StringEscapeUtils" *#
+#* @vtlvariable name="methods" type="java.util.List<io.myweb.processor.model.ParsedMethod>" *#
+package io.myweb;
+
+#set( $json="#parse('app-info-json.vm')")
+
+import android.content.Context;
+import android.net.LocalSocket;
+import android.util.Log;
+
+import java.io.*;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import io.myweb.Endpoint;
+
+public class AppInfoEndpoint extends Endpoint {
+
+    public AppInfoEndpoint(Context ctx) {
+        super(ctx);
+    }
+
+	protected String httpMethod() {
+		return "GET";
+	}
+
+	protected String originalPath() {
+		return "/services.json";
+	}
+
+    private Pattern pattern = Pattern.compile(originalPath());
+
+    @Override
+    protected Pattern getPattern() {
+        return pattern;
+    }
+
+    private String pkgName() {
+        return getContext().getPackageName();
+    }
+
+    private String appName() {
+        CharSequence charSequence = getContext().getApplicationInfo().loadLabel(getContext().getPackageManager());
+        return charSequence.toString();
+    }
+
+    private final String SERVICES_TEMPL = "$esc.escapeJava($json)";
+
+    private String servicesJson = null;
+
+    private String servicesJson() {
+        synchronized (this) {
+            if (servicesJson == null) {
+                servicesJson = String.format(SERVICES_TEMPL, pkgName(), appName());
+            }
+            return servicesJson;
+        }
+    }
+
+	@Override
+	public void invoke(String uri, String request, LocalSocket localSocket, String reqId) {
+        try {
+            OutputStream os = outputStream(localSocket);
+            writeResponseHeaders(os, reqId);
+            os.write(("Content-Type: application/json\r\n\r\n").getBytes());
+            os.write(servicesJson().getBytes());
+            os.flush();
+        } catch (Exception e) {
+            Log.d("AppInfoEndpoint", "", e);
+        }
+	}
+}

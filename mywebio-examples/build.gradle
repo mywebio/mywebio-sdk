@@ -1,0 +1,29 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:0.9.+'
+        classpath 'com.neenbedankt.gradle.plugins:android-apt:1.2'   // myweb
+    }
+}
+apply plugin: 'android'
+apply plugin: 'android-apt'  // myweb
+
+dependencies {
+    repositories {
+        mavenCentral()
+    }
+    compile project(':mywebio-api')
+    apt project(':mywebio')   // myweb
+}
+
+android {
+    compileSdkVersion 19
+    buildToolsVersion '19.1.0'
+
+    defaultConfig {
+        minSdkVersion 14
+        targetSdkVersion 19
+    }
+}
