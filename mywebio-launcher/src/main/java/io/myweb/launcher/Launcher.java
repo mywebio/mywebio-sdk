@@ -20,7 +20,7 @@ import io.myweb.api.HttpResponse;
 
 public class Launcher {
 
-    private final static String SERVER_PACKAGE = "io.myweb.server";
+    private final static String SERVER_PACKAGE = "io.myweb.server.alpha";
 
     @GET("/icon/:appName")
     @Produces("image/png")
