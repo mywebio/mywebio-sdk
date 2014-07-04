@@ -1,0 +1,13 @@
+*~
+*.swp
+*.iml
+.idea
+.gradle
+.project
+.settings
+.classpath
+.cproject
+build
+target
+out
+local.properties
