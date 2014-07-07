@@ -11,6 +11,8 @@ import java.util.regex.Pattern;
 
 public class AssetEndpoint extends Endpoint {
 
+	public static final String MYWEB_ASSETS_DIR = "myweb";
+
 	public AssetEndpoint(Context context) {
 		super(context);
 	}
@@ -36,7 +38,7 @@ public class AssetEndpoint extends Endpoint {
 		if ("GET".equals(method)) {
 			AssetManager assetManager = getContext().getAssets();
 			try {
-				assetManager.open("webio" + uri).close();
+				assetManager.open(MYWEB_ASSETS_DIR + uri).close();
 				Log.d("AssetEndpoint", "matched: " + uri);
 				return true;
 			} catch (IOException e) {
@@ -54,7 +56,7 @@ public class AssetEndpoint extends Endpoint {
 			String contentType = MimeTypes.getMimeType(uri);
 			OutputStream os = outputStream(localSocket);
 			writeResponseHeaders(os, reqId);
-			InputStream is = assetManager.open("webio" + uri);
+			InputStream is = assetManager.open(MYWEB_ASSETS_DIR + uri);
 			ResponseBuilder responseBuilder = new ResponseBuilder();
 			responseBuilder.writeResponse(contentType, is, os);
 		} catch (IOException e) {
