@@ -76,17 +76,7 @@ public HttpResponse json(String name, int id) throws JSONException {
 ```
 
 ## Building myweb.io-enabled project
-To run myweb.io-enabled app add few lines to your AndroidManifest.xml: 
-```xml
-<uses-permission android:name="io.myweb.server.permission.REQUEST" />
-<application
-  <service android:name="io.myweb.Service"
-           android:exported="true"
-           android:permission="io.myweb.server.permission.REQUEST">
-  </service>
-</application>
-```
-and write this in build.gradle:
+In order to use myweb.io API you need to add few lines in build.gradle:
 ```groovy
 apply plugin: 'android-apt'
 buildscript {
@@ -95,7 +85,8 @@ buildscript {
   }
 }
 dependencies {
-  apt project('io.myweb:mywebio:0.1-SNAPSHOT')
+  compile 'io.myweb:mywebio-api-aar:0.1-SNAPSHOT'
+  apt 'io.myweb:mywebio:0.1-SNAPSHOT'
 }
 ```
 That's it! Now you can enter
