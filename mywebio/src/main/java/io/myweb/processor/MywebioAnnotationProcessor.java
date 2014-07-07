@@ -142,15 +142,15 @@ public class MywebioAnnotationProcessor extends AbstractProcessor implements Log
 	private void generateSourcesFromResource() {
 		String prefix = "/io/myweb/";
 		String[] files = new String[] {
-				prefix + "AssetEndpoint.java_",
-				prefix + "Endpoint.java_",
-				prefix + "FormalParam.java_",
-				prefix + "ActualParam.java_",
-				prefix + "RequestTask.java_",
-				prefix + "ResponseBuilder.java_",
-				prefix + "Server.java_",
-				prefix + "Service.java_",
-				prefix + "ThreadFactories.java_",
+				prefix + "AssetEndpoint.java",
+				prefix + "Endpoint.java",
+				prefix + "FormalParam.java",
+				prefix + "ActualParam.java",
+				prefix + "RequestTask.java",
+				prefix + "ResponseBuilder.java",
+				prefix + "Server.java",
+				prefix + "Service.java",
+				prefix + "ThreadFactories.java",
 		};
 		for (String file : files) {
 			generateSourceFileFromResource(file, classNameFromResourcePath(file));
@@ -206,8 +206,8 @@ public class MywebioAnnotationProcessor extends AbstractProcessor implements Log
 
 	private String classNameFromResourcePath(String resourePath) {
 		String noTrailingSlash = resourePath.substring(1);
-		String noJava_ = noTrailingSlash.replace(".java_", "");
-		return noJava_.replaceAll("/", ".");
+		String noJava = noTrailingSlash.replace(".java", "");
+		return noJava.replaceAll("/", ".");
 	}
 
 	private void generateSourceFileFromResource(String resourcePath, String className) {

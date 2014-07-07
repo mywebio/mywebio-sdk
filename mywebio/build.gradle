@@ -13,26 +13,14 @@ dependencies {
     compile 'org.apache.commons:commons-lang3:3.3.2'
 }
 
-task copyGen(type: Copy) {
-    from('src/main/java/io/myweb/') {
-        include '*.java'
-    }
-    into 'src/main/resources/io/myweb/'
-    rename { String fileName ->
-        fileName + '_'
-    }
-//    includeEmptyDirs = false
-}
-
 sourceCompatibility = 1.6
 targetCompatibility = 1.6
 
-task copyGenWithDeps {
-    inputs.file copyGen
-    outputs.dir "src/main/resources/io/myweb/"
+processResources {
+    from('src/main/java/') {
+        include 'io/myweb/*.java'
+    }
 }
-
-compileJava.dependsOn copyGenWithDeps
 
 group = projectIds.group
 version = projectIds.version
