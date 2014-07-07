@@ -81,7 +81,7 @@ In order to use myweb.io API you need to add few lines in build.gradle:
 apply plugin: 'android-apt'
 buildscript {
   dependencies {
-    classpath 'com.neenbedankt.gradle.plugins:android-apt:1.2'
+    classpath 'com.neenbedankt.gradle.plugins:android-apt:1.3'
   }
 }
 dependencies {
