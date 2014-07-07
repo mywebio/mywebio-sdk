@@ -10,7 +10,7 @@ import java.util.List;
 
 public class EndpointContainer {
 
-    public List<? extends Endpoint> getAllEndpoints(Context ctx) {
+    public static List<? extends Endpoint> instantiateEndpoints(Context ctx) {
         List<Endpoint> endpoints = new LinkedList<Endpoint>();
         endpoints.add(new io.myweb.AppInfoEndpoint(ctx));
         endpoints.add(new io.myweb.AssetEndpoint(ctx));

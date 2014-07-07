@@ -6,8 +6,6 @@ import android.net.LocalSocket;
 import android.util.Log;
 
 import java.io.IOException;
-import java.lang.reflect.Method;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.*;
 
@@ -23,6 +21,8 @@ public class Server implements Runnable {
 
 	private ExecutorService workerExecutorService;
 
+	private List<? extends Endpoint> endpoints;
+
 	public Server(Context context) {
 		this.context = context;
 		this.workerExecutorService = new ThreadPoolExecutor(2, 16, 60, TimeUnit.SECONDS,
@@ -31,6 +31,7 @@ public class Server implements Runnable {
 
 	@Override
 	public void run() {
+		instantiateAndStoreEndpoints(context);
 		openLocalServerSocket(context.getPackageName());
 		mainLoop();
 		Log.i(TAG, "Server socket has been shutdown. Exiting normally.");
@@ -63,25 +64,12 @@ public class Server implements Runnable {
 
 	private void handleMessage(LocalSocket socket) throws IOException {
 		Log.d(TAG, "send buffer size " + socket.getSendBufferSize());
-		RequestTask worker = new RequestTask(socket, context, instantiateEndpoints());
+		RequestTask worker = new RequestTask(socket, context, endpoints);
 		workerExecutorService.execute(worker);
 	}
 
-	// describe why hack with reflection
-	private List<? extends Endpoint> instantiateEndpoints() {
-		String className = "io.myweb.EndpointContainer";
-		List<? extends Endpoint> endpoints;
-		try {
-			Class c = Class.forName(className);
-			Object endpointContainer = c.newInstance();
-			Method getAllEndpointsMethod = c.getDeclaredMethod("getAllEndpoints", Context.class);
-			endpoints = (List<? extends Endpoint>) getAllEndpointsMethod.invoke(endpointContainer, context);
-		} catch (Exception e) {
-			// shouldn't happen in properly built application (programmer error)
-			Log.d(TAG, "cannot instantiate endpoints", e);
-			endpoints = Collections.emptyList();
-		}
-		return endpoints;
+	private void instantiateAndStoreEndpoints(Context ctx) {
+		endpoints = EndpointContainer.instantiateEndpoints(ctx);
 	}
 
 	public synchronized void shutdown() {
