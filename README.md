@@ -9,6 +9,7 @@ You can build project by invoking on console:
 ```
  $ ./gradlew build
 ```
+
 ## API Overview
 ### Simple GET
 ```java
@@ -17,6 +18,7 @@ public String get() {
 	return "Hello, World!";
 }
 ```
+
 ### Getting data from URL
 ```java
 @GET("/path/:name/:id")
@@ -24,6 +26,7 @@ public String dataFromUrl(int id, String name) {
 	return name + id;
 }
 ```
+
 ### Getting data from query string
 ```java
 @GET("/query?:name=default&:id=0")
@@ -32,6 +35,7 @@ public String queryString(int id, String name) {
 }
 ```
 Please note that if request comes without query string (just "/query") then in our example method queryString() receives values id=0 and name=default.
+
 ### Content-Type of response
 ```java
 @GET("/produces")
@@ -40,6 +44,7 @@ public String produces() {
 	return "{ id = 1 }";
 }
 ```
+
 ### Inject android.content.Context
 ```java
 @GET("/assets/:filename")
@@ -47,6 +52,7 @@ public InputStream assets(Context ctx, String filename) throws IOException {
 	return ctx.getAssets().open(filename);
 }
 ```
+
 ### Response as HttpResponse object
 ```java
 @GET("/http-response/*filename")
@@ -57,6 +63,7 @@ public HttpResponse httpResponse(Context ctx, String filename) throws IOExceptio
           .withMimeTypeFromFilename(filename);
 }
 ```
+
 ### Returning JSON
 ```java
 @GET("/json/:name/:id")
@@ -67,6 +74,7 @@ public HttpResponse json(String name, int id) throws JSONException {
 	return HttpResponse.ok().withBody(json);
 }
 ```
+
 ## Building myweb.io-enabled project
 To run myweb.io-enabled app add few lines to your AndroidManifest.xml: 
 ```xml
@@ -77,7 +85,6 @@ To run myweb.io-enabled app add few lines to your AndroidManifest.xml:
            android:permission="io.myweb.server.permission.REQUEST">
   </service>
 </application>
- 
 ```
 and write this in build.gradle:
 ```groovy
@@ -91,7 +98,6 @@ dependencies {
   apt project('io.myweb:mywebio:0.1-SNAPSHOT')
 }
 ```
-
 That's it! Now you can enter
 ```
 http://ip:8080/your.app.pkg/[your services]
