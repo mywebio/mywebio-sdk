@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="io.myweb.api" >
+
+    <uses-permission android:name="io.myweb.server.permission.REQUEST" />
+
+    <application>
+        <service
+            android:name="io.myweb.Service"
+            android:exported="true"
+            android:permission="io.myweb.server.permission.REQUEST">
+        </service>
+    </application>
+
+</manifest>
