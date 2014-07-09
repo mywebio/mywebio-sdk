@@ -7,7 +7,11 @@
         {
             "url": "$m.httpUri",
             "method": "$m.httpMethod"
+#if($foreach.hasNext)
         },
+#else
+        }
+#end
 #end
     ]
 }
