@@ -1,7 +1,7 @@
 package io.myweb;
 
 
-import io.myweb.api.HttpResponse;
+import io.myweb.api.Response;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -32,15 +32,15 @@ public class ResponseBuilder {
 		os.close();
 	}
 
-	public void writeResponse(String produces, HttpResponse srcHttpResponse, OutputStream os) throws IOException, JSONException {
+	public void writeResponse(String produces, Response srcResponse, OutputStream os) throws IOException, JSONException {
 		String mime;
-		if (srcHttpResponse.getMimeType() == null) {
+		if (srcResponse.getMimeType() == null) {
 			mime = produces;
 		} else {
-			mime = srcHttpResponse.getMimeType();
+			mime = srcResponse.getMimeType();
 		}
 		os.write((CONTENT_TYPE + mime + CRLF).getBytes());
-		writeLengthAndBody(srcHttpResponse.getContentLength(), srcHttpResponse.getBody(), os);
+		writeLengthAndBody(srcResponse.getContentLength(), srcResponse.getBody(), os);
 		os.close();
 	}
 

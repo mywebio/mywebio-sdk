@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 
+import io.myweb.api.Response;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -16,7 +17,6 @@ import java.util.List;
 
 import io.myweb.api.GET;
 import io.myweb.api.Produces;
-import io.myweb.api.HttpResponse;
 
 public class Launcher {
 
@@ -24,16 +24,16 @@ public class Launcher {
 
     @GET("/icon/:appName")
     @Produces("image/png")
-    public HttpResponse getIcon(Context context, String appName) throws PackageManager.NameNotFoundException {
+    public Response getIcon(Context context, String appName) throws PackageManager.NameNotFoundException {
         BitmapDrawable icon = (BitmapDrawable) context.getPackageManager().getApplicationIcon(appName);
-        return HttpResponse.ok().withBody(getIconInputStream(icon));
+        return Response.ok().withBody(getIconInputStream(icon));
     }
 
     @GET("/apps")
-    public HttpResponse getApps(Context context) throws JSONException {
+    public Response getApps(Context context) throws JSONException {
         JSONObject response = new JSONObject();
         response.put("apps", getJsonApps(context, context.getPackageManager()));
-        return HttpResponse.ok().withBody(response);
+        return Response.ok().withBody(response);
     }
 
     private ByteArrayInputStream getIconInputStream(BitmapDrawable icon) {

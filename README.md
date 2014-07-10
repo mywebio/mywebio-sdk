@@ -53,12 +53,12 @@ public InputStream assets(Context ctx, String filename) throws IOException {
 }
 ```
 
-### Response as HttpResponse object
+### Response as Response object
 ```java
-@GET("/http-response/*filename")
-public HttpResponse httpResponse(Context ctx, String filename) throws IOException {
+@GET("/response/*filename")
+public Response response(Context ctx, String filename) throws IOException {
   InputStream is = ctx.getAssets().open(filename);
-  return HttpResponse.ok()
+  return Response.ok()
           .withBody(is)
           .withMimeTypeFromFilename(filename);
 }
@@ -67,11 +67,11 @@ public HttpResponse httpResponse(Context ctx, String filename) throws IOExceptio
 ### Returning JSON
 ```java
 @GET("/json/:name/:id")
-public HttpResponse json(String name, int id) throws JSONException {
+public Response json(String name, int id) throws JSONException {
 	JSONObject json = new JSONObject();
 	json.put("name", name);
 	json.put("id", id);
-	return HttpResponse.ok().withBody(json);
+	return Response.ok().withBody(json);
 }
 ```
 
