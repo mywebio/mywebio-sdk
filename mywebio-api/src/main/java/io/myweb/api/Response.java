@@ -4,7 +4,7 @@ import org.json.JSONObject;
 
 import java.io.InputStream;
 
-public class HttpResponse {
+public class Response {
 
 	private String mimeType;
 
@@ -14,20 +14,20 @@ public class HttpResponse {
 
 	private long contentLength;
 
-	private HttpResponse(int statusCode) {
+	private Response(int statusCode) {
 		this.statusCode = statusCode;
 	}
 
-	private static HttpResponse newWithStatusCode(int statusCode) {
-		return new HttpResponse(statusCode);
+	private static Response newWithStatusCode(int statusCode) {
+		return new Response(statusCode);
 	}
 
-	public static HttpResponse ok() {
-		return HttpResponse.newWithStatusCode(200);
+	public static Response ok() {
+		return Response.newWithStatusCode(200);
 	}
 
-	public static HttpResponse notFound() {
-		return HttpResponse.newWithStatusCode(404);
+	public static Response notFound() {
+		return Response.newWithStatusCode(404);
 	}
 
 	public String getMimeType() {
@@ -38,31 +38,31 @@ public class HttpResponse {
 		return body;
 	}
 
-	public HttpResponse withMimeType(String mimeType) {
+	public Response withMimeType(String mimeType) {
 		this.mimeType = mimeType;
 		return this;
 	}
 
-	public HttpResponse withMimeTypeFromFilename(String filename) {
+	public Response withMimeTypeFromFilename(String filename) {
 		return withMimeType(MimeTypes.getMimeType(filename));
 	}
 
-	public HttpResponse withBody(String s) {
+	public Response withBody(String s) {
 		this.body = s;
 		return this;
 	}
 
-	public HttpResponse withBody(InputStream is) {
+	public Response withBody(InputStream is) {
 		this.body = is;
 		return this;
 	}
 
-	public HttpResponse withBody(JSONObject jsonObject) {
+	public Response withBody(JSONObject jsonObject) {
 		this.body = jsonObject;
 		return withMimeType(MimeTypes.MIME_APPLICATION_JSON);
 	}
 
-	public HttpResponse withContentLength(long length) {
+	public Response withContentLength(long length) {
 		this.contentLength = length;
 		return this;
 	}

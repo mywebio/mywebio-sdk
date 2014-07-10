@@ -4,7 +4,7 @@ import static java.net.URLDecoder.decode;
 
 import android.os.Environment;
 import io.myweb.api.GET;
-import io.myweb.api.HttpResponse;
+import io.myweb.api.Response;
 import io.myweb.api.MimeTypes;
 import java.io.File;
 import java.io.FileInputStream;
@@ -12,6 +12,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Comparator;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -26,24 +27,24 @@ public class FileManager {
 	public static final String JSON_URI = "uri";
 
 	@GET("/ls/*filename")
-	public HttpResponse file(String filename) throws IOException, JSONException {
+	public Response file(String filename) throws IOException, JSONException {
 		String slashAndFilename = SLASH + noEndingSlashes(decode(filename, "UTF-8"));
 		File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + slashAndFilename);
 		return file.isDirectory() ? dirJsonPage(slashAndFilename, file) : fileContent(file);
 	}
 
-	private HttpResponse fileContent(File file) throws FileNotFoundException {
-		return HttpResponse.ok()
+	private Response fileContent(File file) throws FileNotFoundException {
+		return Response.ok()
 				.withBody(new FileInputStream(file))
 				.withContentLength(file.length())
 				.withMimeTypeFromFilename(file.getName());
 	}
 
-	private HttpResponse dirJsonPage(String dir, File file) throws JSONException {
+	private Response dirJsonPage(String dir, File file) throws JSONException {
 		JSONObject dirJson = new JSONObject();
 		dirJson.put(JSON_PWD, dir);
 		dirJson.put(JSON_LS, listFilesInJson(dir, file));
-		return HttpResponse.ok().withBody(dirJson);
+		return Response.ok().withBody(dirJson);
 	}
 
 	private String noEndingSlashes(String str) {
