@@ -80,11 +80,13 @@ public class RequestTask implements Runnable {
 	private String readRequest(InputStream is) throws IOException {
 		int length;
 		byte[] buffer = new byte[BUFFER_SIZE];
+		String result = "";
 		while ((length = is.read(buffer)) != -1) {
-			Log.d(TAG, "Read request from server (" + length + ") " + new String(buffer, 0, length));
+			result = new String(buffer, 0, length);
+			Log.d(TAG, "Read request from server (" + length + ") " + result);
 		}
 		Log.d(TAG, "Finish read request from server");
-		return new String(buffer);
+		return result;
 	}
 
 	private void writeErrorResponse(OutputStream out, String requestId, String fileName) throws IOException {

@@ -69,7 +69,7 @@ public class $i.generatedClassName extends Endpoint {
     @Override
 	public void invoke(String uri, String request, LocalSocket localSocket, String reqId) {
 		try {
-            ActualParam[] ap = actualParams(uri, formalParams(), defaulQueryParams(), groupMap(), getContext());
+            ActualParam[] ap = actualParams(uri, body(request), formalParams(), defaulQueryParams(), groupMap(), getContext());
             OutputStream os = outputStream(localSocket);
             writeResponseHeaders(os, reqId);
             final ${i.destMethodRetType} respFromUserCode = new ${i.destClass}().${i.destMethod}($i.paramsJavaSrc);

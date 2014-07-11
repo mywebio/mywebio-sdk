@@ -58,9 +58,14 @@ public abstract class Endpoint {
 
 	protected abstract String httpMethod();
 
-	protected ActualParam[] actualParams(String uri, FormalParam[] formalParams, Map<String, String> defaultQueryParams, Map<String, Integer> groupMap, Context ctx) throws Exception {
+	protected ActualParam[] actualParams(String uri, String requestBody, FormalParam[] formalParams, Map<String, String> defaultQueryParams, Map<String, Integer> groupMap, Context ctx) throws Exception {
 		String urlNoQueryParams = urlNoQueryParams(uri);
-		Map<String, String> queryParamsMap = actualQueryParamsMap(uri);
+		Map<String, String> paramsMap;
+		if ("POST".equals(httpMethod())) {
+			paramsMap = decodeQueryString(requestBody);
+		} else {
+			paramsMap = decodeQueryString(queryParams(uri));
+		}
 		Matcher m = matcher(urlNoQueryParams);
 		ActualParam[] actualParams = new ActualParam[formalParams.length];
 		if (m.matches()) {
@@ -75,8 +80,8 @@ public abstract class Endpoint {
 					actualParams[fpId] = new ActualParam(fpClazz, convertedVal);
 				} else if (Context.class.equals(fpClazz)) {
 					actualParams[fpId] = new ActualParam(Context.class, ctx);
-				} else if (queryParamsMap.containsKey(fpName)) {
-					String val = queryParamsMap.get(fpName);
+				} else if (paramsMap.containsKey(fpName)) {
+					String val = paramsMap.get(fpName);
 					Object convertedVal = convert(val, fp.getTypeName());
 					actualParams[fpId] = new ActualParam(fpClazz, convertedVal);
 				} else if (defaultQueryParams.containsKey(fpName)) {
@@ -91,6 +96,11 @@ public abstract class Endpoint {
 		return actualParams;
 	}
 
+	protected String body(String request) {
+		int firstEmptyLine = request.indexOf("\r\n\r\n");
+		return request.substring(firstEmptyLine + 4);
+	}
+
 	private String urlNoQueryParams(String url) {
 		int i = url.indexOf("?");
 		String result;
@@ -102,8 +112,7 @@ public abstract class Endpoint {
 		return result;
 	}
 
-	private Map<String, String> actualQueryParamsMap(String url) {
-		String queryParamsStr = queryParams(url);
+	private Map<String, String> decodeQueryString(String queryParamsStr) {
 		String[] nameAndValues = queryParamsStr.split("&");
 		Map<String, String> result = new HashMap<String, String>();
 		for (String nameAndVal : nameAndValues) {
