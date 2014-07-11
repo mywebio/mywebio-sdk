@@ -37,7 +37,6 @@ public class WowFirstWorkingTest extends MywebTestCase {
 		clientSocket.connect(new LocalSocketAddress("doesn't matter now"));
 		OutputStream os = clientSocket.getOutputStream();
 		os.write(GET_TEST1.getBytes());
-		os.flush();
 		os.close();
 
 		// then
