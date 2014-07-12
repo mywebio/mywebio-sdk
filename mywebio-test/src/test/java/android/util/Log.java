@@ -1,86 +1,79 @@
 package android.util;
 
-import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class Log {
 
+	private static final Logger log = LoggerFactory.getLogger(Log.class);
+
 	public static int v(java.lang.String tag, java.lang.String msg) {
-		println(0, tag, msg);
+		log.debug("<{}> {}", tag, msg);
 		return 0;
 	}
 
 	public static int v(java.lang.String tag, java.lang.String msg, java.lang.Throwable tr) {
-		println(0, tag, msg + "\n"+ getStackTraceString(tr));
+		log.debug("<" + tag + "> " + msg, tr);
 		return 0;
 	}
 
 	public static int d(java.lang.String tag, java.lang.String msg) {
-		println(0, tag, msg);
+		log.debug("<{}> {}", tag, msg);
 		return 0;
 	}
 
 	public static int d(java.lang.String tag, java.lang.String msg, java.lang.Throwable tr) {
-		println(0, tag, msg + "\n"+ getStackTraceString(tr));
+		log.debug("<" + tag + "> " + msg, tr);
 		return 0;
 	}
 
 	public static int i(java.lang.String tag, java.lang.String msg) {
-		println(0, tag, msg);
+		log.info("<{}> {}", tag, msg);
 		return 0;
 	}
 
 	public static int i(java.lang.String tag, java.lang.String msg, java.lang.Throwable tr) {
-		println(0, tag, msg + "\n"+ getStackTraceString(tr));
+		log.info("<" + tag + "> " + msg, tr);
 		return 0;
 	}
 
 	public static int w(java.lang.String tag, java.lang.String msg) {
-		println(0, tag, msg);
+		log.warn("<{}> {}", tag, msg);
 		return 0;
 	}
 
 	public static int w(java.lang.String tag, java.lang.String msg, java.lang.Throwable tr) {
-		println(0, tag, msg + "\n"+ getStackTraceString(tr));
+		log.warn("<" + tag + "> " + msg, tr);
 		return 0;
 	}
 
 	public static int w(java.lang.String tag, java.lang.Throwable tr) {
-		println(0, tag, getStackTraceString(tr));
+		log.warn(tag, tr);
 		return 0;
 	}
 
 	public static int e(java.lang.String tag, java.lang.String msg) {
-		println(0, tag, msg);
+		log.error("<{}> {}", tag, msg);
 		return 0;
 	}
 
 	public static int e(java.lang.String tag, java.lang.String msg, java.lang.Throwable tr) {
-		println(0, tag, msg + "\n"+ getStackTraceString(tr));
+		log.error("<" + tag + "> " + msg, tr);
 		return 0;
 	}
 
 	public static int wtf(java.lang.String tag, java.lang.String msg) {
-		println(0, tag, msg);
+		log.error("<{}> WTF {}", tag, msg);
 		return 0;
 	}
 
 	public static int wtf(java.lang.String tag, java.lang.Throwable tr) {
-		println(0, tag, getStackTraceString(tr));
+		log.error("<" + tag + "> WTF ", tr);
 		return 0;
 	}
 
 	public static int wtf(java.lang.String tag, java.lang.String msg, java.lang.Throwable tr) {
-		println(0, tag, msg + "\n"+ getStackTraceString(tr));
+		log.error("<" + tag + "> WTF " + msg, tr);
 		return 0;
 	}
-
-	public static java.lang.String getStackTraceString(java.lang.Throwable tr) {
-		return ExceptionUtils.getStackTrace(tr);
-	}
-
-	public static int println(int priority, java.lang.String tag, java.lang.String msg) {
-		System.out.println(tag + " " + msg);
-		return 0;
-	}
-
 }

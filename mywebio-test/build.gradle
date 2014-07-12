@@ -17,6 +17,7 @@ dependencies {
     testCompile 'junit:junit:4.11'
     testCompile 'org.springframework:spring-core:4.0.4.RELEASE'
     testCompile 'commons-io:commons-io:2.4'
+    testCompile 'ch.qos.logback:logback-classic:1.1.2'
 }
 
 test {
