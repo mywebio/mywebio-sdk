@@ -1,4 +1,6 @@
 # MyWeb.io SDK and client library
+[![Build Status](https://travis-ci.org/mywebio/mywebio-sdk.svg)](https://travis-ci.org/mywebio/mywebio-sdk)
+
 This library allows you to write web applications for Android.
 It works with Android application available on [Google Play](https://play.google.com/store/apps/details?id=io.myweb.server.alpha).
 
