@@ -9,11 +9,12 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.12.+'
+        classpath 'com.android.tools.build:gradle:0.9.+'
     }
 }
 
 dependencies {
+    compile 'com.google.android:android:4.0.1.2'
     compile project(':mywebio-api')
 }
 
