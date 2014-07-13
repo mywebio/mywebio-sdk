@@ -7,4 +7,4 @@ before_install:
   - curl -L https://raw.github.com/embarkmobile/android-sdk-installer/version-1/android-sdk-installer | bash /dev/stdin --install=$COMPONENTS
   - source ~/.android-sdk-installer/env
   - export GRADLE_OPTS="-Xmx1024m -XX:MaxPermSize=256m"
-script: ./gradlew build
+install: ./gradlew build
