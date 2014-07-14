@@ -5,7 +5,7 @@ dependencies {
     repositories {
         mavenCentral()
     }
-    compile project(':mywebio-api')
+    compile project(':mywebio-api-java')
     compile 'org.apache.velocity:velocity:1.7'
     compile 'org.apache.velocity:velocity-tools:2.0'
     compile 'com.google.guava:guava:17.0'

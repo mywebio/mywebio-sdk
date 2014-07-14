@@ -15,7 +15,7 @@ publishing {
     publications {
         plugin(MavenPublication) {
             from components.java
-            artifactId 'mywebio-api'
+            artifactId 'mywebio-api-java'
         }
     }
 }

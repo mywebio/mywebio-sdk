@@ -1,4 +1,4 @@
-include ':mywebio-api',
+include ':mywebio-api-java',
         ':mywebio-api-aar',
         ':mywebio',
         ':mywebio-examples',

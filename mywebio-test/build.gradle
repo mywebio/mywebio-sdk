@@ -7,7 +7,7 @@ dependencies {
     repositories {
         mavenCentral()
     }
-    compile (project(':mywebio-api')) {
+    compile (project(':mywebio-api-java')) {
         exclude group: 'com.google.android', module: 'android'
     }
     compile (project(':mywebio')) {
