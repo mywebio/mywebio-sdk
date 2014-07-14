@@ -14,7 +14,6 @@ buildscript {
 }
 
 dependencies {
-    compile 'com.google.android:android:4.0.1.2'
     compile project(':mywebio-api')
 }
 
