@@ -1,5 +1,5 @@
 include ':mywebio-api-java',
-        ':mywebio-api-aar',
+        ':mywebio-api',
         ':mywebio',
         ':mywebio-examples',
         ':mywebio-gallery',

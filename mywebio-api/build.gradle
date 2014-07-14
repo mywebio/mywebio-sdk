@@ -36,7 +36,7 @@ publishing {
             // TODO is there a better way for that?
             def aarName = "build/libs/${artifactId}-${project.version}.aar"
             artifact file(aarName)
-            artifactId 'mywebio-api-aar'
+            artifactId 'mywebio-api'
         }
     }
 }

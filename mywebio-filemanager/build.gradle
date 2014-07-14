@@ -12,7 +12,7 @@ dependencies {
     repositories {
         mavenCentral()
     }
-    compile project(':mywebio-api-aar')
+    compile project(':mywebio-api')
     provided project(':mywebio')
 }
 
