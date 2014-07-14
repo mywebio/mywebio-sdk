@@ -80,15 +80,14 @@ public Response json(String name, int id) throws JSONException {
 ## Building myweb.io-enabled project
 In order to use myweb.io API you need to add few lines in build.gradle:
 ```groovy
-apply plugin: 'android-apt'
-buildscript {
-  dependencies {
-    classpath 'com.neenbedankt.gradle.plugins:android-apt:1.3'
-  }
-}
 dependencies {
   compile 'io.myweb:mywebio-api-aar:0.1-SNAPSHOT'
-  apt 'io.myweb:mywebio:0.1-SNAPSHOT'
+  provided 'io.myweb:mywebio:0.1-SNAPSHOT'
+}
+android {
+  lintOptions {
+    disable 'InvalidPackage'
+  }
 }
 ```
 That's it! Now you can enter
