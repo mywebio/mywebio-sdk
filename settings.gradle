@@ -1,6 +1,6 @@
 include ':mywebio-api-java',
         ':mywebio-api',
-        ':mywebio',
+        ':mywebio-compiler',
         ':mywebio-examples',
         ':mywebio-gallery',
         ':mywebio-filemanager',

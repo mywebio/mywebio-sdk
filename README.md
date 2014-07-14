@@ -82,7 +82,7 @@ In order to use myweb.io API you need to add few lines in build.gradle:
 ```groovy
 dependencies {
   compile 'io.myweb:mywebio-api:0.1-SNAPSHOT'
-  provided 'io.myweb:mywebio:0.1-SNAPSHOT'
+  provided 'io.myweb:mywebio-compiler:0.1-SNAPSHOT'
 }
 android {
   lintOptions {

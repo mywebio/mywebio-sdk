@@ -10,7 +10,7 @@ dependencies {
     compile (project(':mywebio-api-java')) {
         exclude group: 'com.google.android', module: 'android'
     }
-    compile (project(':mywebio')) {
+    compile (project(':mywebio-compiler')) {
         exclude group: 'com.google.android', module: 'android'
     }
     testCompile 'com.google.guava:guava:17.0'

@@ -29,7 +29,7 @@ publishing {
     publications {
         plugin(MavenPublication) {
             from components.java
-            artifactId 'mywebio'
+            artifactId 'mywebio-compiler'
         }
     }
 }

@@ -13,7 +13,7 @@ dependencies {
 		mavenCentral()
 	}
 	compile project(':mywebio-api')
-	provided project(':mywebio')
+	provided project(':mywebio-compiler')
 }
 
 android {
