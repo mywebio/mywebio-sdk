@@ -13,6 +13,8 @@ public class ResponseBuilder {
 
 	public static final String CONTENT_TYPE = "Content-Type: ";
 
+	private static final String EMPTY = "";
+
 	public static final String CRLF = "\r\n";
 
 	public static final int BUFFER_LENGTH = 32 * 1024;
@@ -51,6 +53,8 @@ public class ResponseBuilder {
 			writeLengthAndBody(userDefinedLength, (InputStream) body, os);
 		} else if (body instanceof JSONObject) {
 			writeLengthAndBody(userDefinedLength, (JSONObject) body, os);
+		} else if (body == null) {
+			writeLengthAndBody(userDefinedLength, EMPTY, os);
 		} else {
 			throw new RuntimeException("unsupported type: " + body.getClass());
 		}
