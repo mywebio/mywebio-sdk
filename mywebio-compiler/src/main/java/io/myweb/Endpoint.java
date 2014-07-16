@@ -58,11 +58,11 @@ public abstract class Endpoint {
 
 	protected abstract String httpMethod();
 
-	protected ActualParam[] actualParams(String uri, String requestBody, FormalParam[] formalParams, Map<String, String> defaultQueryParams, Map<String, Integer> groupMap, Context ctx) throws Exception {
+	protected ActualParam[] actualParams(String uri, String request, FormalParam[] formalParams, Map<String, String> defaultQueryParams, Map<String, Integer> groupMap, Context ctx) throws Exception {
 		String urlNoQueryParams = urlNoQueryParams(uri);
 		Map<String, String> paramsMap;
 		if ("POST".equals(httpMethod())) {
-			paramsMap = decodeQueryString(requestBody);
+			paramsMap = decodeQueryString(body(request));
 		} else {
 			paramsMap = decodeQueryString(queryParams(uri));
 		}
@@ -96,7 +96,7 @@ public abstract class Endpoint {
 		return actualParams;
 	}
 
-	protected String body(String request) {
+	private String body(String request) {
 		int firstEmptyLine = request.indexOf("\r\n\r\n");
 		return request.substring(firstEmptyLine + 4);
 	}
