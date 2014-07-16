@@ -20,7 +20,7 @@ public abstract class Endpoint {
 		this.context = context;
 	}
 
-	public abstract void invoke(String uri, String request, LocalSocket localSocket, String reqId);
+	public abstract void invoke(String uri, String request, LocalSocket localSocket, String reqId) throws Exception;
 
 	protected Context getContext() {
 		return context;

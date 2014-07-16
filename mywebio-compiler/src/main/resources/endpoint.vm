@@ -67,16 +67,12 @@ public class $i.generatedClassName extends Endpoint {
     }
 
     @Override
-	public void invoke(String uri, String request, LocalSocket localSocket, String reqId) {
-		try {
-            ActualParam[] ap = actualParams(uri, body(request), formalParams(), defaulQueryParams(), groupMap(), getContext());
-            OutputStream os = outputStream(localSocket);
-            writeResponseHeaders(os, reqId);
-            final ${i.destMethodRetType} respFromUserCode = new ${i.destClass}().${i.destMethod}($i.paramsJavaSrc);
-            ResponseBuilder responseBuilder = new ResponseBuilder();
-            responseBuilder.writeResponse("${i.produces}", respFromUserCode, os);
-        } catch (Exception e) {
-            Log.d("Endpoint", "error during invoke", e);
-        }
+	public void invoke(String uri, String request, LocalSocket localSocket, String reqId) throws Exception {
+		ActualParam[] ap = actualParams(uri, body(request), formalParams(), defaulQueryParams(), groupMap(), getContext());
+		OutputStream os = outputStream(localSocket);
+		writeResponseHeaders(os, reqId);
+		final ${i.destMethodRetType} respFromUserCode = new ${i.destClass}().${i.destMethod}($i.paramsJavaSrc);
+		ResponseBuilder responseBuilder = new ResponseBuilder();
+		responseBuilder.writeResponse("${i.produces}", respFromUserCode, os);
     }
 }

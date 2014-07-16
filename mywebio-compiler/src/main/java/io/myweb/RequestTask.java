@@ -107,7 +107,7 @@ public class RequestTask implements Runnable {
 		}
 	}
 
-	public void findAndInvokeEndpoint(final String request, final String reqId) {
+	public void findAndInvokeEndpoint(final String request, final String reqId) throws Exception {
 		String firstLine = request.substring(0, request.indexOf("\n"));
 		String[] split = firstLine.split(" ");
 		String method = split[0];
@@ -124,7 +124,6 @@ public class RequestTask implements Runnable {
 			endpoint = findEndpoint(method, effectiveUri);
 		}
 		endpoint.invoke(effectiveUri, request, socket, reqId);
-		// TODO HTTP 500
 	}
 
 	private Endpoint findEndpoint(String method, String uri) {
