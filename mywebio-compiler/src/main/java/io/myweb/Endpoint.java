@@ -3,9 +3,13 @@ package io.myweb;
 import android.content.Context;
 import android.net.LocalSocket;
 import android.util.Log;
+import io.myweb.api.Cookie;
+import io.myweb.api.Cookies;
 
 import java.io.*;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -80,6 +84,11 @@ public abstract class Endpoint {
 					actualParams[fpId] = new ActualParam(fpClazz, convertedVal);
 				} else if (Context.class.equals(fpClazz)) {
 					actualParams[fpId] = new ActualParam(Context.class, ctx);
+				} else if (Cookies.class.equals(fpClazz)){
+					actualParams[fpId] = new ActualParam(Cookies.class, parseCookies(request));
+				} else if (Cookie.class.equals(fpClazz)){
+					Cookie cookie = parseCookies(request).getCookie(fpName);
+					actualParams[fpId] = new ActualParam(Cookie.class, cookie);
 				} else if (paramsMap.containsKey(fpName)) {
 					String val = paramsMap.get(fpName);
 					Object convertedVal = convert(val, fp.getTypeName());
@@ -96,9 +105,40 @@ public abstract class Endpoint {
 		return actualParams;
 	}
 
+	private Cookies parseCookies(String request) {
+		String[] headers = headers(request).split("\\r\\n");
+		Map<String, Cookie> cookies = new HashMap<String, Cookie>();
+		for (String header : headers) {
+			String[] hv = header.split(":");
+			if (hv.length == 2) {
+				if ("Cookie".equals(hv[0])) {
+					Cookie cookie = parseCookie(hv[1]);
+					cookies.put(cookie.getName(), cookie);
+				}
+			}
+		}
+		return new Cookies(cookies);
+	}
+
+	private Cookie parseCookie(String cookieStr) {
+		String[] nv = cookieStr.split("=");
+		if (nv.length == 2) {
+			return new Cookie(nv[0].trim(), nv[1].trim());
+		} else {
+			throw new RuntimeException("invalid cookie: " + cookieStr);
+		}
+	}
+
 	private String body(String request) {
-		int firstEmptyLine = request.indexOf("\r\n\r\n");
-		return request.substring(firstEmptyLine + 4);
+		return request.substring(bodyStartIndex(request));
+	}
+
+	private int bodyStartIndex(String request) {
+		return request.indexOf("\r\n\r\n") + 4;
+	}
+
+	private String headers(String request) {
+		return request.substring(0, bodyStartIndex(request));
 	}
 
 	private String urlNoQueryParams(String url) {

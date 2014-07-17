@@ -1,6 +1,7 @@
 package io.myweb;
 
 
+import io.myweb.api.Cookie;
 import io.myweb.api.Response;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -41,9 +42,22 @@ public class ResponseBuilder {
 		} else {
 			mime = srcResponse.getMimeType();
 		}
+		if (srcResponse.getCookies() != null) {
+			for (Cookie cookie : srcResponse.getCookies()) {
+				writeCookie(cookie, os);
+			}
+		}
 		os.write((CONTENT_TYPE + mime + CRLF).getBytes());
 		writeLengthAndBody(srcResponse.getContentLength(), srcResponse.getBody(), os);
 		os.close();
+	}
+
+	private void writeCookie(Cookie cookie, OutputStream os) throws IOException {
+		os.write("Set-Cookie: ".getBytes());
+		os.write(cookie.getName().getBytes());
+		os.write("=".getBytes());
+		os.write(cookie.getValue().getBytes());
+		os.write(CRLF.getBytes());
 	}
 
 	private void writeLengthAndBody(long userDefinedLength, Object body, OutputStream os) throws IOException, JSONException {

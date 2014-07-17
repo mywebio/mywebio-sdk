@@ -14,6 +14,8 @@ public class Response {
 
 	private long contentLength;
 
+	private Cookie[] cookies;
+
 	private Response(int statusCode) {
 		this.statusCode = statusCode;
 	}
@@ -73,5 +75,14 @@ public class Response {
 
 	public long getContentLength() {
 		return contentLength;
+	}
+
+	public Cookie[] getCookies() {
+		return cookies;
+	}
+
+	public Response withCookies(Cookie... cookies) {
+		this.cookies = cookies;
+		return this;
 	}
 }
