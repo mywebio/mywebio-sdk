@@ -5,6 +5,7 @@ import android.net.LocalSocket;
 import android.util.Log;
 import io.myweb.api.Cookie;
 import io.myweb.api.Cookies;
+import io.myweb.api.Headers;
 
 import java.io.*;
 import java.net.URLDecoder;
@@ -87,9 +88,11 @@ public abstract class Endpoint {
 					actualParams[fpId] = new ActualParam(Context.class, ctx);
 				} else if (Cookies.class.equals(fpClazz)){
 					actualParams[fpId] = new ActualParam(Cookies.class, parseCookies(request));
-				} else if (Cookie.class.equals(fpClazz)){
+				} else if (Cookie.class.equals(fpClazz)) {
 					Cookie cookie = parseCookies(request).getCookie(fpName);
 					actualParams[fpId] = new ActualParam(Cookie.class, cookie);
+				} else if (Headers.class.equals(fpClazz)) {
+					actualParams[fpId] = new ActualParam(Headers.class, headersObject(request));
 				} else if (paramsMap.containsKey(fpName)) {
 					String val = paramsMap.get(fpName);
 					Object convertedVal = convert(val, fp.getTypeName());
@@ -142,6 +145,30 @@ public abstract class Endpoint {
 
 	private String headers(String request) {
 		return request.substring(0, bodyStartIndex(request));
+	}
+
+	private Headers headersObject(String request) {
+		String headersString = headers(request);
+		String[] headersArr = headersString.split("\\r\\n");
+		Map<String, List<String>> headersMap = new HashMap<String, List<String>>();
+		for (int i = 1; i < headersArr.length; i++) {
+			int valIdx = headersArr[i].indexOf(": ");
+			String key = headersArr[i].substring(0, valIdx);
+			String val = headersArr[i].substring(valIdx + 2);
+			insert(headersMap, key, val);
+		}
+		return new Headers(headersMap);
+	}
+
+	private void insert(Map<String, List<String>> headersMap, String key, String val) {
+		List<String> values;
+		if (headersMap.containsKey(key)) {
+			values = headersMap.get(key);
+		} else {
+			values = new LinkedList<String>();
+			headersMap.put(key, values);
+		}
+		values.add(val);
 	}
 
 	private String urlNoQueryParams(String url) {
