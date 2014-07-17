@@ -9,7 +9,7 @@ public class TestCookie {
 
 	@GET("/setCookie?:name=name&:value=value")
 	public Response setCookie(String name, String value) {
-		return Response.ok().withCookies(new Cookie(name, value, 24 * 3600, "localhost", false, true));
+		return Response.ok().withCookies(new Cookie(name, value + " " + value));
 	}
 
 	@GET("/acceptCookie?:cookieName=name")

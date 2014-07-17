@@ -7,6 +7,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.*;
+import java.net.URLEncoder;
 
 public class ResponseBuilder {
 
@@ -56,7 +57,8 @@ public class ResponseBuilder {
 		os.write("Set-Cookie: ".getBytes());
 		os.write(cookie.getName().getBytes());
 		os.write("=".getBytes());
-		os.write(cookie.getValue().getBytes());
+		String encodedVal = URLEncoder.encode(cookie.getValue(), "UTF-8");
+		os.write(encodedVal.getBytes());
 		os.write(CRLF.getBytes());
 	}
 

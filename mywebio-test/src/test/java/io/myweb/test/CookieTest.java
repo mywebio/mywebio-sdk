@@ -47,7 +47,7 @@ public class CookieTest extends MywebTestCase {
 		InputStream is = clientSocket.getInputStream();
 		String response = IOUtils.toString(is);
 		System.out.println("response: " + response);
-		String expectedBody = "Set-Cookie: COOKIE_NAME=cookieValue";
+		String expectedBody = "Set-Cookie: COOKIE_NAME=cookieValue+cookieValue";
 		assertThat(response, containsString(expectedBody));
 	}
 

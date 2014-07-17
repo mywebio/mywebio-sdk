@@ -7,6 +7,7 @@ import io.myweb.api.Cookie;
 import io.myweb.api.Cookies;
 
 import java.io.*;
+import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -105,7 +106,7 @@ public abstract class Endpoint {
 		return actualParams;
 	}
 
-	private Cookies parseCookies(String request) {
+	private Cookies parseCookies(String request) throws UnsupportedEncodingException {
 		String[] headers = headers(request).split("\\r\\n");
 		Map<String, Cookie> cookies = new HashMap<String, Cookie>();
 		for (String header : headers) {
@@ -120,10 +121,12 @@ public abstract class Endpoint {
 		return new Cookies(cookies);
 	}
 
-	private Cookie parseCookie(String cookieStr) {
+	private Cookie parseCookie(String cookieStr) throws UnsupportedEncodingException {
 		String[] nv = cookieStr.split("=");
 		if (nv.length == 2) {
-			return new Cookie(nv[0].trim(), nv[1].trim());
+			String value = nv[1].trim();
+			String decodedVal = URLDecoder.decode(value, "UTF-8");
+			return new Cookie(nv[0].trim(), decodedVal);
 		} else {
 			throw new RuntimeException("invalid cookie: " + cookieStr);
 		}
