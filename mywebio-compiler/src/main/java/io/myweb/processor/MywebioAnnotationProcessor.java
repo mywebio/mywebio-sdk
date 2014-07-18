@@ -57,7 +57,7 @@ public class MywebioAnnotationProcessor extends AbstractProcessor {
 			Set<? extends Element> elementsAnnotated = roundEnv.getElementsAnnotatedWith(te);
 			Set<ExecutableElement> executableElements = ElementFilter.methodsIn(elementsAnnotated);
 			for (ExecutableElement ee : executableElements) {
-//				log("process: executableElement " + ee.getSimpleName().toString() + " hash=" + ee.hashCode());
+				log("process: executableElement " + ee.getSimpleName().toString() + " hash=" + ee.hashCode());
 				if (!processed.contains(ee)) {
 					processed.add(ee);
 					String destClass = ee.getEnclosingElement().toString();
@@ -168,7 +168,7 @@ public class MywebioAnnotationProcessor extends AbstractProcessor {
 //			OutputStream os = filer.createSourceFile("io.web.Service").openOutputStream();
 //			w = new PrintWriter(os);
 		} catch (IOException e) {
-//				error("Cannot create file: " + e.toString());
+			error("Cannot create file: " + e.toString());
 			return;
 		}
 		t.merge(ctx, w);
@@ -193,7 +193,7 @@ public class MywebioAnnotationProcessor extends AbstractProcessor {
 //			OutputStream os = filer.createSourceFile("io.web.Service").openOutputStream();
 //			w = new PrintWriter(os);
 		} catch (IOException e) {
-//				error("Cannot create file: " + e.toString());
+			error("Cannot create file: " + e.toString());
 			return;
 		}
 		t.merge(ctx, w);
@@ -217,7 +217,7 @@ public class MywebioAnnotationProcessor extends AbstractProcessor {
 			os.close();
 			is.close();
 		} catch (IOException e) {
-//			error(e.toString());
+			error(e.toString());
 		}
 	}
 }
