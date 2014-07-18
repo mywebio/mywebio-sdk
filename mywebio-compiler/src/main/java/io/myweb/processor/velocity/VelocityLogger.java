@@ -16,8 +16,8 @@ public class VelocityLogger implements LogChute {
 	private static final boolean LOG_WARN = true;
 	private static final boolean LOG_ERROR = true;
 	private static final boolean LOG_INFO = true;
-	private static final boolean LOG_DEBUG = true;
-	private static final boolean LOG_TRACE = true;
+	private static final boolean LOG_DEBUG = false;
+	private static final boolean LOG_TRACE = false;
 
 	public static final String LOG_PREFIX = "Velocity";
 
