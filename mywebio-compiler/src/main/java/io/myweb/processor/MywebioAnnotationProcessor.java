@@ -1,6 +1,7 @@
 package io.myweb.processor;
 
 import com.google.common.io.ByteStreams;
+import io.myweb.api.*;
 import io.myweb.processor.model.ParsedMethod;
 import io.myweb.processor.model.ParsedParam;
 import io.myweb.processor.velocity.VelocityLogger;
@@ -10,10 +11,6 @@ import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.RuntimeConstants;
 import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
-import io.myweb.api.GET;
-import io.myweb.api.MimeTypes;
-import io.myweb.api.POST;
-import io.myweb.api.Produces;
 
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
@@ -26,6 +23,8 @@ import java.util.*;
 @SupportedAnnotationTypes({
 		"io.myweb.api.GET",
 		"io.myweb.api.POST",
+		"io.myweb.api.DELETE",
+		"io.myweb.api.PUT",
 		"io.myweb.api.Produces"
 })
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
@@ -83,7 +82,8 @@ public class MywebioAnnotationProcessor extends AbstractProcessor {
 						// TODO verify if annotation aren't duplicated
 						// TODO support other annotation types as well
 						String annotationName = am.getAnnotationType().toString();
-						if (GET.class.getName().equals(annotationName) || POST.class.getName().equals(annotationName)) {
+						if (GET.class.getName().equals(annotationName) || POST.class.getName().equals(annotationName)
+								|| DELETE.class.getName().equals(annotationName) || PUT.class.getName().equals(annotationName)) {
 							httpMethod = annotationName.substring(annotationName.lastIndexOf(".") + 1).trim();
 							for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry : am.getElementValues().entrySet()) {
 								if ("value".equals(entry.getKey().getSimpleName().toString())) {
