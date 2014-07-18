@@ -92,7 +92,7 @@ public abstract class Endpoint {
 					Cookie cookie = parseCookies(request).getCookie(fpName);
 					actualParams[fpId] = new ActualParam(Cookie.class, cookie);
 				} else if (Headers.class.equals(fpClazz)) {
-					actualParams[fpId] = new ActualParam(Headers.class, headersObject(request));
+					actualParams[fpId] = new ActualParam(Headers.class, headers(request));
 				} else if (paramsMap.containsKey(fpName)) {
 					String val = paramsMap.get(fpName);
 					Object convertedVal = convert(val, fp.getTypeName());
@@ -110,18 +110,14 @@ public abstract class Endpoint {
 	}
 
 	private Cookies parseCookies(String request) throws UnsupportedEncodingException {
-		String[] headers = headers(request).split("\\r\\n");
-		Map<String, Cookie> cookies = new HashMap<String, Cookie>();
-		for (String header : headers) {
-			String[] hv = header.split(":");
-			if (hv.length == 2) {
-				if ("Cookie".equals(hv[0])) {
-					Cookie cookie = parseCookie(hv[1]);
-					cookies.put(cookie.getName(), cookie);
-				}
-			}
+		Headers headers = headers(request);
+		List<String> cookies = headers.getAll("Cookie");
+		Map<String, Cookie> cookieMap = new HashMap<String, Cookie>();
+		for (String cookieStr : cookies) {
+			Cookie cookie = parseCookie(cookieStr);
+			cookieMap.put(cookie.getName(), cookie);
 		}
-		return new Cookies(cookies);
+		return new Cookies(cookieMap);
 	}
 
 	private Cookie parseCookie(String cookieStr) throws UnsupportedEncodingException {
@@ -143,13 +139,13 @@ public abstract class Endpoint {
 		return request.indexOf("\r\n\r\n") + 4;
 	}
 
-	private String headers(String request) {
+	private String headersStr(String request) {
 		return request.substring(0, bodyStartIndex(request));
 	}
 
-	private Headers headersObject(String request) {
-		String headersString = headers(request);
-		String[] headersArr = headersString.split("\\r\\n");
+	private Headers headers(String request) {
+		String headersStr = headersStr(request);
+		String[] headersArr = headersStr.split("\\r\\n");
 		Map<String, List<String>> headersMap = new HashMap<String, List<String>>();
 		for (int i = 1; i < headersArr.length; i++) {
 			int valIdx = headersArr[i].indexOf(": ");
