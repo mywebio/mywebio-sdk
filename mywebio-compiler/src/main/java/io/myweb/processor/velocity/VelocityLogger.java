@@ -41,47 +41,52 @@ public class VelocityLogger implements LogChute {
 
 	@Override
 	public void log(int level, String message) {
-		switch (level) {
-			case LogChute.WARN_ID:
-				log(Kind.WARNING, LOG_PREFIX + LogChute.WARN_PREFIX + message);
-				break;
-			case LogChute.ERROR_ID:
-				log(Kind.ERROR, LOG_PREFIX + LogChute.ERROR_PREFIX + message);
-				break;
-			case LogChute.INFO_ID:
-				log(Kind.NOTE, LOG_PREFIX + LogChute.INFO_PREFIX + message);
-				break;
-			case LogChute.DEBUG_ID:
-				log(Kind.NOTE, LOG_PREFIX + LogChute.DEBUG_PREFIX + message);
-				break;
-			case LogChute.TRACE_ID:
-				log(Kind.NOTE, LOG_PREFIX + LogChute.TRACE_PREFIX + message);
-				break;
-			default:
-				logFatal(level);
+		if (isLevelEnabled(level)) {
+			switch (level) {
+				case LogChute.WARN_ID:
+					log(Kind.WARNING, LOG_PREFIX + LogChute.WARN_PREFIX + message);
+					break;
+				case LogChute.ERROR_ID:
+					log(Kind.ERROR, LOG_PREFIX + LogChute.ERROR_PREFIX + message);
+					break;
+				case LogChute.INFO_ID:
+					log(Kind.NOTE, LOG_PREFIX + LogChute.INFO_PREFIX + message);
+					break;
+				case LogChute.DEBUG_ID:
+					log(Kind.NOTE, LOG_PREFIX + LogChute.DEBUG_PREFIX + message);
+					break;
+				case LogChute.TRACE_ID:
+					log(Kind.NOTE, LOG_PREFIX + LogChute.TRACE_PREFIX + message);
+					break;
+				default:
+					logFatal(level);
+
+			}
 		}
 	}
 
 	@Override
 	public void log(int level, String message, Throwable t) {
-		switch (level) {
-			case LogChute.WARN_ID:
-				log(Kind.WARNING, LOG_PREFIX + LogChute.WARN_PREFIX + message, t);
-				break;
-			case LogChute.ERROR_ID:
-				log(Kind.ERROR, LOG_PREFIX + LogChute.ERROR_PREFIX + message, t);
-				break;
-			case LogChute.INFO_ID:
-				log(Kind.NOTE, LOG_PREFIX +  LogChute.INFO_PREFIX + message, t);
-				break;
-			case LogChute.DEBUG_ID:
-				log(Kind.NOTE, LOG_PREFIX + LogChute.DEBUG_PREFIX + message, t);
-				break;
-			case LogChute.TRACE_ID:
-				log(Kind.NOTE, LOG_PREFIX + LogChute.TRACE_PREFIX + message, t);
-				break;
-			default:
-				logFatal(level);
+		if (isLevelEnabled(level)) {
+			switch (level) {
+				case LogChute.WARN_ID:
+					log(Kind.WARNING, LOG_PREFIX + LogChute.WARN_PREFIX + message, t);
+					break;
+				case LogChute.ERROR_ID:
+					log(Kind.ERROR, LOG_PREFIX + LogChute.ERROR_PREFIX + message, t);
+					break;
+				case LogChute.INFO_ID:
+					log(Kind.NOTE, LOG_PREFIX + LogChute.INFO_PREFIX + message, t);
+					break;
+				case LogChute.DEBUG_ID:
+					log(Kind.NOTE, LOG_PREFIX + LogChute.DEBUG_PREFIX + message, t);
+					break;
+				case LogChute.TRACE_ID:
+					log(Kind.NOTE, LOG_PREFIX + LogChute.TRACE_PREFIX + message, t);
+					break;
+				default:
+					logFatal(level);
+			}
 		}
 	}
 
