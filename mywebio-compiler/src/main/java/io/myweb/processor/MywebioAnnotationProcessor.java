@@ -3,13 +3,12 @@ package io.myweb.processor;
 import com.google.common.io.ByteStreams;
 import io.myweb.processor.model.ParsedMethod;
 import io.myweb.processor.model.ParsedParam;
+import io.myweb.processor.velocity.VelocityLogger;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.RuntimeConstants;
-import org.apache.velocity.runtime.RuntimeServices;
-import org.apache.velocity.runtime.log.LogChute;
 import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 import io.myweb.api.GET;
 import io.myweb.api.MimeTypes;
@@ -30,7 +29,7 @@ import java.util.*;
 		"io.myweb.api.Produces"
 })
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
-public class MywebioAnnotationProcessor extends AbstractProcessor implements LogChute {
+public class MywebioAnnotationProcessor extends AbstractProcessor {
 
 	private static final boolean quiet = false;
 
@@ -114,7 +113,7 @@ public class MywebioAnnotationProcessor extends AbstractProcessor implements Log
 	private void generateCode(List<ParsedMethod> parsedMethods) {
 		generateSourcesFromResource();
 		VelocityEngine ve = new VelocityEngine();
-		ve.setProperty(VelocityEngine.RUNTIME_LOG_LOGSYSTEM, this);
+		ve.setProperty(VelocityEngine.RUNTIME_LOG_LOGSYSTEM, new VelocityLogger(processingEnv.getMessager()));
 		ve.setProperty(RuntimeConstants.RESOURCE_LOADER, "classpath");
 		ve.setProperty("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());
 		ve.init();
@@ -220,42 +219,5 @@ public class MywebioAnnotationProcessor extends AbstractProcessor implements Log
 		} catch (IOException e) {
 //			error(e.toString());
 		}
-	}
-
-	public void writeInputStream(InputStream is, Writer w) throws IOException {
-		char[] buffer = new char[1024];
-		Reader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
-		int n;
-		while ((n = reader.read(buffer)) != -1) {
-			w.write(buffer, 0, n);
-		}
-	}
-
-	private void processExecutableElement(ExecutableElement ee) {
-		log("processExecutableElement ee=" + ee);
-	}
-
-	private void processAnnotation(Element e) {
-		log("processAnnotation element=" + e);
-	}
-
-	@Override
-	public void init(RuntimeServices rs) throws Exception {
-		log("init: " + rs);
-	}
-
-	@Override
-	public void log(int level, String message) {
-		log("log(" + level + "): " + message);
-	}
-
-	@Override
-	public void log(int level, String message, Throwable t) {
-		log("log(" + level + "): " + message + " ex: " + t);
-	}
-
-	@Override
-	public boolean isLevelEnabled(int level) {
-		return true;
 	}
 }
