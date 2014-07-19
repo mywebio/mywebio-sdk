@@ -1,11 +1,16 @@
 package io.myweb.processor;
 
+import com.google.common.base.Function;
+import com.google.common.base.Joiner;
+import com.google.common.base.Predicate;
+
 import com.google.common.io.ByteStreams;
 import io.myweb.api.*;
 import io.myweb.processor.model.ParsedMethod;
 import io.myweb.processor.model.ParsedParam;
 import io.myweb.processor.velocity.VelocityLogger;
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
@@ -19,6 +24,10 @@ import javax.lang.model.util.ElementFilter;
 import javax.tools.Diagnostic;
 import java.io.*;
 import java.util.*;
+
+import static com.google.common.collect.Collections2.transform;
+import static com.google.common.collect.Iterables.filter;
+import static com.google.common.collect.Iterables.size;
 
 @SupportedAnnotationTypes({
 		"io.myweb.api.GET",
@@ -52,62 +61,90 @@ public class MywebioAnnotationProcessor extends AbstractProcessor {
 		List<ParsedMethod> parsedMethods = new LinkedList<ParsedMethod>();
 		Set<ExecutableElement> processed = new HashSet<ExecutableElement>();
 
-		for (TypeElement te: annotations) {
-			Set<? extends Element> elementsAnnotated = roundEnv.getElementsAnnotatedWith(te);
-			Set<ExecutableElement> executableElements = ElementFilter.methodsIn(elementsAnnotated);
-			for (ExecutableElement ee : executableElements) {
-				log("process: executableElement " + ee.getSimpleName().toString() + " hash=" + ee.hashCode());
-				if (!processed.contains(ee)) {
-					processed.add(ee);
-					String destClass = ee.getEnclosingElement().toString();
-					String destMethod = ee.getSimpleName().toString();
-					String destMethodRetType = ee.getReturnType().toString();
-					List<ParsedParam> params = new LinkedList<ParsedParam>();
-					String httpMethod = "GET";
-					String httpUri = "/";
-					String produces = MimeTypes.MIME_TEXT_PLAIN;
-					List<? extends VariableElement> parameters = ee.getParameters();
-					int i = 0;
-					for (VariableElement p : parameters) {
-						ParsedParam pp = null;
-						try {
-							String type = p.asType().toString().replaceFirst("class ", "");
-							pp = new ParsedParam(i++, type, p.getSimpleName().toString());
-						} catch (ClassNotFoundException e) {
-							error("cannot load class: " + e.getMessage());
+		try {
+			for (TypeElement te : annotations) {
+				Set<? extends Element> elementsAnnotated = roundEnv.getElementsAnnotatedWith(te);
+				Set<ExecutableElement> executableElements = ElementFilter.methodsIn(elementsAnnotated);
+				for (ExecutableElement ee : executableElements) {
+					log("process: executableElement " + ee.getSimpleName().toString() + " hash=" + ee.hashCode());
+					if (!processed.contains(ee)) {
+						processed.add(ee);
+						log("parameter names: " + Joiner.on(", ").join(ee.getParameters()));
+						String destClass = ee.getEnclosingElement().toString();
+						String destMethod = ee.getSimpleName().toString();
+						String destMethodRetType = ee.getReturnType().toString();
+						List<ParsedParam> params = new LinkedList<ParsedParam>();
+						String httpMethod = "GET";
+						String httpUri = "/";
+						String produces = MimeTypes.MIME_TEXT_PLAIN;
+						List<? extends VariableElement> parameters = ee.getParameters();
+						int i = 0;
+						Collection<String> types = transform(parameters, new Function<VariableElement, String>() {
+							@Override
+							public String apply(VariableElement ve) {
+								return ve.asType().toString().replaceFirst("class ", "");
+							}
+						});
+						log("parameters types: " + Joiner.on(", ").join(types));
+						for (VariableElement p : parameters) {
+							ParsedParam pp = null;
+							try {
+								String type = p.asType().toString().replaceFirst("class ", "");
+								pp = new ParsedParam(i++, type, p.getSimpleName().toString());
+							} catch (ClassNotFoundException e) {
+								error("cannot load class: " + e.getMessage());
+							}
+							params.add(pp);
 						}
-						params.add(pp);
-					}
-					for (AnnotationMirror am : ee.getAnnotationMirrors()) {
-						// TODO verify if annotation aren't duplicated
-						// TODO support other annotation types as well
-						String annotationName = am.getAnnotationType().toString();
-						if (GET.class.getName().equals(annotationName) || POST.class.getName().equals(annotationName)
-								|| DELETE.class.getName().equals(annotationName) || PUT.class.getName().equals(annotationName)) {
-							httpMethod = annotationName.substring(annotationName.lastIndexOf(".") + 1).trim();
-							for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry : am.getElementValues().entrySet()) {
-								if ("value".equals(entry.getKey().getSimpleName().toString())) {
-									httpUri = entry.getValue().getValue().toString();
-									break;
+						for (AnnotationMirror am : ee.getAnnotationMirrors()) {
+							// TODO verify if annotation aren't duplicated
+							// TODO support other annotation types as well
+							String annotationName = am.getAnnotationType().toString();
+							if (GET.class.getName().equals(annotationName) || POST.class.getName().equals(annotationName)
+									|| DELETE.class.getName().equals(annotationName) || PUT.class.getName().equals(annotationName)) {
+								httpMethod = annotationName.substring(annotationName.lastIndexOf(".") + 1).trim();
+								for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry : am.getElementValues().entrySet()) {
+									if ("value".equals(entry.getKey().getSimpleName().toString())) {
+										httpUri = entry.getValue().getValue().toString();
+										validateAnnotation(params, httpUri, ee, am, entry.getValue());
+										break;
+									}
+								}
+							}
+							if (Produces.class.getName().equals(annotationName)) {
+								for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry : am.getElementValues().entrySet()) {
+									if ("value".equals(entry.getKey().getSimpleName().toString())) {
+										produces = entry.getValue().getValue().toString();
+										break;
+									}
 								}
 							}
 						}
-						if (Produces.class.getName().equals(annotationName)) {
-							for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry : am.getElementValues().entrySet()) {
-								if ("value".equals(entry.getKey().getSimpleName().toString())) {
-									produces = entry.getValue().getValue().toString();
-									break;
-								}
-							}
-						}
+						ParsedMethod parsedMethod = new ParsedMethod(destClass, destMethod, destMethodRetType, params, httpMethod, httpUri, produces);
+						parsedMethods.add(parsedMethod);
 					}
-					ParsedMethod parsedMethod = new ParsedMethod(destClass, destMethod, destMethodRetType, params, httpMethod, httpUri, produces);
-					parsedMethods.add(parsedMethod);
 				}
 			}
+			generateCode(parsedMethods);
+		} catch (Exception e) {
+			processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "after exception");
 		}
-		generateCode(parsedMethods);
 		return false;
+	}
+
+	private void validateAnnotation(List<ParsedParam> params, String httpUri, ExecutableElement ee, AnnotationMirror am, AnnotationValue entry) {
+		int paramsInAnnotation = StringUtils.countMatches(httpUri, ":");
+		paramsInAnnotation += StringUtils.countMatches(httpUri, "*");
+		int paramsInMethod = size(filter(params, new Predicate<ParsedParam>() {
+			@Override
+			public boolean apply(ParsedParam param) {
+				return String.class.getName().equals(param.getTypeName()) || "int".equals(param.getTypeName());
+			}
+		}));
+		if (paramsInAnnotation != paramsInMethod) {
+			processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "wrong number of parameters (in annotation " + paramsInAnnotation + " but in method " + paramsInMethod +")", ee, am/*, entry*/);
+			throw new RuntimeException();
+		}
 	}
 
 	private void generateCode(List<ParsedMethod> parsedMethods) {
