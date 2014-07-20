@@ -16,10 +16,12 @@ import javax.tools.ToolProvider;
 import javax.tools.JavaCompiler.CompilationTask;
 
 import static java.util.Arrays.asList;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public abstract class MywebTestCase {
 
-	private static final String SRC_TEST_DIR = "src/test/java";
+	private static final String SRC_TEST_DIR = "src/main/java";
 
 	private static final String JAVA_FILE_EXT = ".java";
 
@@ -79,5 +81,21 @@ public abstract class MywebTestCase {
 
 	private String classNameToSrcPath(String name) {
 		return name.replace(".", File.separator);
+	}
+
+	protected static void assertCompilationSuccessful(List<Diagnostic<? extends JavaFileObject>> diagnostics) {
+		for (Diagnostic<? extends JavaFileObject> diagnostic : diagnostics) {
+			assertFalse("Compilation error", diagnostic.getKind().equals(Diagnostic.Kind.ERROR));
+		}
+	}
+
+	protected static void assertCompilationError(long expectedLineNumber, List<Diagnostic<? extends JavaFileObject>> diagnostics) {
+		boolean expectedDiagnosticFound = false;
+		for (Diagnostic<? extends JavaFileObject> diagnostic : diagnostics) {
+			if ((diagnostic.getLineNumber() == expectedLineNumber)) {
+				expectedDiagnosticFound = true;
+			}
+		}
+		assertTrue("Expected error at line " + expectedLineNumber, expectedDiagnosticFound);
 	}
 }

@@ -33,7 +33,6 @@ public class WowFirstWorkingTest extends MywebTestCase {
 	@Test
 	public void simplestGet() throws IOException, InterruptedException {
 		// given
-		compile(Test1.class);
 		Service service = new Service();
 		service.onCreate();
 		service.onStartCommand(new Intent(), 0, 0);
@@ -56,7 +55,6 @@ public class WowFirstWorkingTest extends MywebTestCase {
 	@Test
 	public void simplestPost() throws IOException, InterruptedException {
 		// given
-		compile(TestPost.class);
 		Service service = new Service();
 		service.onCreate();
 		service.onStartCommand(new Intent(), 0, 0);

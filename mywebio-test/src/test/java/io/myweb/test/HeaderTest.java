@@ -27,7 +27,6 @@ public class HeaderTest extends MywebTestCase {
 	@Test
 	public void headersShouldBeDecoded() throws IOException {
 		// given
-		compile(TestHeader.class);
 		Service service = new Service();
 		service.onCreate();
 		service.onStartCommand(new Intent(), 0, 0);

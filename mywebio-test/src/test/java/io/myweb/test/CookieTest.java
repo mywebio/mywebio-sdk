@@ -31,7 +31,6 @@ public class CookieTest extends MywebTestCase {
 	@Test
 	public void cookieShouldBeReturned() throws IOException, InterruptedException {
 		// given
-		compile(TestCookie.class);
 		Service service = new Service();
 		service.onCreate();
 		service.onStartCommand(new Intent(), 0, 0);
@@ -54,7 +53,6 @@ public class CookieTest extends MywebTestCase {
 	@Test
 	public void cookieShouldBeAccepted() throws IOException, InterruptedException {
 		// given
-		compile(TestCookie.class);
 		Service service = new Service();
 		service.onCreate();
 		service.onStartCommand(new Intent(), 0, 0);
