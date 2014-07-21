@@ -23,4 +23,8 @@ public class ParsedParam {
 	public String getTypeName() {
 		return typeName;
 	}
+
+	public String getTypeAndName() {
+		return typeName + " " + name;
+	}
 }
