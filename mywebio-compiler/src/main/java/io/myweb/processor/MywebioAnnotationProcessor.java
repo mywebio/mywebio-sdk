@@ -171,6 +171,7 @@ public class MywebioAnnotationProcessor extends AbstractProcessor {
 	}
 
 	private void appendMethod(StringBuilder sb, String destMethodRetType, String destMethod, List<ParsedParam> params) {
+		sb.append("\u001B[33m");
 		sb.append(TAB);
 		sb.append("public ");
 		sb.append(simpleTypeName(destMethodRetType)).append(" ");
@@ -178,6 +179,7 @@ public class MywebioAnnotationProcessor extends AbstractProcessor {
 		sb.append("(");
 		appendMethodParams(sb, params);
 		sb.append(")");
+		sb.append("\u001B[0m");
 	}
 
 	private String simpleTypeName(String destMethodRetType) {
@@ -201,8 +203,10 @@ public class MywebioAnnotationProcessor extends AbstractProcessor {
 	}
 
 	private void appendAnnotation(StringBuilder sb, String httpMethod, String httpUri) {
+		sb.append("\u001B[33m");
 		sb.append(TAB).append("@").append(httpMethod);
 		sb.append("(\"").append(httpUri).append("\")");
+		sb.append("\u001B[0m");
 	}
 
 	private void appendAnnotationUnderline(StringBuilder sb, String httpMethod, String httpUri, List<ParsedParam> params) {
@@ -268,9 +272,11 @@ public class MywebioAnnotationProcessor extends AbstractProcessor {
 	}
 
 	private void appendUnderlineChars(StringBuilder sb, int count) {
+		sb.append("\u001B[31m");
 		for (int i = 0; i < count; i++) {
 			sb.append("^");
 		}
+		sb.append("\u001B[0m");
 	}
 
 	private int paramTypeNameLength(final String paramName, List<ParsedParam> params) {
