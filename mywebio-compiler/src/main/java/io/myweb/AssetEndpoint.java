@@ -58,10 +58,10 @@ public class AssetEndpoint extends Endpoint {
 			writeResponseHeaders(os, reqId);
 			InputStream is = assetManager.open(MYWEB_ASSETS_DIR + uri);
 			ResponseBuilder responseBuilder = new ResponseBuilder();
-			responseBuilder.writeResponse(contentType, is, os);
+			long length = AssetInfo.getAssetLengths().get(uri);
+			responseBuilder.writeResponse(contentType, length, is, os);
 		} catch (IOException e) {
 			Log.e("AssetEndpoint", "error during invoke", e);
 		}
 	}
-
 }

@@ -1,16 +1,14 @@
 package io.myweb.processor;
 
-import android.content.Context;
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
 
-import com.google.common.base.Throwables;
-import com.google.common.collect.Collections2;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Iterators;
+import com.google.common.collect.*;
 import com.google.common.io.ByteStreams;
+import com.google.common.io.Files;
 import io.myweb.api.*;
+import io.myweb.processor.model.AssetFile;
 import io.myweb.processor.model.ParsedMethod;
 import io.myweb.processor.model.ParsedParam;
 import io.myweb.processor.velocity.VelocityLogger;
@@ -27,12 +25,16 @@ import javax.lang.model.SourceVersion;
 import javax.lang.model.element.*;
 import javax.lang.model.util.ElementFilter;
 import javax.tools.Diagnostic;
+import javax.tools.JavaFileObject;
 import java.io.*;
 import java.util.*;
 
 import static com.google.common.collect.Collections2.transform;
 import static com.google.common.collect.Iterables.filter;
 import static com.google.common.collect.Iterables.size;
+import static com.google.common.io.Files.fileTreeTraverser;
+import static org.apache.commons.lang3.StringUtils.substringAfter;
+import static org.apache.commons.lang3.StringUtils.substringBeforeLast;
 
 @SupportedAnnotationTypes({
 		"io.myweb.api.GET",
@@ -305,12 +307,13 @@ public class MywebioAnnotationProcessor extends AbstractProcessor {
 	}
 
 	private void generateCode(List<ParsedMethod> parsedMethods) {
-		generateSourcesFromResource();
+		String sourceCodePath = generateSourcesFromResource();
 		VelocityEngine ve = new VelocityEngine();
 		ve.setProperty(VelocityEngine.RUNTIME_LOG_LOGSYSTEM, new VelocityLogger(processingEnv.getMessager()));
 		ve.setProperty(RuntimeConstants.RESOURCE_LOADER, "classpath");
 		ve.setProperty("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());
 		ve.init();
+		generateAssetsInfo(ve, sourceCodePath);
 		Template t = ve.getTemplate("endpoint.vm");
 		VelocityContext context = new VelocityContext();
 
@@ -332,7 +335,31 @@ public class MywebioAnnotationProcessor extends AbstractProcessor {
 		generateEndpointContainer(ve, parsedMethods);
 	}
 
-	private void generateSourcesFromResource() {
+	private void generateAssetsInfo(VelocityEngine ve, String sourceCodePath) {
+		processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, sourceCodePath);
+		String currentProjectPath = substringBeforeLast(sourceCodePath, "/build/");
+		final String mywebAssetDir = currentProjectPath + "/src/main/assets/myweb";
+		FluentIterable<File> filesAndDirs = fileTreeTraverser().breadthFirstTraversal(new File(mywebAssetDir));
+		FluentIterable<File> files = filesAndDirs.filter(Files.isFile());
+		FluentIterable<AssetFile> assetFiles = files.transform(new Function<File, AssetFile>() {
+			@Override
+			public AssetFile apply(File f) {
+				String relativePath = substringAfter(f.getAbsolutePath(), mywebAssetDir);
+				return new AssetFile(relativePath, f.length());
+			}
+		});
+		generateAssetInfo(ve, assetFiles.toList());
+		// TODO make debug/trace logs configurable in annotation processor
+//		FluentIterable<String> str = assetFiles.transform(new Function<AssetFile, String>() {
+//			@Override
+//			public String apply(AssetFile af) {
+//				return af.getName() + " " + af.getLength();
+//			}
+//		});
+//		processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, Joiner.on("\n").join(str));
+	}
+
+	private String generateSourcesFromResource() {
 		String prefix = "/io/myweb/";
 		String[] files = new String[] {
 				prefix + "AssetEndpoint.java",
@@ -345,9 +372,11 @@ public class MywebioAnnotationProcessor extends AbstractProcessor {
 				prefix + "Service.java",
 				prefix + "ThreadFactories.java",
 		};
+		String basePath = "";
 		for (String file : files) {
-			generateSourceFileFromResource(file, classNameFromResourcePath(file));
+			basePath = generateSourceFileFromResource(file);
 		}
+		return basePath;
 	}
 
 	private void generateAppInfoEndpoint(VelocityEngine ve, List<ParsedMethod> parsedMethods) {
@@ -382,10 +411,30 @@ public class MywebioAnnotationProcessor extends AbstractProcessor {
 		ctx.put("endpoints", ls);
 		Writer w = null;
 		try {
-			OutputStream os = processingEnv.getFiler().createSourceFile("io.myweb.EndpointContainer").openOutputStream();
+			JavaFileObject sourceFile = processingEnv.getFiler().createSourceFile("io.myweb.EndpointContainer");
+			OutputStream os = sourceFile.openOutputStream();
 			w = new PrintWriter(os);
 //			OutputStream os = filer.createSourceFile("io.web.Service").openOutputStream();
 //			w = new PrintWriter(os);
+		} catch (IOException e) {
+			error("Cannot create file: " + e.toString());
+			return;
+		}
+		t.merge(ctx, w);
+		try {
+			w.close();
+		} catch (IOException e) {
+		}
+	}
+
+	private void generateAssetInfo(VelocityEngine ve, List<AssetFile> assetFiles) {
+		Template t = ve.getTemplate("asset-info.vm");
+		VelocityContext ctx = new VelocityContext();
+		ctx.put("assetFiles", assetFiles);
+		Writer w = null;
+		try {
+			OutputStream os = processingEnv.getFiler().createSourceFile("io.myweb.AssetInfo").openOutputStream();
+			w = new PrintWriter(os);
 		} catch (IOException e) {
 			error("Cannot create file: " + e.toString());
 			return;
@@ -403,15 +452,25 @@ public class MywebioAnnotationProcessor extends AbstractProcessor {
 		return noJava.replaceAll("/", ".");
 	}
 
-	private void generateSourceFileFromResource(String resourcePath, String className) {
+	/**
+	 * @param resourcePath
+	 * @return absolute path of directory where file was saved
+	 */
+	private String generateSourceFileFromResource(String resourcePath) {
 		try {
+			String className = classNameFromResourcePath(resourcePath);
 			InputStream is = this.getClass().getResourceAsStream(resourcePath);
-			OutputStream os = processingEnv.getFiler().createSourceFile(className).openOutputStream();
+			JavaFileObject sourceFile = processingEnv.getFiler().createSourceFile(className);
+			String fullPath = sourceFile.toUri().getPath();
+			String basePath = fullPath.replace(resourcePath, "");
+			OutputStream os = sourceFile.openOutputStream();
 			ByteStreams.copy(is, os);
 			os.close();
 			is.close();
+			return basePath;
 		} catch (IOException e) {
 			error(e.toString());
 		}
+		return "";
 	}
 }

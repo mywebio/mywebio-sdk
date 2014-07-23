@@ -36,6 +36,14 @@ public class ResponseBuilder {
 		os.close();
 	}
 
+	public void writeResponse(String produces, long contentLength, InputStream srcInputStream, OutputStream os) throws IOException {
+		os.write((CONTENT_TYPE + produces + CRLF).getBytes());
+		os.write((CONTENT_LENGTH + contentLength + CRLF).getBytes());
+		os.write(CRLF.getBytes());
+		copy(srcInputStream, os);
+		os.close();
+	}
+
 	public void writeResponse(String produces, Response srcResponse, OutputStream os) throws IOException, JSONException {
 		String mime;
 		if (srcResponse.getMimeType() == null) {
