@@ -212,22 +212,15 @@ public class MywebioAnnotationProcessor extends AbstractProcessor {
 	}
 
 	private void appendAnnotationUnderline(StringBuilder sb, String httpMethod, String httpUri, List<ParsedParam> params) {
-//		sb.append("                      ^^^^       ^^^");
 		int beginOffset = 5 + httpMethod.length() + 2;  // TAB @NAME ("
 		appendSpaces(sb, beginOffset);
 		String[] uriSplit = httpUri.split("/");
 		for (String pathElem : uriSplit) {
-//			int i = httpUri.indexOf(pathElem);
 			if (pathElem.startsWith(":")) {
 				String paramName = pathElem.substring(1);
 				if (isPathParamCorrect(paramName, params)) {
-//					int paramTypeNameLength = paramTypeNameLength(paramName, params);
-//					appendSpaces(sb, paramTypeNameLength + 1); // TYPENAME[space]
 					appendSpaces(sb, 2 + paramName.length()); // NAME + "/:"
 				} else {
-//					int paramTypeNameLength = paramTypeNameLength(paramName, params);
-//					appendUnderlineChars(sb, paramTypeNameLength + 1); // TYPENAME[space]
-//					appendUnderlineChars(sb, pathElem.length() + 2); // NAME + ", "
 					appendUnderlineChars(sb, 1 + paramName.length()); // NAME + "/:"
 					appendSpaces(sb, 1); // NAME + "/:"
 				}
