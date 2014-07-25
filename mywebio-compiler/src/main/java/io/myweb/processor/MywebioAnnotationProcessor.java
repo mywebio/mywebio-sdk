@@ -36,13 +36,6 @@ import static com.google.common.io.Files.fileTreeTraverser;
 import static org.apache.commons.lang3.StringUtils.substringAfter;
 import static org.apache.commons.lang3.StringUtils.substringBeforeLast;
 
-@SupportedAnnotationTypes({
-		"io.myweb.api.GET",
-		"io.myweb.api.POST",
-		"io.myweb.api.DELETE",
-		"io.myweb.api.PUT",
-		"io.myweb.api.Produces"
-})
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
 public class MywebioAnnotationProcessor extends AbstractProcessor {
 
@@ -58,6 +51,17 @@ public class MywebioAnnotationProcessor extends AbstractProcessor {
 
 	private void error(String msg) {
 		processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, msg);
+	}
+
+	@Override
+	public Set<String> getSupportedAnnotationTypes() {
+		Set<String> annotationTypes = new HashSet<String>();
+		annotationTypes.add(GET.class.getName());
+		annotationTypes.add(PUT.class.getName());
+		annotationTypes.add(DELETE.class.getName());
+		annotationTypes.add(POST.class.getName());
+		annotationTypes.add(Produces.class.getName());
+		return annotationTypes;
 	}
 
 	@Override
