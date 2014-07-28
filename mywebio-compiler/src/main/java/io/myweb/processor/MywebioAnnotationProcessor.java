@@ -40,26 +40,21 @@ public class MywebioAnnotationProcessor extends AbstractProcessor {
 
 	@Override
 	public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-		log("process: annotations=" + annotations + ", roundEnv=" + roundEnv);
 		if (annotations.isEmpty()) {
 			return false;
 		}
-
 		List<ParsedMethod> parsedMethods = new LinkedList<ParsedMethod>();
 		Set<ExecutableElement> processed = new HashSet<ExecutableElement>();
 		MywebValidator mywebValidator = new MywebValidator(processingEnv.getMessager());
 		MywebParser mywebParser = new MywebParser(processingEnv.getMessager(), mywebValidator);
 		MywebCodeGenerator mywebCodeGenerator = new MywebCodeGenerator(processingEnv);
-
 		try {
 			for (TypeElement te : annotations) {
 				Set<? extends Element> elementsAnnotated = roundEnv.getElementsAnnotatedWith(te);
 				Set<ExecutableElement> executableElements = ElementFilter.methodsIn(elementsAnnotated);
 				for (ExecutableElement ee : executableElements) {
-					log("process: executableElement " + ee.getSimpleName().toString() + " hash=" + ee.hashCode());
 					if (!processed.contains(ee)) {
 						processed.add(ee);
-						log("parameter names: " + Joiner.on(", ").join(ee.getParameters()));
 						ParsedMethod parsedMethod = mywebParser.parse(ee);
 						parsedMethods.add(parsedMethod);
 					}
@@ -68,7 +63,6 @@ public class MywebioAnnotationProcessor extends AbstractProcessor {
 			mywebCodeGenerator.generateCode(parsedMethods);
 		} catch (Exception e) {
 			processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "after exception " + e);
-//			processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "after exception\n" + Throwables.getStackTraceAsString(e));
 		}
 		return false;
 	}
