@@ -65,7 +65,6 @@ public class MywebParser extends AnnotationMessagerAware {
 					if ("value".equals(entry.getKey().getSimpleName().toString())) {
 						httpUri = entry.getValue().getValue().toString();
 						mywebValidator.validateAnnotation(httpMethod, destMethodRetType, destMethod, params, httpUri, ee, am, entry.getValue());
-						break;
 					}
 				}
 			}
@@ -73,7 +72,6 @@ public class MywebParser extends AnnotationMessagerAware {
 				for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry : am.getElementValues().entrySet()) {
 					if ("value".equals(entry.getKey().getSimpleName().toString())) {
 						produces = entry.getValue().getValue().toString();
-						break;
 					}
 				}
 			}
