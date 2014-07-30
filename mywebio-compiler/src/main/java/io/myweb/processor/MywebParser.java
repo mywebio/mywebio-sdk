@@ -56,7 +56,6 @@ public class MywebParser extends AnnotationMessagerAware {
 		}
 		for (AnnotationMirror am : ee.getAnnotationMirrors()) {
 			// TODO verify if annotation aren't duplicated
-			// TODO support other annotation types as well
 			String annotationName = am.getAnnotationType().toString();
 			if (GET.class.getName().equals(annotationName) || POST.class.getName().equals(annotationName)
 					|| DELETE.class.getName().equals(annotationName) || PUT.class.getName().equals(annotationName)) {
