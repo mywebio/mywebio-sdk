@@ -1,7 +1,5 @@
 package io.myweb.processor;
 
-import com.google.common.base.Joiner;
-
 import io.myweb.api.*;
 import io.myweb.processor.model.ParsedMethod;
 
@@ -14,14 +12,6 @@ import java.util.*;
 
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
 public class MywebioAnnotationProcessor extends AbstractProcessor {
-
-	private static final boolean quiet = false;
-
-	private void log(String msg) {
-		if (!quiet) {
-			processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, msg);
-		}
-	}
 
 	private void error(String msg) {
 		processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, msg);
@@ -62,7 +52,7 @@ public class MywebioAnnotationProcessor extends AbstractProcessor {
 			}
 			mywebCodeGenerator.generateCode(parsedMethods);
 		} catch (Exception e) {
-			processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "after exception " + e);
+			error("error(s) found - details above: " + e);
 		}
 		return false;
 	}
