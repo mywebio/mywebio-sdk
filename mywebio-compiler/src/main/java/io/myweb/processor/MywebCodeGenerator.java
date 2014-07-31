@@ -1,6 +1,5 @@
 package io.myweb.processor;
 
-
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
 import com.google.common.io.ByteStreams;
@@ -63,7 +62,6 @@ public class MywebCodeGenerator extends ProcessingEnvAware {
 	}
 
 	private void generateAssetsInfo(VelocityEngine ve, String sourceCodePath) {
-		getProcessingEnv().getMessager().printMessage(Diagnostic.Kind.NOTE, sourceCodePath);
 		String currentProjectPath = substringBeforeLast(sourceCodePath, "/build/");
 		final String mywebAssetDir = currentProjectPath + "/src/main/assets/myweb";
 		FluentIterable<File> filesAndDirs = fileTreeTraverser().breadthFirstTraversal(new File(mywebAssetDir));

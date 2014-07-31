@@ -1,7 +1,5 @@
 package io.myweb.processor;
 
-import com.google.common.base.Function;
-import com.google.common.base.Joiner;
 import io.myweb.api.*;
 import io.myweb.processor.model.ParsedMethod;
 import io.myweb.processor.model.ParsedParam;
@@ -11,12 +9,9 @@ import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.VariableElement;
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
-import static com.google.common.collect.Collections2.transform;
 
 public class MywebParser extends AnnotationMessagerAware {
 
@@ -37,13 +32,6 @@ public class MywebParser extends AnnotationMessagerAware {
 		String produces = MimeTypes.MIME_TEXT_PLAIN;
 		List<? extends VariableElement> parameters = ee.getParameters();
 		int i = 0;
-		Collection<String> types = transform(parameters, new Function<VariableElement, String>() {
-			@Override
-			public String apply(VariableElement ve) {
-				return ve.asType().toString().replaceFirst("class ", "");
-			}
-		});
-		log("parameters types: " + Joiner.on(", ").join(types));
 		for (VariableElement p : parameters) {
 			ParsedParam pp = null;
 			try {
