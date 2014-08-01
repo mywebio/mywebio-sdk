@@ -4,16 +4,18 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:0.9.+'
+        classpath 'com.neenbedankt.gradle.plugins:android-apt:1.3'
     }
 }
 apply plugin: 'android'
+apply plugin: 'android-apt'
 
 dependencies {
     repositories {
         mavenCentral()
     }
     compile project(':mywebio-api')
-    provided project(':mywebio-compiler')
+    apt project(':mywebio-compiler')
 }
 
 android {
@@ -24,9 +26,4 @@ android {
         minSdkVersion 14
         targetSdkVersion 19
     }
-
-    lintOptions {
-        disable 'InvalidPackage'
-    }
-
 }
