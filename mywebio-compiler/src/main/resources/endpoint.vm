@@ -1,4 +1,4 @@
-#* @vtlvariable name="i" type="io.myweb.processor.model.ParsedMethod" *#
+#* @vtlvariable name="parsedMethod" type="io.myweb.processor.model.ParsedMethod" *#
 /*
  * GENERATED FILE
  */
@@ -19,29 +19,29 @@ import java.util.Map;
 import io.myweb.Endpoint;
 import io.myweb.ResponseBuilder;
 
-public class $i.generatedClassName extends Endpoint {
+public class $parsedMethod.generatedClassName extends Endpoint {
 
-    public ${i.generatedClassName}(Context context) {
+    public ${parsedMethod.generatedClassName}(Context context) {
         super(context);
     }
 
     protected String httpMethod() {
-        return "$i.httpMethod";
+        return "$parsedMethod.httpMethod";
     }
 
     protected String originalPath() {
-        return "$i.httpUri";
+        return "$parsedMethod.httpUri";
     }
 
     private FormalParam[] formalParams() {
-        FormalParam[] formalParams =  new FormalParam[$i.parsedParams.size()];
-#foreach( $param in $i.parsedParams )
+        FormalParam[] formalParams =  new FormalParam[$parsedMethod.parsedParams.size()];
+#foreach( $param in $parsedMethod.parsedParams )
         formalParams[$param.id] = new FormalParam($param.id, "$param.typeName", "$param.name");
 #end
         return formalParams;
     }
 
-#set( $generatedPattern = $i.generatedPattern )
+#set( $generatedPattern = $parsedMethod.generatedPattern )
 
     private Map<String, Integer> groupMap() {
         Map<String, Integer> groupMap = new HashMap<String, Integer>();
@@ -53,7 +53,7 @@ public class $i.generatedClassName extends Endpoint {
 
     private Map<String, String> defaulQueryParams() {
         Map<String, String> defaultQueryParams = new HashMap<String, String>();
-#foreach( $dqp in $i.defaultQueryParams)
+#foreach( $dqp in $parsedMethod.defaultQueryParams)
         defaultQueryParams.put("$dqp.name", "$dqp.val");
 #end
         return defaultQueryParams;
@@ -71,8 +71,8 @@ public class $i.generatedClassName extends Endpoint {
 		ActualParam[] ap = actualParams(uri, request, formalParams(), defaulQueryParams(), groupMap(), getContext());
 		OutputStream os = outputStream(localSocket);
 		writeResponseHeaders(os, reqId);
-		final ${i.destMethodRetType} respFromUserCode = new ${i.destClass}().${i.destMethod}($i.paramsJavaSrc);
+		final ${parsedMethod.destMethodRetType} respFromUserCode = new ${parsedMethod.destClass}().${parsedMethod.destMethod}($parsedMethod.paramsJavaSrc);
 		ResponseBuilder responseBuilder = new ResponseBuilder();
-		responseBuilder.writeResponse("${i.produces}", respFromUserCode, os);
+		responseBuilder.writeResponse("${parsedMethod.produces}", respFromUserCode, os);
     }
 }

@@ -49,7 +49,7 @@ public class MywebCodeGenerator extends ProcessingEnvAware {
 				Filer filer = getProcessingEnv().getFiler();
 				OutputStream os = filer.createSourceFile("io.myweb." + pm.getGeneratedClassName()).openOutputStream();
 				w = new PrintWriter(os);
-				context.put("i", pm);
+				context.put("parsedMethod", pm);
 				t.merge(context, w);
 				w.close();
 			} catch (IOException e) {
