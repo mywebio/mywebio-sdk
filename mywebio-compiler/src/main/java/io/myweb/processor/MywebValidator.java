@@ -27,7 +27,7 @@ public class MywebValidator extends AnnotationMessagerAware {
 		super(messager);
 	}
 
-	public void validateAnnotation(String httpMethod, String destMethodRetType, String destMethod, List<ParsedParam> params, String httpUri, ExecutableElement ee, AnnotationMirror am, AnnotationValue entry) {
+	public void validateAnnotation(String httpMethod, String destMethodRetType, String destMethod, List<ParsedParam> params, String httpUri, ExecutableElement ee, AnnotationMirror am) {
 		int paramsInAnnotation = StringUtils.countMatches(httpUri, ":");
 		paramsInAnnotation += StringUtils.countMatches(httpUri, "*");
 		int paramsInMethod = size(filter(params, new Predicate<ParsedParam>() {
