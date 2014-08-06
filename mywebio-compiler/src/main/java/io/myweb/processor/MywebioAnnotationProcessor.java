@@ -6,9 +6,10 @@ import io.myweb.processor.model.ParsedMethod;
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.*;
-import javax.lang.model.util.ElementFilter;
 import javax.tools.Diagnostic;
 import java.util.*;
+
+import static javax.lang.model.util.ElementFilter.methodsIn;
 
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
 public class MywebioAnnotationProcessor extends AbstractProcessor {
@@ -41,7 +42,7 @@ public class MywebioAnnotationProcessor extends AbstractProcessor {
 		try {
 			for (TypeElement te : annotations) {
 				Set<? extends Element> elementsAnnotated = roundEnv.getElementsAnnotatedWith(te);
-				Set<ExecutableElement> executableElements = ElementFilter.methodsIn(elementsAnnotated);
+				Set<ExecutableElement> executableElements = methodsIn(elementsAnnotated);
 				for (ExecutableElement ee : executableElements) {
 					if (!processed.contains(ee)) {
 						processed.add(ee);

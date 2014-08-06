@@ -23,6 +23,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import static com.google.common.io.Files.fileTreeTraverser;
+import static com.google.common.io.Files.isFile;
 import static org.apache.commons.lang3.StringUtils.substringAfter;
 import static org.apache.commons.lang3.StringUtils.substringBeforeLast;
 
@@ -65,7 +66,7 @@ public class MywebCodeGenerator extends ProcessingEnvAware {
 		String currentProjectPath = substringBeforeLast(sourceCodePath, "/build/");
 		final String mywebAssetDir = currentProjectPath + "/src/main/assets/myweb";
 		FluentIterable<File> filesAndDirs = fileTreeTraverser().breadthFirstTraversal(new File(mywebAssetDir));
-		FluentIterable<File> files = filesAndDirs.filter(Files.isFile());
+		FluentIterable<File> files = filesAndDirs.filter(isFile());
 		FluentIterable<AssetFile> assetFiles = files.transform(new Function<File, AssetFile>() {
 			@Override
 			public AssetFile apply(File f) {
