@@ -1,15 +1,16 @@
 package io.myweb.processor;
 
+import android.content.Context;
+
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
 import io.myweb.processor.model.ParsedParam;
 import org.apache.commons.lang3.StringUtils;
+import org.json.JSONObject;
 
 import javax.annotation.processing.Messager;
 import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.ExecutableElement;
 import javax.tools.Diagnostic;
 import java.util.Collection;
@@ -21,9 +22,12 @@ import static com.google.common.collect.Iterables.size;
 
 public class MywebValidator extends AnnotationMessagerAware {
 
-	private final static String TAB = "    ";
+    private final static String TAB = "    ";
+    private static final String CONSOLE_COLOR_ORANGE = "\u001B[33m";
+    private static final String CONSOLE_COLOR_RESET = "\u001B[0m";
+    private static final String CONSOLE_COLOR_RED = "\u001B[31m";
 
-	public MywebValidator(Messager messager) {
+    public MywebValidator(Messager messager) {
 		super(messager);
 	}
 
@@ -48,17 +52,14 @@ public class MywebValidator extends AnnotationMessagerAware {
 		StringBuilder sb = new StringBuilder();
 		sb.append("\n");
 		appendAnnotation(sb, httpMethod, httpUri);
-		sb.append("\n");
 		appendAnnotationUnderline(sb, httpMethod, httpUri, params);
-		sb.append("\n");
 		appendMethod(sb, destMethodRetType, destMethod, params);
-		sb.append("\n");
 		appendMethodUnderline(sb, destMethodRetType, destMethod, httpUri, params);
 		return sb.toString();
 	}
 
 	private void appendMethod(StringBuilder sb, String destMethodRetType, String destMethod, List<ParsedParam> params) {
-		sb.append("\u001B[33m");
+		sb.append(CONSOLE_COLOR_ORANGE);
 		sb.append(TAB);
 		sb.append("public ");
 		sb.append(simpleTypeName(destMethodRetType)).append(" ");
@@ -66,7 +67,8 @@ public class MywebValidator extends AnnotationMessagerAware {
 		sb.append("(");
 		appendMethodParams(sb, params);
 		sb.append(")");
-		sb.append("\u001B[0m");
+		sb.append(CONSOLE_COLOR_RESET);
+        sb.append("\n");
 	}
 
 	private String simpleTypeName(String destMethodRetType) {
@@ -90,10 +92,11 @@ public class MywebValidator extends AnnotationMessagerAware {
 	}
 
 	private void appendAnnotation(StringBuilder sb, String httpMethod, String httpUri) {
-		sb.append("\u001B[33m");
+		sb.append(CONSOLE_COLOR_ORANGE);
 		sb.append(TAB).append("@").append(httpMethod);
 		sb.append("(\"").append(httpUri).append("\")");
-		sb.append("\u001B[0m");
+		sb.append(CONSOLE_COLOR_RESET);
+        sb.append("\n");
 	}
 
 	private void appendAnnotationUnderline(StringBuilder sb, String httpMethod, String httpUri, List<ParsedParam> params) {
@@ -113,10 +116,10 @@ public class MywebValidator extends AnnotationMessagerAware {
 				appendSpaces(sb, 1 + pathElem.length());
 			}
 		}
+        sb.append("\n");
 	}
 
 	private void appendMethodUnderline(StringBuilder sb, String destMethodRetType, String destMethod, String httpUri, List<ParsedParam> params) {
-//		sb.append("                                      ^^^^^  ^^^^^^^^");
 		int beginOffset  = 4 + "public ".length() + simpleTypeName(destMethodRetType).length() + 1 + destMethod.length() + 1;
 		appendSpaces(sb, beginOffset);
 		for (ParsedParam param : params) {
@@ -144,29 +147,19 @@ public class MywebValidator extends AnnotationMessagerAware {
 				}
 			}
 		}
-		if ("android.content.Context".equals(param.getTypeName()) ||
-				"org.json.JSONObject".equals(param.getTypeName())) {
+        if (Context.class.getName().equals(param.getTypeName()) ||
+                JSONObject.class.getName().equals(param.getTypeName())) {
 			methodParamCorrect = true;
 		}
 		return methodParamCorrect;
 	}
 
 	private void appendUnderlineChars(StringBuilder sb, int count) {
-		sb.append("\u001B[31m");
+		sb.append(CONSOLE_COLOR_RED);
 		for (int i = 0; i < count; i++) {
 			sb.append("^");
 		}
-		sb.append("\u001B[0m");
-	}
-
-	private int paramTypeNameLength(final String paramName, List<ParsedParam> params) {
-		ParsedParam param = Iterables.find(params, new Predicate<ParsedParam>() {
-			@Override
-			public boolean apply(ParsedParam pp) {
-				return pp.getName().equals(paramName);
-			}
-		});
-		return simpleTypeName(param.getTypeName()).length();
+		sb.append(CONSOLE_COLOR_RESET);
 	}
 
 	private void appendSpaces(StringBuilder sb, int count) {
