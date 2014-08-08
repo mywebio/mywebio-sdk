@@ -75,14 +75,6 @@ public class MywebCodeGenerator extends ProcessingEnvAware {
 			}
 		});
 		generateAssetInfo(ve, assetFiles.toList());
-		// TODO make debug/trace logs configurable in annotation processor
-//		FluentIterable<String> str = assetFiles.transform(new Function<AssetFile, String>() {
-//			@Override
-//			public String apply(AssetFile af) {
-//				return af.getName() + " " + af.getLength();
-//			}
-//		});
-//		processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, Joiner.on("\n").join(str));
 	}
 
 	private String generateSourcesFromResource() {
