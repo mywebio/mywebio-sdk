@@ -19,30 +19,20 @@ public class RequestTask implements Runnable {
 
 	private LocalSocket socket;
 
-	private Context context;
-
 	private final List<? extends Endpoint> endpoints;
 
-	public RequestTask(LocalSocket socket, Context context, List<? extends Endpoint> endpoints) {
+	public RequestTask(LocalSocket socket, List<? extends Endpoint> endpoints) {
 		this.socket = socket;
-		this.context = context;
 		this.endpoints = endpoints;
 	}
 
 	private static final int BUFFER_SIZE = 32768;
 	private static final int REQUEST_ID_HEADER_LENGTH = 37; // 36 characters of UUID + 1 character "\n"
 
-	private static final String HEADERS = "%s\n" +
-			"HTTP/1.1 200 OK\n" +
-			"Content-Type: video/x-msvideo\n" +
-			"Connection: close\n\n";
-
 	private static final String ERROR_RESPONSE = "%s\n" +
 			"HTTP/1.1 404 Not Found\n" +
 			"Connection: close\n\n" +
 			"File %s not found";
-
-	private static final Pattern IMAGE_PATTERN = Pattern.compile("(?:GET|POST|PUT|DELETE) \\/(.+?) HTTP");
 
 	@Override
 	public void run() {

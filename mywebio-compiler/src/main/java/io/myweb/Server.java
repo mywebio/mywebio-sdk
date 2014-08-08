@@ -64,7 +64,7 @@ public class Server implements Runnable {
 
 	private void handleMessage(LocalSocket socket) throws IOException {
 		Log.d(TAG, "send buffer size " + socket.getSendBufferSize());
-		RequestTask worker = new RequestTask(socket, context, endpoints);
+		RequestTask worker = new RequestTask(socket, endpoints);
 		workerExecutorService.execute(worker);
 	}
 
