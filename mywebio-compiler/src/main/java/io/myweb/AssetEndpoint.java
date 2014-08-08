@@ -24,12 +24,12 @@ public class AssetEndpoint extends Endpoint {
 
 	@Override
 	protected String originalPath() {
-		return "/";
+		return "/"; // doesn't matter actually
 	}
 
 	@Override
 	protected Pattern getPattern() {
-		return null;
+		return null; // doesn't matter actually
 	}
 
 	@Override
