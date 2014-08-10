@@ -19,9 +19,9 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.tools.JavaFileObject;
 
 import java.io.*;
-import java.util.LinkedList;
 import java.util.List;
 
+import static com.google.common.collect.Lists.transform;
 import static com.google.common.io.Files.fileTreeTraverser;
 import static com.google.common.io.Files.isFile;
 import static org.apache.commons.lang3.StringUtils.substringAfter;
@@ -83,11 +83,13 @@ public class MywebCodeGenerator extends ProcessingEnvAware {
 
     private void generateEndpointContainer(VelocityEngine ve, List<ParsedMethod> parsedMethods) {
         VelocityContext ctx = new VelocityContext();
-        List<String> ls = new LinkedList<String>();
-        for (ParsedMethod parsedMethod : parsedMethods) {
-            ls.add("io.myweb." + parsedMethod.getGeneratedClassName());
-        }
-        ctx.put("endpoints", ls);
+        List<String> endpoints = transform(parsedMethods, new Function<ParsedMethod, String>() {
+            @Override
+            public String apply(ParsedMethod pm) {
+                return "io.myweb." + pm.getGeneratedClassName();
+            }
+        });
+        ctx.put("endpoints", endpoints);
         generateFromTemplate(ve, ctx, "io.myweb.EndpointContainer");
     }
 
