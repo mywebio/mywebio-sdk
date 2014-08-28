@@ -5,4 +5,5 @@ include ':mywebio-api-java',
         ':mywebio-gallery',
         ':mywebio-filemanager',
         ':mywebio-launcher',
-        ':mywebio-test'
+        ':mywebio-test',
+        ':mywebio-camera'
