@@ -10,10 +10,11 @@ buildscript {
 apply plugin: 'com.android.application'
 apply plugin: 'com.neenbedankt.android-apt'
 
+repositories {
+    mavenCentral()
+}
+
 dependencies {
-    repositories {
-        mavenCentral()
-    }
     compile project(':mywebio-api')
     apt project(':mywebio-compiler')
 }

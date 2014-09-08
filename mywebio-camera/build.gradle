@@ -3,19 +3,20 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.9.+'
-        classpath 'com.neenbedankt.gradle.plugins:android-apt:1.2'
+        classpath 'com.android.tools.build:gradle:0.12.2+'
+        classpath 'com.neenbedankt.gradle.plugins:android-apt:1.4'
     }
 }
-apply plugin: 'android'
-apply plugin: 'android-apt'
+apply plugin: 'com.android.application'
+apply plugin: 'com.neenbedankt.android-apt'
+
+repositories {
+    mavenCentral()
+}
 
 dependencies {
-    repositories {
-        mavenCentral()
-    }
     compile project(':mywebio-api')
-    apt project(':mywebio')
+    apt project(':mywebio-compiler')
 }
 
 android {

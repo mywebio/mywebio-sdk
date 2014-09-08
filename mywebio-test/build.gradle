@@ -7,10 +7,11 @@ compileJava {
     options.compilerArgs << '-proc:none'
 }
 
+repositories {
+    mavenCentral()
+}
+
 dependencies {
-    repositories {
-        mavenCentral()
-    }
     compile (project(':mywebio-api-java')) {
         exclude group: 'com.google.android', module: 'android'
     }
