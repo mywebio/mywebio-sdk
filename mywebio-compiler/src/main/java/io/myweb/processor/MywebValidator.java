@@ -5,6 +5,7 @@ import android.content.Context;
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
+import io.myweb.api.Method;
 import io.myweb.processor.model.ParsedParam;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
@@ -31,7 +32,7 @@ public class MywebValidator extends AnnotationMessagerAware {
 		super(messager);
 	}
 
-	public void validateAnnotation(String httpMethod, String destMethodRetType, String destMethod, List<ParsedParam> params, String httpUri, ExecutableElement ee, AnnotationMirror am) {
+	public void validateAnnotation(Method httpMethod, String destMethodRetType, String destMethod, List<ParsedParam> params, String httpUri, ExecutableElement ee, AnnotationMirror am) {
 		int paramsInAnnotation = StringUtils.countMatches(httpUri, ":");
 		paramsInAnnotation += StringUtils.countMatches(httpUri, "*");
 		int paramsInMethod = size(filter(params, new Predicate<ParsedParam>() {
@@ -48,7 +49,7 @@ public class MywebValidator extends AnnotationMessagerAware {
 		}
 	}
 
-	private String buildErrorMsg(String httpMethod, String httpUri, String destMethodRetType, String destMethod, List<ParsedParam> params) {
+	private String buildErrorMsg(Method httpMethod, String httpUri, String destMethodRetType, String destMethod, List<ParsedParam> params) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("\n");
 		appendAnnotation(sb, httpMethod, httpUri);
@@ -91,16 +92,16 @@ public class MywebValidator extends AnnotationMessagerAware {
 		sb.append(paramsStr);
 	}
 
-	private void appendAnnotation(StringBuilder sb, String httpMethod, String httpUri) {
+	private void appendAnnotation(StringBuilder sb, Method httpMethod, String httpUri) {
 		sb.append(CONSOLE_COLOR_ORANGE);
-		sb.append(TAB).append("@").append(httpMethod);
+		sb.append(TAB).append("@").append(httpMethod.toString());
 		sb.append("(\"").append(httpUri).append("\")");
 		sb.append(CONSOLE_COLOR_RESET);
         sb.append("\n");
 	}
 
-	private void appendAnnotationUnderline(StringBuilder sb, String httpMethod, String httpUri, List<ParsedParam> params) {
-		int beginOffset = 5 + httpMethod.length() + 2;  // TAB @NAME ("
+	private void appendAnnotationUnderline(StringBuilder sb, Method httpMethod, String httpUri, List<ParsedParam> params) {
+		int beginOffset = 5 + httpMethod.toString().length() + 2;  // TAB @NAME ("
 		appendSpaces(sb, beginOffset);
 		String[] uriSplit = httpUri.split("/");
 		for (String pathElem : uriSplit) {

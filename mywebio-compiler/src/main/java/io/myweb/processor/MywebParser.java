@@ -31,7 +31,7 @@ public class MywebParser extends AnnotationMessagerAware {
         String destClass = ee.getEnclosingElement().toString();
         String destMethod = ee.getSimpleName().toString();
         String destMethodRetType = ee.getReturnType().toString();
-        String httpMethod = "GET";
+        Method httpMethod = Method.GET;
         String httpUri = "/";
         String produces = MimeTypes.MIME_TEXT_PLAIN;
         List<? extends AnnotationMirror> annotationMirrors = ee.getAnnotationMirrors();
@@ -44,7 +44,7 @@ public class MywebParser extends AnnotationMessagerAware {
         return new ParsedMethod(destClass, destMethod, destMethodRetType, params, httpMethod, httpUri, produces);
     }
 
-    private String validateAndExtractHttpUri(AnnotationMirror am, String httpMethod, String destMethodRetType, String destMethod, List<ParsedParam> params, ExecutableElement ee) {
+    private String validateAndExtractHttpUri(AnnotationMirror am, Method httpMethod, String destMethodRetType, String destMethod, List<ParsedParam> params, ExecutableElement ee) {
         String annotationName = am.getAnnotationType().toString();
         String httpUri = "/";
         if (isHttpMethodAnnotation(annotationName)) {
@@ -63,11 +63,11 @@ public class MywebParser extends AnnotationMessagerAware {
                 || DELETE.class.getName().equals(annotationName) || PUT.class.getName().equals(annotationName);
     }
 
-    private String extractHttpMethod(AnnotationMirror am) {
+    private Method extractHttpMethod(AnnotationMirror am) {
         String annotationName = am.getAnnotationType().toString();
-        String httpMethod = "GET";
+        Method httpMethod = Method.GET;
         if (isHttpMethodAnnotation(annotationName)) {
-            httpMethod = annotationName.substring(annotationName.lastIndexOf(".") + 1).trim();
+            httpMethod = Method.findByName(annotationName.substring(annotationName.lastIndexOf(".") + 1).trim());
         }
         return httpMethod;
     }

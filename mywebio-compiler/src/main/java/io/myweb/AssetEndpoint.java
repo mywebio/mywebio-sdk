@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.res.AssetManager;
 import android.net.LocalSocket;
 import android.util.Log;
+
+import io.myweb.api.Method;
 import io.myweb.api.MimeTypes;
 import io.myweb.api.Request;
 import io.myweb.api.Response;
@@ -20,8 +22,8 @@ public class AssetEndpoint extends Endpoint {
 	}
 
 	@Override
-	protected String httpMethod() {
-		return "GET";
+	protected Method httpMethod() {
+		return Method.GET;
 	}
 
 	@Override

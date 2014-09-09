@@ -24,8 +24,8 @@ public class AppInfoEndpoint extends Endpoint {
         super(ctx);
     }
 
-	protected String httpMethod() {
-		return "GET";
+	protected Method httpMethod() {
+		return Method.GET;
 	}
 
 	protected String originalPath() {

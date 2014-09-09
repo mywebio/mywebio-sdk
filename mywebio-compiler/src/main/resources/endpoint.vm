@@ -25,8 +25,8 @@ public class $parsedMethod.generatedClassName extends Endpoint {
         super(context);
     }
 
-    protected String httpMethod() {
-        return "$parsedMethod.httpMethod";
+    protected Method httpMethod() {
+        return Method.$parsedMethod.httpMethod;
     }
 
     protected String originalPath() {

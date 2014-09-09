@@ -6,6 +6,7 @@ import android.util.Log;
 import io.myweb.api.Cookie;
 import io.myweb.api.Cookies;
 import io.myweb.api.Headers;
+import io.myweb.api.Method;
 import io.myweb.api.Request;
 
 import java.io.*;
@@ -48,13 +49,13 @@ public abstract class Endpoint {
 
 	protected abstract String originalPath();
 
-	protected abstract String httpMethod();
+	protected abstract Method httpMethod();
 
 	protected ActualParam[] actualParams(String uri, Request request, FormalParam[] formalParams, Map<String, String> defaultQueryParams, Map<String, Integer> groupMap, Context ctx) throws Exception {
 		String urlNoQueryParams = urlNoQueryParams(uri);
 		Map<String, String> paramsMap;
-		if ("POST".equals(httpMethod())) {
-			paramsMap = decodeQueryString(body(request));
+		if (Method.POST.equals(httpMethod())) {
+			paramsMap = decodeQueryString(request.getBodyAsString());
 		} else {
 			paramsMap = decodeQueryString(queryParams(uri));
 		}

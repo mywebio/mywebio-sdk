@@ -4,17 +4,19 @@ import com.google.common.base.Joiner;
 
 import java.util.*;
 
+import io.myweb.api.Method;
+
 public class ParsedMethod {
 
 	private final String destClass;
 	private final String destMethod;
 	private final String destMethodRetType;
 	private final List<ParsedParam> params;
-	private final String httpMethod;
+	private final Method httpMethod;
 	private final String httpUri;
 	private final String produces;
 
-	public ParsedMethod(String destClass, String destMethod, String destMethodRetType, List<ParsedParam> params, String httpMethod, String httpUri, String produces) {
+	public ParsedMethod(String destClass, String destMethod, String destMethodRetType, List<ParsedParam> params, Method httpMethod, String httpUri, String produces) {
 		this.destClass = destClass;
 		this.destMethod = destMethod;
 		this.destMethodRetType = destMethodRetType;
@@ -49,7 +51,7 @@ public class ParsedMethod {
 	}
 
 	public String getHttpMethod() {
-		return httpMethod;
+		return httpMethod.toString();
 	}
 
 	public String getHttpUri() {
