@@ -53,7 +53,7 @@ public class RequestTask implements Runnable {
 		Request request = null;
 		try {
 			outputStream = new BufferedOutputStream(socket.getOutputStream());
-			PushbackInputStream inputStream = new PushbackInputStream(socket.getInputStream());
+			PushbackInputStream inputStream = new PushbackInputStream(socket.getInputStream(),BUFFER_SIZE);
 			request = readRequest(inputStream);
 			findAndInvokeEndpoint(request);
 			Log.i(TAG, "Sent response to Web IO Server");
@@ -86,7 +86,8 @@ public class RequestTask implements Runnable {
 			if (idx >= 0) {
 				sb.append(result.substring(0, idx));
 				idx += 4;
-				is.unread(buffer, idx, buffer.length - idx);
+				int len = buffer.length - idx;
+				if (len>0) is.unread(buffer, idx, len);
 				break;
 			} else {
 				sb.append(result);

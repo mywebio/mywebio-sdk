@@ -40,7 +40,7 @@ public class ResponseWriter {
 	}
 
 	public void write(Response response) throws IOException {
-		if (!closed) {
+		if (!closed && response!=null) {
 			if (response.getContentType() == null) response.withContentType(produces);
 			if (response.hasCallback()) writeCallback(response);
 			else if (response.getBody() instanceof InputStream) writeInputStream(response);
@@ -56,10 +56,15 @@ public class ResponseWriter {
 	}
 
 	private void writeObject(Response response) throws IOException {
-		byte[] body = response.getBody().toString().getBytes();
-		response.withLength(body.length);
-		os.write(response.toString().getBytes());
-		os.write(body);
+		if (response.getBody() != null) {
+			byte[] body = response.getBody().toString().getBytes();
+			response.withLength(body.length);
+			os.write(response.toString().getBytes());
+			os.write(body);
+		} else {
+			response.withLength(0);
+			os.write(response.toString().getBytes());
+		}
 	}
 
 	private void writeInputStream(Response response) throws IOException {
