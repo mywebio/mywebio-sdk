@@ -72,10 +72,20 @@ public class Server implements Runnable {
 		endpoints = EndpointContainer.instantiateEndpoints(ctx);
 	}
 
+	private void shutdownAllTasks() {
+		Log.d(TAG, "shutting down all server tasks");
+		workerExecutorService.shutdown();
+		try {
+			workerExecutorService.awaitTermination(1, TimeUnit.SECONDS);
+		} catch (InterruptedException e) {
+			Log.e(TAG, e.getMessage(), e);
+		}
+	}
+
 	public synchronized void shutdown() {
 		try {
+			shutdownAllTasks();
 			Log.d(TAG, "shutting down server socket");
-			// TODO gk implement graceful shutdown (with workers shutdown)
 			serverSocket.close();
 			serverSocket = null;
 		} catch (IOException e) {
