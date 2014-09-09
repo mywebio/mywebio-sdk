@@ -20,8 +20,7 @@ public class HeaderTest extends MywebTestCase {
 	public static final String GET_1 = "123456789012345678901234567890123456\n" +
 			"GET /headertest HTTP/1.1\r\n" +
 			"Host: localhost\r\n" +
-			"Cookie: a=1\r\n" +
-			"Cookie: b=2\r\n" +
+			"Cookie: a=1; b=2\r\n" +
 			"Connection: Keep-Alive\r\n\r\n";
 
 	@Test
@@ -42,9 +41,8 @@ public class HeaderTest extends MywebTestCase {
 		InputStream is = clientSocket.getInputStream();
 		String response = IOUtils.toString(is);
 		System.out.println("response: " + response);
-		String expectedBody = "Host: localhost " +
-				"First cookie: a=1 " +
-				"All cookies: a=1, b=2";
-		assertThat(response, containsString(expectedBody));
+		assertThat(response, containsString("localhost"));
+		assertThat(response, containsString("b=2"));
+		assertThat(response, containsString("a=1"));
 	}
 }
