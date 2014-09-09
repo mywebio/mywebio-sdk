@@ -15,6 +15,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import io.myweb.Endpoint;
+import io.myweb.ResponseWriter;
+import io.myweb.api.*;
 
 public class AppInfoEndpoint extends Endpoint {
 
@@ -60,13 +62,12 @@ public class AppInfoEndpoint extends Endpoint {
     }
 
 	@Override
-	public void invoke(String uri, String request, LocalSocket localSocket, String reqId) {
+	public void invoke(String uri, Request request, LocalSocket localSocket) {
         try {
-            OutputStream os = outputStream(localSocket);
-            writeResponseHeaders(os, reqId);
-            os.write(("Content-Type: application/json\r\n\r\n").getBytes());
-            os.write(servicesJson().getBytes());
-            os.flush();
+            ResponseWriter rw = new ResponseWriter(localSocket);
+            // TODO old behaviour
+            rw.writeRequestId(request.getId());
+            rw.write(Response.ok().withContentType(MimeTypes.MIME_APPLICATION_JSON).withBody(servicesJson()));
         } catch (Exception e) {
             Log.d("AppInfoEndpoint", "", e);
         }

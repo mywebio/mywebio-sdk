@@ -7,7 +7,6 @@ import io.myweb.api.GET;
 import io.myweb.api.Response;
 import io.myweb.api.MimeTypes;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Arrays;
@@ -34,10 +33,7 @@ public class FileManager {
 	}
 
 	private Response fileContent(File file) throws FileNotFoundException {
-		return Response.ok()
-				.withBody(new FileInputStream(file))
-				.withContentLength(file.length())
-				.withMimeTypeFromFilename(file.getName());
+		return Response.ok().withFile(file);
 	}
 
 	private Response dirJsonPage(String dir, File file) throws JSONException {

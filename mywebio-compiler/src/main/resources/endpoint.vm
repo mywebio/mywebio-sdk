@@ -17,7 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import io.myweb.Endpoint;
-import io.myweb.ResponseBuilder;
+import io.myweb.api.*;
 
 public class $parsedMethod.generatedClassName extends Endpoint {
 
@@ -67,12 +67,12 @@ public class $parsedMethod.generatedClassName extends Endpoint {
     }
 
     @Override
-	public void invoke(String uri, String request, LocalSocket localSocket, String reqId) throws Exception {
+	public void invoke(String uri, Request request, LocalSocket localSocket) throws Exception {
 		ActualParam[] ap = actualParams(uri, request, formalParams(), defaulQueryParams(), groupMap(), getContext());
-		OutputStream os = outputStream(localSocket);
-		writeResponseHeaders(os, reqId);
+		ResponseWriter rw = new ResponseWriter("${parsedMethod.produces}", localSocket);
+        // TODO old behaviour
+        rw.writeRequestId(request.getId());
 		final ${parsedMethod.destMethodRetType} respFromUserCode = new ${parsedMethod.destClass}().${parsedMethod.destMethod}($parsedMethod.paramsJavaSrc);
-		ResponseBuilder responseBuilder = new ResponseBuilder();
-		responseBuilder.writeResponse("${parsedMethod.produces}", respFromUserCode, os);
+		rw.write(respFromUserCode);
     }
 }

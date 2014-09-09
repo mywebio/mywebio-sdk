@@ -5,6 +5,8 @@ import android.content.res.AssetManager;
 import android.net.LocalSocket;
 import android.util.Log;
 import io.myweb.api.MimeTypes;
+import io.myweb.api.Request;
+import io.myweb.api.Response;
 
 import java.io.*;
 import java.util.regex.Pattern;
@@ -50,16 +52,15 @@ public class AssetEndpoint extends Endpoint {
 	}
 
 	@Override
-	public void invoke(String uri, String request, LocalSocket localSocket, String reqId) {
+	public void invoke(String uri, Request request, LocalSocket localSocket) {
 		AssetManager assetManager = getContext().getAssets();
 		try {
-			String contentType = MimeTypes.getMimeType(uri);
-			OutputStream os = outputStream(localSocket);
-			writeResponseHeaders(os, reqId);
-			InputStream is = assetManager.open(MYWEB_ASSETS_DIR + uri);
-			ResponseBuilder responseBuilder = new ResponseBuilder();
+            ResponseWriter rw = new ResponseWriter(MimeTypes.getMimeType(uri), localSocket);
+            // TODO old behaviour
+            rw.writeRequestId(request.getId());
+            InputStream is = assetManager.open(MYWEB_ASSETS_DIR + uri);
 			long length = AssetInfo.getAssetLengths().get(uri);
-			responseBuilder.writeResponse(contentType, length, is, os);
+			rw.write(Response.ok().withLength(length).withBody(is));
 		} catch (IOException e) {
 			Log.e("AssetEndpoint", "error during invoke", e);
 		}

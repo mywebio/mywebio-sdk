@@ -137,7 +137,7 @@ public class MywebCodeGenerator extends ProcessingEnvAware {
                 prefix + "FormalParam.java",
                 prefix + "ActualParam.java",
                 prefix + "RequestTask.java",
-                prefix + "ResponseBuilder.java",
+                prefix + "ResponseWriter.java",
                 prefix + "Server.java",
                 prefix + "Service.java",
                 prefix + "ThreadFactories.java",

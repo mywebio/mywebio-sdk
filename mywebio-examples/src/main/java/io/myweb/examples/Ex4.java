@@ -14,6 +14,6 @@ public class Ex4 {
 		InputStream is = ctx.getAssets().open(filename);
 		return Response.ok()
 				.withBody(is)
-				.withMimeTypeFromFilename(filename);
+				.withContentTypeFrom(filename);
 	}
 }

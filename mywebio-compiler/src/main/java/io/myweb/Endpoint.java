@@ -6,19 +6,15 @@ import android.util.Log;
 import io.myweb.api.Cookie;
 import io.myweb.api.Cookies;
 import io.myweb.api.Headers;
+import io.myweb.api.Request;
 
 import java.io.*;
-import java.net.URLDecoder;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public abstract class Endpoint {
-
-	public static final int OUTPUT_STREAM_BUFFER_SIZE = 32 * 1024;
 
 	private Context context;
 
@@ -26,7 +22,7 @@ public abstract class Endpoint {
 		this.context = context;
 	}
 
-	public abstract void invoke(String uri, String request, LocalSocket localSocket, String reqId) throws Exception;
+	public abstract void invoke(String uri, Request request, LocalSocket localSocket) throws Exception;
 
 	protected Context getContext() {
 		return context;
@@ -36,16 +32,6 @@ public abstract class Endpoint {
 
 	protected Matcher matcher(String uri) {
 		return getPattern().matcher(uri);
-	}
-
-	protected void writeResponseHeaders(OutputStream os, String reqId) throws IOException {
-		os.write((reqId + "\n").getBytes());
-		os.write("HTTP/1.1 200 OK\r\n".getBytes());
-		os.write("Connection: keep-alive\r\n".getBytes());
-	}
-
-	protected OutputStream outputStream(LocalSocket localSocket) throws IOException {
-		return new BufferedOutputStream(localSocket.getOutputStream(), OUTPUT_STREAM_BUFFER_SIZE);
 	}
 
 	public boolean match(String method, String uri) {
@@ -64,7 +50,7 @@ public abstract class Endpoint {
 
 	protected abstract String httpMethod();
 
-	protected ActualParam[] actualParams(String uri, String request, FormalParam[] formalParams, Map<String, String> defaultQueryParams, Map<String, Integer> groupMap, Context ctx) throws Exception {
+	protected ActualParam[] actualParams(String uri, Request request, FormalParam[] formalParams, Map<String, String> defaultQueryParams, Map<String, Integer> groupMap, Context ctx) throws Exception {
 		String urlNoQueryParams = urlNoQueryParams(uri);
 		Map<String, String> paramsMap;
 		if ("POST".equals(httpMethod())) {
@@ -87,12 +73,14 @@ public abstract class Endpoint {
 				} else if (Context.class.equals(fpClazz)) {
 					actualParams[fpId] = new ActualParam(Context.class, ctx);
 				} else if (Cookies.class.equals(fpClazz)){
-					actualParams[fpId] = new ActualParam(Cookies.class, parseCookies(request));
+					actualParams[fpId] = new ActualParam(Cookies.class, request.getCookies());
 				} else if (Cookie.class.equals(fpClazz)) {
-					Cookie cookie = parseCookies(request).getCookie(fpName);
+					Cookie cookie = request.getCookies().getCookie(fpName);
 					actualParams[fpId] = new ActualParam(Cookie.class, cookie);
 				} else if (Headers.class.equals(fpClazz)) {
-					actualParams[fpId] = new ActualParam(Headers.class, headers(request));
+					actualParams[fpId] = new ActualParam(Headers.class, request.getHeaders());
+				} else if (Request.class.equals(fpClazz)) {
+					actualParams[fpId] = new ActualParam(Request.class, request);
 				} else if (paramsMap.containsKey(fpName)) {
 					String val = paramsMap.get(fpName);
 					Object convertedVal = convert(val, fp.getTypeName());
@@ -107,64 +95,6 @@ public abstract class Endpoint {
 			throw new Exception("couldn't match URI: '" + uri + "' with pattern '" + getPattern() + "' (BTW, this shouldn't happen...)");
 		}
 		return actualParams;
-	}
-
-	private Cookies parseCookies(String request) throws UnsupportedEncodingException {
-		Headers headers = headers(request);
-		List<String> cookies = headers.getAll("Cookie");
-		Map<String, Cookie> cookieMap = new HashMap<String, Cookie>();
-		for (String cookieStr : cookies) {
-			Cookie cookie = parseCookie(cookieStr);
-			cookieMap.put(cookie.getName(), cookie);
-		}
-		return new Cookies(cookieMap);
-	}
-
-	private Cookie parseCookie(String cookieStr) throws UnsupportedEncodingException {
-		String[] nv = cookieStr.split("=");
-		if (nv.length == 2) {
-			String value = nv[1].trim();
-			String decodedVal = URLDecoder.decode(value, "UTF-8");
-			return new Cookie(nv[0].trim(), decodedVal);
-		} else {
-			throw new RuntimeException("invalid cookie: " + cookieStr);
-		}
-	}
-
-	private String body(String request) {
-		return request.substring(bodyStartIndex(request));
-	}
-
-	private int bodyStartIndex(String request) {
-		return request.indexOf("\r\n\r\n") + 4;
-	}
-
-	private String headersStr(String request) {
-		return request.substring(0, bodyStartIndex(request));
-	}
-
-	private Headers headers(String request) {
-		String headersStr = headersStr(request);
-		String[] headersArr = headersStr.split("\\r\\n");
-		Map<String, List<String>> headersMap = new HashMap<String, List<String>>();
-		for (int i = 1; i < headersArr.length; i++) {
-			int valIdx = headersArr[i].indexOf(": ");
-			String key = headersArr[i].substring(0, valIdx);
-			String val = headersArr[i].substring(valIdx + 2);
-			insert(headersMap, key, val);
-		}
-		return new Headers(headersMap);
-	}
-
-	private void insert(Map<String, List<String>> headersMap, String key, String val) {
-		List<String> values;
-		if (headersMap.containsKey(key)) {
-			values = headersMap.get(key);
-		} else {
-			values = new LinkedList<String>();
-			headersMap.put(key, values);
-		}
-		values.add(val);
 	}
 
 	private String urlNoQueryParams(String url) {

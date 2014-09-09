@@ -1,14 +1,13 @@
 package io.myweb;
 
-import android.content.Context;
 import android.net.LocalSocket;
-import android.net.LocalSocketAddress;
 import android.util.Log;
-import io.myweb.Endpoint;
+
+import io.myweb.api.Request;
+import io.myweb.api.Response;
 
 import java.io.*;
 import java.util.List;
-import java.util.regex.Pattern;
 
 public class RequestTask implements Runnable {
 
@@ -26,31 +25,47 @@ public class RequestTask implements Runnable {
 		this.endpoints = endpoints;
 	}
 
-	private static final int BUFFER_SIZE = 32768;
-	private static final int REQUEST_ID_HEADER_LENGTH = 37; // 36 characters of UUID + 1 character "\n"
+	private static final int BUFFER_SIZE = 512;
+	//	private static final int REQUEST_ID_HEADER_LENGTH = 37; // 36 characters of UUID + 1 character "\n"
+	private static final String FILE_NOT_FOUND = "File %s not found";
 
-	private static final String ERROR_RESPONSE = "%s\n" +
-			"HTTP/1.1 404 Not Found\n" +
-			"Connection: close\n\n" +
-			"File %s not found";
+	private void writeNotFoundResponse(OutputStream out, String requestId, String fileName) throws IOException {
+		// TODO old behaviour, first line with request id
+		out.write((requestId + "\n").getBytes());
+		out.write(Response.notFound().toString().getBytes());
+		out.write(String.format(FILE_NOT_FOUND, fileName).getBytes());
+		out.close();
+	}
+
+	private void writeErrorResponse(OutputStream out, String requestId, String msg) throws IOException {
+		// TODO old behaviour, first line with request id
+		out.write((requestId + "\n").getBytes());
+		out.write(Response.internalError().toString().getBytes());
+		out.write(msg.getBytes());
+		out.close();
+	}
 
 	@Override
 	public void run() {
 		OutputStream outputStream = null;
-		String requestId = null;
 		String fileName = null;
+		Request request = null;
 		try {
 			outputStream = new BufferedOutputStream(socket.getOutputStream());
-			InputStream inputStream = socket.getInputStream();
-			requestId = readRequestId(inputStream);
-			Log.d(TAG, "Read request id: " + requestId);
-			String request = readRequest(inputStream);
-			findAndInvokeEndpoint(request, requestId);
+			PushbackInputStream inputStream = new PushbackInputStream(socket.getInputStream());
+			request = readRequest(inputStream);
+			findAndInvokeEndpoint(request);
 			Log.i(TAG, "Sent response to Web IO Server");
-		} catch (Exception e) {
-			Log.e(TAG, "Error " + e, e);
+		} catch (ClassNotFoundException e) {
 			try {
-				writeErrorResponse(outputStream, requestId, fileName);
+				writeNotFoundResponse(outputStream, request.getId(), fileName);
+			} catch (IOException err) {
+				Log.e(TAG, "Error while write error response " + err, err);
+			}
+		} catch (Exception e) {
+			Log.e(TAG, "Internal error " + e, e);
+			try {
+				writeErrorResponse(outputStream, request.getId(), e.getMessage());
 			} catch (IOException err) {
 				Log.e(TAG, "Error while write error response " + err, err);
 			}
@@ -59,31 +74,28 @@ public class RequestTask implements Runnable {
 		}
 	}
 
-	private String readRequestId(InputStream is) throws IOException {
-		byte[] buffer = new byte[REQUEST_ID_HEADER_LENGTH];
-		if (is.read(buffer, 0, REQUEST_ID_HEADER_LENGTH) != REQUEST_ID_HEADER_LENGTH) {
-			throw new RuntimeException("Cannot read request id");
-		}
-		return new String(buffer).trim();
-	}
-
-	private String readRequest(InputStream is) throws IOException {
+	private Request readRequest(PushbackInputStream is) throws IOException {
 		int length;
 		byte[] buffer = new byte[BUFFER_SIZE];
-		String result = "";
+		StringBuilder sb = new StringBuilder();
 		while ((length = is.read(buffer)) != -1) {
-			result = new String(buffer, 0, length);
-			Log.d(TAG, "Read request from server (" + length + ") " + result);
+			// find double EOLs
+			String result = new String(buffer, 0, length);
+			int idx = result.indexOf("\r\n\r\n");
+			if (idx >= 0) {
+				sb.append(result.substring(0, idx));
+				idx += 4;
+				is.unread(buffer, idx, buffer.length - idx);
+				break;
+			} else {
+				sb.append(result);
+			}
 		}
+		//TODO old behaviour, first line contains request id
+		String[] lines = sb.toString().split("\n", 2);
+		Request result = Request.parse(lines[1]).withId(lines[0].trim()).withBody(is);
 		Log.d(TAG, "Finish read request from server");
 		return result;
-	}
-
-	private void writeErrorResponse(OutputStream out, String requestId, String fileName) throws IOException {
-		byte[] response = String.format(ERROR_RESPONSE, requestId, fileName).getBytes();
-		Log.d(TAG, "Write error response " + new String(response));
-		out.write(response, 0, response.length);
-		out.close();
 	}
 
 	private void closeConnection() {
@@ -97,23 +109,22 @@ public class RequestTask implements Runnable {
 		}
 	}
 
-	public void findAndInvokeEndpoint(final String request, final String reqId) throws Exception {
-		String firstLine = request.substring(0, request.indexOf("\n"));
-		String[] split = firstLine.split(" ");
-		String method = split[0];
-		String uri = split[1];
+	public void findAndInvokeEndpoint(final Request request) throws Exception {
+		String uri = request.getURI().toString();
 		String effectiveUri = uri;
-		Endpoint endpoint = findEndpoint(method, effectiveUri);
+		Endpoint endpoint = findEndpoint(request.getMethod().toString(), effectiveUri);
 		// TODO think how to handle better default requests (like "/index.html" on "/")
 		if (("/".equals(uri) || "".equals(uri)) && endpoint == null) {
 			effectiveUri = INDEX_HTML;
-			endpoint = findEndpoint(method, effectiveUri);
+			endpoint = findEndpoint(request.getMethod().toString(), effectiveUri);
 		}
 		if (("/".equals(uri) || "".equals(uri)) && endpoint == null) {
 			effectiveUri = SERVICES_JSON;
-			endpoint = findEndpoint(method, effectiveUri);
+			endpoint = findEndpoint(request.getMethod().toString(), effectiveUri);
 		}
-		endpoint.invoke(effectiveUri, request, socket, reqId);
+		if (endpoint == null)
+			throw new ClassNotFoundException("Endpoint class for " + uri + " not found!");
+		endpoint.invoke(effectiveUri, request, socket);
 	}
 
 	private Endpoint findEndpoint(String method, String uri) {

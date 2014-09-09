@@ -27,6 +27,10 @@ public class LocalSocket {
 		return inputStream;
 	}
 
+	public FileDescriptor getFileDescriptor() {
+        return new FileDescriptor();
+    }
+
 	public void shutdownOutput() throws IOException {
 
 	}
