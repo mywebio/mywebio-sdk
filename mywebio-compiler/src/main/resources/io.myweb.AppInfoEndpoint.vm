@@ -68,6 +68,7 @@ public class AppInfoEndpoint extends Endpoint {
             // TODO old behaviour
             rw.writeRequestId(request.getId());
             rw.write(Response.ok().withContentType(MimeTypes.MIME_APPLICATION_JSON).withBody(servicesJson()));
+            rw.close();
         } catch (Exception e) {
             Log.d("AppInfoEndpoint", "", e);
         }

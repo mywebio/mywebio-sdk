@@ -1,11 +1,19 @@
 package io.myweb.api;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 
+import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONTokener;
 
 public class Request {
+	public static final int BUFFER_LENGTH = 32 * 1024;
 	private final Method method;
 	private final URI uri;
 	private final String protocolVersion;
@@ -50,18 +58,37 @@ public class Request {
 	}
 
 	public InputStream getBodyAsInputStream() {
-		if (body instanceof InputStream) return (InputStream) body;
-		return null;
+		if (body instanceof InputStream) {
+			InputStream is = (InputStream) body;
+			try {
+				is.reset();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			return is;
+		} else {
+			return new ByteArrayInputStream(body.toString().getBytes(StandardCharsets.UTF_8));
+		}
 	}
 
 	public String getBodyAsString() {
 		if (body instanceof String) return (String) body;
-		// TODO convert from InputStream
+		else if (body instanceof InputStream) {
+			body = inputToString((InputStream) body);
+		}
+		if (body!=null) return body.toString();
 		return null;
 	}
 
 	public JSONObject getBodyAsJSON() {
 		if (body instanceof JSONObject) return (JSONObject) body;
+		else if (body instanceof InputStream) {
+			try {
+				body = new JSONObject(new JSONTokener(new InputStreamReader((InputStream) body, StandardCharsets.UTF_8)));
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+		}
 		return null;
 	}
 
@@ -70,6 +97,9 @@ public class Request {
 	}
 
 	public Request withBody(InputStream is) {
+		if(is.markSupported()) {
+			is.mark(BUFFER_LENGTH);
+		}
 		body = is;
 		return this;
 	}
@@ -100,5 +130,27 @@ public class Request {
 		Headers headers = Headers.parse(lines[1]);
 		Cookies cookies = Cookies.parse(headers);
 		return new Request(method, uri, protocolVersion, headers, cookies);
+	}
+
+	private static String inputToString(final InputStream is) {
+		final char[] buffer = new char[BUFFER_LENGTH];
+		final StringBuilder out = new StringBuilder();
+		try {
+			final Reader in = new InputStreamReader(is, StandardCharsets.UTF_8);
+			try {
+				while (true) {
+					int bytesRead = in.read(buffer, 0, buffer.length);
+					if (bytesRead < 0) break;
+					out.append(buffer, 0, bytesRead);
+				}
+			}
+			finally {
+				in.close();
+			}
+		}
+		catch (IOException ex) {
+			ex.printStackTrace();
+		}
+		return out.toString();
 	}
 }

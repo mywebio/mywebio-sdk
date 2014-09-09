@@ -66,13 +66,14 @@ public class $parsedMethod.generatedClassName extends Endpoint {
         return pattern;
     }
 
-    @Override
+	@Override
 	public void invoke(String uri, Request request, LocalSocket localSocket) throws Exception {
 		ActualParam[] ap = actualParams(uri, request, formalParams(), defaulQueryParams(), groupMap(), getContext());
 		ResponseWriter rw = new ResponseWriter("${parsedMethod.produces}", localSocket);
-        // TODO old behaviour
-        rw.writeRequestId(request.getId());
+		// TODO old behaviour
+		rw.writeRequestId(request.getId());
 		final ${parsedMethod.destMethodRetType} respFromUserCode = new ${parsedMethod.destClass}().${parsedMethod.destMethod}($parsedMethod.paramsJavaSrc);
 		rw.write(respFromUserCode);
-    }
+		rw.close();
+	}
 }

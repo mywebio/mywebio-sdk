@@ -37,9 +37,9 @@ public class AssetEndpoint extends Endpoint {
 	}
 
 	@Override
-	public boolean match(String method, String uri) {
+	public boolean match(Method method, String uri) {
 		Log.d("AssetEndpoint", "trying to match: " + uri);
-		if ("GET".equals(method)) {
+		if (Method.GET == method) {
 			AssetManager assetManager = getContext().getAssets();
 			try {
 				assetManager.open(MYWEB_ASSETS_DIR + uri).close();
@@ -63,6 +63,7 @@ public class AssetEndpoint extends Endpoint {
             InputStream is = assetManager.open(MYWEB_ASSETS_DIR + uri);
 			long length = AssetInfo.getAssetLengths().get(uri);
 			rw.write(Response.ok().withLength(length).withBody(is));
+			rw.close();
 		} catch (IOException e) {
 			Log.e("AssetEndpoint", "error during invoke", e);
 		}

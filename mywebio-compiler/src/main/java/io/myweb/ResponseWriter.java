@@ -22,7 +22,7 @@ public class ResponseWriter {
 	public ResponseWriter(String produces, LocalSocket socket) throws IOException {
 		this.produces = produces;
 		this.socket = socket;
-		os = new BufferedOutputStream(socket.getOutputStream(), BUFFER_LENGTH);
+		os = socket.getOutputStream();
 	}
 
 	public ResponseWriter(LocalSocket socket) throws IOException {

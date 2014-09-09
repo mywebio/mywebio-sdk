@@ -3,6 +3,7 @@ package io.myweb;
 import android.net.LocalSocket;
 import android.util.Log;
 
+import io.myweb.api.Method;
 import io.myweb.api.Request;
 import io.myweb.api.Response;
 
@@ -112,22 +113,22 @@ public class RequestTask implements Runnable {
 	public void findAndInvokeEndpoint(final Request request) throws Exception {
 		String uri = request.getURI().toString();
 		String effectiveUri = uri;
-		Endpoint endpoint = findEndpoint(request.getMethod().toString(), effectiveUri);
+		Endpoint endpoint = findEndpoint(request.getMethod(), effectiveUri);
 		// TODO think how to handle better default requests (like "/index.html" on "/")
 		if (("/".equals(uri) || "".equals(uri)) && endpoint == null) {
 			effectiveUri = INDEX_HTML;
-			endpoint = findEndpoint(request.getMethod().toString(), effectiveUri);
+			endpoint = findEndpoint(request.getMethod(), effectiveUri);
 		}
 		if (("/".equals(uri) || "".equals(uri)) && endpoint == null) {
 			effectiveUri = SERVICES_JSON;
-			endpoint = findEndpoint(request.getMethod().toString(), effectiveUri);
+			endpoint = findEndpoint(request.getMethod(), effectiveUri);
 		}
 		if (endpoint == null)
 			throw new ClassNotFoundException("Endpoint class for " + uri + " not found!");
 		endpoint.invoke(effectiveUri, request, socket);
 	}
 
-	private Endpoint findEndpoint(String method, String uri) {
+	private Endpoint findEndpoint(Method method, String uri) {
 		for (Endpoint endpoint : endpoints) {
 			if (endpoint.match(method, uri)) {
 				return endpoint;

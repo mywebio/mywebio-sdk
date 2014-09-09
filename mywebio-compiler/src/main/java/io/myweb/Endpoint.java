@@ -35,7 +35,7 @@ public abstract class Endpoint {
 		return getPattern().matcher(uri);
 	}
 
-	public boolean match(String method, String uri) {
+	public boolean match(Method method, String uri) {
 		String urlNoQueryParams = urlNoQueryParams(uri);
 		Matcher m = matcher(urlNoQueryParams);
 		boolean matched = httpMethod().equals(method) && m.matches();
