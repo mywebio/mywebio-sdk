@@ -2,7 +2,7 @@ package io.myweb.examples;
 
 import android.content.Context;
 import io.myweb.api.GET;
-import io.myweb.api.Response;
+import io.myweb.http.Response;
 
 import java.io.IOException;
 import java.io.InputStream;

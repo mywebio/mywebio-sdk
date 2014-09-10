@@ -4,8 +4,8 @@ import android.net.LocalSocket;
 
 import org.json.JSONObject;
 
-import io.myweb.api.MimeTypes;
-import io.myweb.api.Response;
+import io.myweb.http.MimeTypes;
+import io.myweb.http.Response;
 
 import java.io.*;
 

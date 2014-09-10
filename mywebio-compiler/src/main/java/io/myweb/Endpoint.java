@@ -3,13 +3,12 @@ package io.myweb;
 import android.content.Context;
 import android.net.LocalSocket;
 import android.util.Log;
-import io.myweb.api.Cookie;
-import io.myweb.api.Cookies;
-import io.myweb.api.Headers;
-import io.myweb.api.Method;
-import io.myweb.api.Request;
+import io.myweb.http.Cookie;
+import io.myweb.http.Cookies;
+import io.myweb.http.Headers;
+import io.myweb.http.Method;
+import io.myweb.http.Request;
 
-import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;

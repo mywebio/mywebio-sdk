@@ -1,6 +1,8 @@
 package io.myweb.processor;
 
 import io.myweb.api.*;
+import io.myweb.http.Method;
+import io.myweb.http.MimeTypes;
 import io.myweb.processor.model.ParsedMethod;
 import io.myweb.processor.model.ParsedParam;
 

@@ -1,7 +1,7 @@
 package io.myweb.examples;
 
 import io.myweb.api.GET;
-import io.myweb.api.Response;
+import io.myweb.http.Response;
 import org.json.JSONException;
 import org.json.JSONObject;
 

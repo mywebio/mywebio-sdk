@@ -5,7 +5,7 @@ import android.content.Context;
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
-import io.myweb.api.Method;
+import io.myweb.http.Method;
 import io.myweb.processor.model.ParsedParam;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;

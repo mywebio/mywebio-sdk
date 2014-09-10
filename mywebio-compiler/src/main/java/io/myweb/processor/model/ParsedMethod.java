@@ -4,7 +4,7 @@ import com.google.common.base.Joiner;
 
 import java.util.*;
 
-import io.myweb.api.Method;
+import io.myweb.http.Method;
 
 public class ParsedMethod {
 

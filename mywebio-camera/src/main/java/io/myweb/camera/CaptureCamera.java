@@ -9,6 +9,9 @@ import android.media.MediaRecorder;
 import android.util.Log;
 
 import io.myweb.api.*;
+import io.myweb.http.MimeTypes;
+import io.myweb.http.Response;
+import io.myweb.http.ResponseCallback;
 
 import java.io.FileDescriptor;
 import java.io.IOException;

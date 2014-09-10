@@ -1,4 +1,4 @@
-package io.myweb.api;
+package io.myweb.http;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;

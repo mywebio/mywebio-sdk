@@ -1,4 +1,4 @@
-package io.myweb.api;
+package io.myweb.http;
 
 import java.util.Collection;
 import java.util.HashMap;

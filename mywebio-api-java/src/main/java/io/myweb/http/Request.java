@@ -1,4 +1,4 @@
-package io.myweb.api;
+package io.myweb.http;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -85,6 +85,7 @@ public class Request {
 		else if (body instanceof InputStream) {
 			try {
 				body = new JSONObject(new JSONTokener(new InputStreamReader((InputStream) body, StandardCharsets.UTF_8)));
+				return (JSONObject) body;
 			} catch (JSONException e) {
 				e.printStackTrace();
 			}

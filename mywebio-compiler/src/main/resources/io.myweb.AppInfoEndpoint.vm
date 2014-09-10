@@ -17,6 +17,7 @@ import java.util.regex.Pattern;
 import io.myweb.Endpoint;
 import io.myweb.ResponseWriter;
 import io.myweb.api.*;
+import io.myweb.http.*;
 
 public class AppInfoEndpoint extends Endpoint {
 

@@ -3,9 +3,9 @@ package io.myweb;
 import android.net.LocalSocket;
 import android.util.Log;
 
-import io.myweb.api.Method;
-import io.myweb.api.Request;
-import io.myweb.api.Response;
+import io.myweb.http.Method;
+import io.myweb.http.Request;
+import io.myweb.http.Response;
 
 import java.io.*;
 import java.util.List;

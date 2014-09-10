@@ -2,9 +2,9 @@ package io.myweb.test;
 
 import com.google.common.base.Joiner;
 
-import io.myweb.api.Cookies;
+import io.myweb.http.Cookies;
 import io.myweb.api.GET;
-import io.myweb.api.Headers;
+import io.myweb.http.Headers;
 
 public class TestHeader {
 

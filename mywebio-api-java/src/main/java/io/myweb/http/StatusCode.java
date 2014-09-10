@@ -1,4 +1,4 @@
-package io.myweb.api;
+package io.myweb.http;
 
 public enum StatusCode {
 	OK(200, "OK"),

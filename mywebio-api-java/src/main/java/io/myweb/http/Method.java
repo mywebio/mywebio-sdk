@@ -1,4 +1,4 @@
-package io.myweb.api;
+package io.myweb.http;
 
 public enum Method {
 	OPTIONS, GET, HEAD, POST, PUT, DELETE, TRACE, CONNECT;

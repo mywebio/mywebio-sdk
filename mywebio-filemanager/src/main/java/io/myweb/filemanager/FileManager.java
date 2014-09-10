@@ -4,8 +4,8 @@ import static java.net.URLDecoder.decode;
 
 import android.os.Environment;
 import io.myweb.api.GET;
-import io.myweb.api.Response;
-import io.myweb.api.MimeTypes;
+import io.myweb.http.Response;
+import io.myweb.http.MimeTypes;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;

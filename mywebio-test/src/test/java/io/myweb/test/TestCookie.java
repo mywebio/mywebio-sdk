@@ -1,9 +1,9 @@
 package io.myweb.test;
 
-import io.myweb.api.Cookie;
-import io.myweb.api.Cookies;
+import io.myweb.http.Cookie;
+import io.myweb.http.Cookies;
 import io.myweb.api.GET;
-import io.myweb.api.Response;
+import io.myweb.http.Response;
 
 public class TestCookie {
 

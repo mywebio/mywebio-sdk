@@ -18,6 +18,7 @@ import java.util.Map;
 
 import io.myweb.Endpoint;
 import io.myweb.api.*;
+import io.myweb.http.*;
 
 public class $parsedMethod.generatedClassName extends Endpoint {
 
