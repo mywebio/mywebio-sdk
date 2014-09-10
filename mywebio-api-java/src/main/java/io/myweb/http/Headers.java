@@ -166,7 +166,7 @@ public class Headers {
 
 	public Header findFirst(String name) {
 		for (Header h : headerList) {
-			if (h.getName().equals(name)) return h;
+			if (h.getName().equalsIgnoreCase(name)) return h;
 		}
 		return null;
 	}
