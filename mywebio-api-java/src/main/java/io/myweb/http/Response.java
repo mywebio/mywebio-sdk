@@ -118,6 +118,14 @@ public class Response {
 		return withUpdatedHeader(Headers.RESPONSE.CONTENT_LEN, Long.toString(length));
 	}
 
+	public boolean hasLength() {
+		return getHeaders().findFirst(Headers.RESPONSE.CONTENT_LEN) != null;
+	}
+
+	public Response withChunks() {
+		return withUpdatedHeader(Headers.RESPONSE.TRANSFER_ENC, "chunked");
+	}
+
 	public Response withCallback(ResponseCallback callback) {
 		this.callback = callback;
 		return this;
