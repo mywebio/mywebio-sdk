@@ -30,7 +30,7 @@ public class RequestTask implements Runnable {
 
 	private void writeNotFoundResponse(String requestId, String fileName) {
 		try {
-			ResponseWriter rw = new ResponseWriter(MimeTypes.MIME_TEXT_HTML, socket);
+			ResponseWriter rw = new ResponseWriter(MimeTypes.MIME_TEXT_HTML, socket.getOutputStream());
 			// TODO old behaviour, first line with request id
 			rw.writeRequestId(requestId);
 			rw.write(Response.notFound().withBody(String.format(FILE_NOT_FOUND, fileName)));
@@ -42,7 +42,7 @@ public class RequestTask implements Runnable {
 
 	private void writeErrorResponse(String requestId, String msg) {
 		try {
-			ResponseWriter rw = new ResponseWriter(MimeTypes.MIME_TEXT_HTML, socket);
+			ResponseWriter rw = new ResponseWriter(MimeTypes.MIME_TEXT_HTML, socket.getOutputStream());
 			// TODO old behaviour, first line with request id
 			rw.writeRequestId(requestId);
 			rw.write(Response.internalError().withBody(msg));

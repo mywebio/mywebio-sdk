@@ -1,7 +1,5 @@
 package io.myweb;
 
-import android.net.LocalSocket;
-
 import org.json.JSONObject;
 
 import io.myweb.http.MimeTypes;
@@ -13,20 +11,18 @@ public class ResponseWriter {
 
 	public static final int BUFFER_LENGTH = 32 * 1024;
 
-	private final LocalSocket socket;
 	private final OutputStream os;
 	private final String produces;
 
 	private boolean closed = false;
 
-	public ResponseWriter(String produces, LocalSocket socket) throws IOException {
+	public ResponseWriter(String produces, OutputStream os) throws IOException {
 		this.produces = produces;
-		this.socket = socket;
-		os = socket.getOutputStream();
+		this.os = os;
 	}
 
-	public ResponseWriter(LocalSocket socket) throws IOException {
-		this(MimeTypes.MIME_TEXT_HTML, socket);
+	public ResponseWriter(OutputStream os) throws IOException {
+		this(MimeTypes.MIME_TEXT_HTML, os);
 	}
 
 	public void close() throws IOException {

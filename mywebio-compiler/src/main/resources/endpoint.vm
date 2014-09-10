@@ -70,7 +70,7 @@ public class $parsedMethod.generatedClassName extends Endpoint {
 	@Override
 	public void invoke(String uri, Request request, LocalSocket localSocket) throws Exception {
 		ActualParam[] ap = actualParams(uri, request, formalParams(), defaulQueryParams(), groupMap(), getContext());
-		ResponseWriter rw = new ResponseWriter("${parsedMethod.produces}", localSocket);
+		ResponseWriter rw = new ResponseWriter("${parsedMethod.produces}", localSocket.getOutputStream());
 		// TODO old behaviour
 		rw.writeRequestId(request.getId());
 		final ${parsedMethod.destMethodRetType} respFromUserCode = new ${parsedMethod.destClass}().${parsedMethod.destMethod}($parsedMethod.paramsJavaSrc);

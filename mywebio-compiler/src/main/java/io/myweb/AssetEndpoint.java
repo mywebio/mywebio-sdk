@@ -57,10 +57,10 @@ public class AssetEndpoint extends Endpoint {
 	public void invoke(String uri, Request request, LocalSocket localSocket) {
 		AssetManager assetManager = getContext().getAssets();
 		try {
-            ResponseWriter rw = new ResponseWriter(MimeTypes.getMimeType(uri), localSocket);
-            // TODO old behaviour
-            rw.writeRequestId(request.getId());
-            InputStream is = assetManager.open(MYWEB_ASSETS_DIR + uri);
+			ResponseWriter rw = new ResponseWriter(MimeTypes.getMimeType(uri), localSocket.getOutputStream());
+			// TODO old behaviour
+			rw.writeRequestId(request.getId());
+			InputStream is = assetManager.open(MYWEB_ASSETS_DIR + uri);
 			long length = AssetInfo.getAssetLengths().get(uri);
 			rw.write(Response.ok().withLength(length).withBody(is));
 			rw.close();
