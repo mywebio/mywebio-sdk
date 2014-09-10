@@ -17,8 +17,6 @@ public class Response {
 
 	private Object body;
 
-	private ResponseCallback callback;
-
 	private Response(StatusCode statusCode) {
 		this.statusCode = statusCode;
 	}
@@ -126,15 +124,6 @@ public class Response {
 		return withUpdatedHeader(Headers.RESPONSE.TRANSFER_ENC, "chunked");
 	}
 
-	public Response withCallback(ResponseCallback callback) {
-		this.callback = callback;
-		return this;
-	}
-
-	public boolean hasCallback() {
-		return callback != null;
-	}
-
 	public StatusCode getStatusCode() {
 		return statusCode;
 	}
@@ -152,7 +141,4 @@ public class Response {
 		return sb.toString();
 	}
 
-	public void writeBody(FileDescriptor fd) throws IOException {
-		if (hasCallback() && fd != null && fd.valid()) callback.writeBody(fd);
-	}
 }

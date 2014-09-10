@@ -61,10 +61,12 @@ public class RequestTask implements Runnable {
 			PushbackInputStream inputStream = new PushbackInputStream(socket.getInputStream(),BUFFER_SIZE);
 			while (keepAlive) {
 				Request request = readRequest(inputStream);
-				requestId = request.getId();
-				findAndInvokeEndpoint(request);
-				Log.i(TAG, "Sent response to Web IO Server");
-				keepAlive = request.isKeptAlive();
+				if (request != null) {
+					requestId = request.getId();
+					findAndInvokeEndpoint(request);
+					Log.i(TAG, "Sent response to Web IO Server");
+					keepAlive = request.isKeptAlive();
+				} else keepAlive = false;
 			}
 		} catch (ClassNotFoundException e) {
 			writeNotFoundResponse(requestId, fileName);
@@ -96,9 +98,12 @@ public class RequestTask implements Runnable {
 		}
 		//TODO old behaviour, first line contains request id
 		String[] lines = sb.toString().split("\n", 2);
-		Request result = Request.parse(lines[1]).withId(lines[0].trim()).withBody(is);
-		Log.d(TAG, "Finish read request from server");
-		return result;
+		if (lines.length==2) {
+			Request result = Request.parse(lines[1]).withId(lines[0].trim()).withBody(is);
+			Log.d(TAG, "Finish read request from server");
+			return result;
+		}
+		return null; // no request
 	}
 
 	private void closeConnection() {

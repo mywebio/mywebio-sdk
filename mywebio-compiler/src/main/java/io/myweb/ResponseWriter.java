@@ -42,17 +42,10 @@ public class ResponseWriter {
 	public void write(Response response) throws IOException {
 		if (!closed && response!=null) {
 			if (response.getContentType() == null) response.withContentType(produces);
-			if (response.hasCallback()) writeCallback(response);
-			else if (response.getBody() instanceof InputStream) writeInputStream(response);
+			if (response.getBody() instanceof InputStream) writeInputStream(response);
 			else writeObject(response);
 			os.flush();
 		}
-	}
-
-	private void writeCallback(Response response) throws IOException {
-		os.write(response.toString().getBytes());
-		os.flush();
-		response.writeBody(socket.getFileDescriptor());
 	}
 
 	private void writeObject(Response response) throws IOException {

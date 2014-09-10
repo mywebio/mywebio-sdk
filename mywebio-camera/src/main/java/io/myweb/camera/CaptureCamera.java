@@ -11,12 +11,11 @@ import android.util.Log;
 import io.myweb.api.*;
 import io.myweb.http.MimeTypes;
 import io.myweb.http.Response;
-import io.myweb.http.ResponseCallback;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
 
-public class CaptureCamera implements ResponseCallback, MediaRecorder.OnErrorListener {
+public class CaptureCamera implements MediaRecorder.OnErrorListener {
 	private static final int HIDDEN_MPEG_TS = 8;
 	private static final String LOG_TAG = CaptureCamera.class.getSimpleName();
 	private MediaRecorder mediaRecorder;
@@ -39,18 +38,14 @@ public class CaptureCamera implements ResponseCallback, MediaRecorder.OnErrorLis
 
 		// Step 2: Set source
 		mediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
+		mediaRecorder.setAudioSource(MediaRecorder.AudioSource.DEFAULT);
 
 		// Step 3: Set a CamcorderProfile (requires API Level 8 or higher)
-		mediaRecorder.setProfile(CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH));
+		CamcorderProfile profile = CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH);
+		profile.fileFormat = HIDDEN_MPEG_TS;
+		mediaRecorder.setProfile(profile);
 
-		// Step 4: Set output format
-		mediaRecorder.setOutputFormat(HIDDEN_MPEG_TS);
-
-
-		// Step 5: Set the preview output
-//		mediaRecorder.setPreviewDisplay(mPreview.getHolder().getSurface());
-
-		return Response.ok().withContentType(MimeTypes.MIME_VIDEO_MPEG).withCallback(this);
+		return Response.ok().withContentType(MimeTypes.MIME_VIDEO_MPEG).withBody("STREAM HERE!");
 	}
 
 	private Camera getCamera() {
@@ -82,7 +77,6 @@ public class CaptureCamera implements ResponseCallback, MediaRecorder.OnErrorLis
 		}
 	}
 
-	@Override
 	public void writeBody(FileDescriptor fd) {
 		// Step 6: Set output file
 		mediaRecorder.setOutputFile(fd);
