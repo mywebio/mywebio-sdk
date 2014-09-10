@@ -3,9 +3,7 @@ package io.myweb;
 import android.net.LocalSocket;
 import android.util.Log;
 
-import io.myweb.http.Method;
-import io.myweb.http.Request;
-import io.myweb.http.Response;
+import io.myweb.http.*;
 
 import java.io.*;
 import java.util.List;
@@ -17,7 +15,7 @@ public class RequestTask implements Runnable {
 	private static final String INDEX_HTML = "/index.html";
 	private static final String SERVICES_JSON = "/services.json";
 
-	private LocalSocket socket;
+	private final LocalSocket socket;
 
 	private final List<? extends Endpoint> endpoints;
 
@@ -30,46 +28,49 @@ public class RequestTask implements Runnable {
 	//	private static final int REQUEST_ID_HEADER_LENGTH = 37; // 36 characters of UUID + 1 character "\n"
 	private static final String FILE_NOT_FOUND = "File %s not found";
 
-	private void writeNotFoundResponse(OutputStream out, String requestId, String fileName) throws IOException {
-		// TODO old behaviour, first line with request id
-		out.write((requestId + "\n").getBytes());
-		out.write(Response.notFound().toString().getBytes());
-		out.write(String.format(FILE_NOT_FOUND, fileName).getBytes());
-		out.close();
+	private void writeNotFoundResponse(String requestId, String fileName) {
+		try {
+			ResponseWriter rw = new ResponseWriter(MimeTypes.MIME_TEXT_HTML, socket);
+			// TODO old behaviour, first line with request id
+			rw.writeRequestId(requestId);
+			rw.write(Response.notFound().withBody(String.format(FILE_NOT_FOUND, fileName)));
+			rw.close();
+		} catch (IOException err) {
+			Log.e(TAG, "Error while writing not found response " + err, err);
+		}
 	}
 
-	private void writeErrorResponse(OutputStream out, String requestId, String msg) throws IOException {
-		// TODO old behaviour, first line with request id
-		out.write((requestId + "\n").getBytes());
-		out.write(Response.internalError().toString().getBytes());
-		out.write(msg.getBytes());
-		out.close();
+	private void writeErrorResponse(String requestId, String msg) {
+		try {
+			ResponseWriter rw = new ResponseWriter(MimeTypes.MIME_TEXT_HTML, socket);
+			// TODO old behaviour, first line with request id
+			rw.writeRequestId(requestId);
+			rw.write(Response.internalError().withBody(msg));
+			rw.close();
+		} catch (IOException err) {
+			Log.e(TAG, "Error while writing error response " + err, err);
+		}
 	}
 
 	@Override
 	public void run() {
-		OutputStream outputStream = null;
 		String fileName = null;
-		Request request = null;
+		String requestId = null;
+		boolean keepAlive = true;
 		try {
-			outputStream = new BufferedOutputStream(socket.getOutputStream());
 			PushbackInputStream inputStream = new PushbackInputStream(socket.getInputStream(),BUFFER_SIZE);
-			request = readRequest(inputStream);
-			findAndInvokeEndpoint(request);
-			Log.i(TAG, "Sent response to Web IO Server");
-		} catch (ClassNotFoundException e) {
-			try {
-				writeNotFoundResponse(outputStream, request.getId(), fileName);
-			} catch (IOException err) {
-				Log.e(TAG, "Error while write error response " + err, err);
+			while (keepAlive) {
+				Request request = readRequest(inputStream);
+				requestId = request.getId();
+				findAndInvokeEndpoint(request);
+				Log.i(TAG, "Sent response to Web IO Server");
+				keepAlive = request.isKeptAlive();
 			}
+		} catch (ClassNotFoundException e) {
+			writeNotFoundResponse(requestId, fileName);
 		} catch (Exception e) {
 			Log.e(TAG, "Internal error " + e, e);
-			try {
-				writeErrorResponse(outputStream, request.getId(), e.getMessage());
-			} catch (IOException err) {
-				Log.e(TAG, "Error while write error response " + err, err);
-			}
+			writeErrorResponse(requestId, Log.getStackTraceString(e));
 		} finally {
 			closeConnection();
 		}

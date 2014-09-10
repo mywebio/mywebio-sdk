@@ -37,6 +37,11 @@ public class Request {
 		return Long.parseLong(lenStr);
 	}
 
+	public boolean isKeptAlive() {
+		Headers.Header keepAliveHeader = getHeaders().findFirst(Headers.REQUEST.CONNECTION);
+		return keepAliveHeader!=null && "keep-alive".equalsIgnoreCase(keepAliveHeader.getValue());
+	}
+
 	public Method getMethod() {
 		return method;
 	}

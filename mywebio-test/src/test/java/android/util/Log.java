@@ -3,6 +3,9 @@ package android.util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 public final class Log {
 
 	private static final Logger log = LoggerFactory.getLogger(Log.class);
@@ -75,5 +78,12 @@ public final class Log {
 	public static int wtf(java.lang.String tag, java.lang.String msg, java.lang.Throwable tr) {
 		log.error("<" + tag + "> WTF " + msg, tr);
 		return 0;
+	}
+
+	public static String getStackTraceString(Throwable ex) {
+		StringWriter sw = new StringWriter();
+		PrintWriter pw = new PrintWriter(sw);
+		ex.printStackTrace(pw);
+		return sw.toString();
 	}
 }
