@@ -68,6 +68,10 @@ public class Response {
 		return this;
 	}
 
+	public Response withId(String id) {
+		return withUpdatedHeader(Headers.X.MYWEB_ID, id);
+	}
+
 	public Response withKeepAlive() {
 		return withUpdatedHeader(Headers.RESPONSE.CONNECTION, "keep-alive");
 	}

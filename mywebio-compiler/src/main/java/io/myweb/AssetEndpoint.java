@@ -58,11 +58,9 @@ public class AssetEndpoint extends Endpoint {
 		AssetManager assetManager = getContext().getAssets();
 		try {
 			ResponseWriter rw = new ResponseWriter(MimeTypes.getMimeType(uri), localSocket.getOutputStream());
-			// TODO old behaviour
-			rw.writeRequestId(request.getId());
 			InputStream is = assetManager.open(MYWEB_ASSETS_DIR + uri);
 			long length = AssetInfo.getAssetLengths().get(uri);
-			rw.write(Response.ok().withLength(length).withBody(is));
+			rw.write(Response.ok().withId(request.getId()).withLength(length).withBody(is));
 			rw.close();
 		} catch (IOException e) {
 			Log.e("AssetEndpoint", "error during invoke", e);

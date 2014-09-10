@@ -31,9 +31,7 @@ public class RequestTask implements Runnable {
 	private void writeNotFoundResponse(String requestId, String fileName) {
 		try {
 			ResponseWriter rw = new ResponseWriter(MimeTypes.MIME_TEXT_HTML, socket.getOutputStream());
-			// TODO old behaviour, first line with request id
-			rw.writeRequestId(requestId);
-			rw.write(Response.notFound().withBody(String.format(FILE_NOT_FOUND, fileName)));
+			rw.write(Response.notFound().withId(requestId).withBody(String.format(FILE_NOT_FOUND, fileName)));
 			rw.close();
 		} catch (IOException err) {
 			Log.e(TAG, "Error while writing not found response " + err, err);
@@ -43,9 +41,7 @@ public class RequestTask implements Runnable {
 	private void writeErrorResponse(String requestId, String msg) {
 		try {
 			ResponseWriter rw = new ResponseWriter(MimeTypes.MIME_TEXT_HTML, socket.getOutputStream());
-			// TODO old behaviour, first line with request id
-			rw.writeRequestId(requestId);
-			rw.write(Response.internalError().withBody(msg));
+			rw.write(Response.internalError().withId(requestId).withBody(msg));
 			rw.close();
 		} catch (IOException err) {
 			Log.e(TAG, "Error while writing error response " + err, err);

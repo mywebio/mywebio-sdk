@@ -98,6 +98,7 @@ public class Headers {
 		public static final String CTO = "X-Content-Type-Options";
 		public static final String POWERED_BY = "X-Powered-By";
 		public static final String UA_COMPATIBLE = "X-UA-Compatible";
+		public static final String MYWEB_ID ="X-Myweb-Request-Id";
 	}
 
 	public static final class Header {
@@ -146,7 +147,10 @@ public class Headers {
 
 	public void update(String name, String value) {
 		Header header = findFirst(name);
-		if (header != null) header.setValue(value);
+		if (header != null) {
+			if (value == null) remove(header);
+			else header.setValue(value);
+		}
 		else add(name, value);
 	}
 

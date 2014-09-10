@@ -66,9 +66,7 @@ public class AppInfoEndpoint extends Endpoint {
 	public void invoke(String uri, Request request, LocalSocket localSocket) {
         try {
             ResponseWriter rw = new ResponseWriter(localSocket.getOutputStream());
-            // TODO old behaviour
-            rw.writeRequestId(request.getId());
-            rw.write(Response.ok().withContentType(MimeTypes.MIME_APPLICATION_JSON).withBody(servicesJson()));
+            rw.write(Response.ok().withId(request.getId()).withContentType(MimeTypes.MIME_APPLICATION_JSON).withBody(servicesJson()));
             rw.close();
         } catch (Exception e) {
             Log.d("AppInfoEndpoint", "", e);

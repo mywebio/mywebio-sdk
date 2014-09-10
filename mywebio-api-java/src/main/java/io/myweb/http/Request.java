@@ -20,7 +20,6 @@ public class Request {
 	private final Headers headers;
 	private final Cookies cookies;
 	private Object body;
-	private String id;
 
 	private Request(Method method, URI uri, String protocolVersion, Headers headers, Cookies cookies) {
 		this.method = method;
@@ -99,7 +98,9 @@ public class Request {
 	}
 
 	public String getId() {
-		return id;
+		Headers.Header myHeader = getHeaders().findFirst(Headers.X.MYWEB_ID);
+		if (myHeader!=null) return myHeader.getValue();
+		return null;
 	}
 
 	public Request withBody(InputStream is) {
@@ -121,7 +122,7 @@ public class Request {
 	}
 
 	public Request withId(String id) {
-		this.id = id;
+		getHeaders().update(Headers.X.MYWEB_ID, id);
 		return this;
 	}
 

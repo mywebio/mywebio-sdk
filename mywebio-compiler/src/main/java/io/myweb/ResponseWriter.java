@@ -2,6 +2,7 @@ package io.myweb;
 
 import org.json.JSONObject;
 
+import io.myweb.http.Headers;
 import io.myweb.http.MimeTypes;
 import io.myweb.http.Response;
 
@@ -37,6 +38,12 @@ public class ResponseWriter {
 
 	public void write(Response response) throws IOException {
 		if (!closed && response!=null) {
+			// TODO old behaviour, remove after new server deployment
+			try {
+				writeRequestId(response.getHeaders().findFirst(Headers.X.MYWEB_ID).getValue());
+			} catch (NullPointerException ex) {
+				ex.printStackTrace();
+			}
 			if (response.getContentType() == null) response.withContentType(produces);
 			if (response.getBody() instanceof InputStream) writeInputStream(response);
 			else writeObject(response);
@@ -65,24 +72,28 @@ public class ResponseWriter {
 		is.close();
 	}
 
-	public void write(InputStream is) throws IOException {
-		write(Response.ok().withBody(is));
+	public void write(String id, InputStream is) throws IOException {
+		write(Response.ok().withId(id).withBody(is));
 	}
 
-	public void write(String text) throws IOException {
-		write(Response.ok().withBody(text));
+	public void write(String id, String text) throws IOException {
+		write(Response.ok().withId(id).withBody(text));
 	}
 
-	public void write(JSONObject json) throws IOException {
-		write(Response.ok().withBody(json));
+	public void write(String id, JSONObject json) throws IOException {
+		write(Response.ok().withId(id).withBody(json));
 	}
 
-	public void write(File file) throws IOException {
-		write(Response.ok().withFile(file));
+	public void write(String id, File file) throws IOException {
+		write(Response.ok().withId(id).withFile(file));
+	}
+
+	public void write(String id, Response resp) throws IOException {
+		write(resp.withId(id));
 	}
 
 	//TODO old behaviour
-	public void writeRequestId(String reqId) throws IOException {
+	private void writeRequestId(String reqId) throws IOException {
 		os.write((reqId + "\n").getBytes());
 	}
 
