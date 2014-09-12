@@ -6,7 +6,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -71,7 +70,7 @@ public class Request {
 			}
 			return is;
 		} else {
-			return new ByteArrayInputStream(body.toString().getBytes(StandardCharsets.UTF_8));
+			return new ByteArrayInputStream(body.toString().getBytes());
 		}
 	}
 
@@ -88,7 +87,7 @@ public class Request {
 		if (body instanceof JSONObject) return (JSONObject) body;
 		else if (body instanceof InputStream) {
 			try {
-				body = new JSONObject(new JSONTokener(new InputStreamReader((InputStream) body, StandardCharsets.UTF_8)));
+				body = new JSONObject(new JSONTokener(new InputStreamReader((InputStream) body)));
 				return (JSONObject) body;
 			} catch (JSONException e) {
 				e.printStackTrace();
@@ -143,7 +142,7 @@ public class Request {
 		final char[] buffer = new char[BUFFER_LENGTH];
 		final StringBuilder out = new StringBuilder();
 		try {
-			final Reader in = new InputStreamReader(is, StandardCharsets.UTF_8);
+			final Reader in = new InputStreamReader(is);
 			try {
 				while (true) {
 					int bytesRead = in.read(buffer, 0, buffer.length);
