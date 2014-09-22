@@ -107,7 +107,7 @@ public class ResponseWriter {
 				break;
 			}
 			if(chunkEncode) {
-				to.write((Integer.toString(buf.length)+"\r\n").getBytes());
+				to.write((Integer.toHexString(r)+"\r\n").getBytes());
 			}
 			to.write(buf, 0, r);
 			if(chunkEncode) {
