@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+	<com.android.grafika.AspectFrameLayout
+		android:id="@+id/cameraPreview_afl"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:layout_centerInParent="true" >
+		<TextureView
+			android:id="@+id/textureView"
+			android:layout_width="match_parent"
+			android:layout_height="match_parent"
+			android:layout_gravity="center"/>
+	</com.android.grafika.AspectFrameLayout>
+
+</RelativeLayout>
