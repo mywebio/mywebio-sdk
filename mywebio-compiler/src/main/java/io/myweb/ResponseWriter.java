@@ -44,11 +44,21 @@ public class ResponseWriter {
 			} catch (NullPointerException ex) {
 				ex.printStackTrace();
 			}
-			if (response.getContentType() == null) response.withContentType(produces);
+			String contentType = response.getContentType();
+			if (contentType == null) contentType = produces;
+			// if content type is text, make sure charset is specified
+			if (!contentType.contains("charset=") && isTextContent(contentType)) {
+				contentType = contentType + "; charset=" + response.getCharset();
+			}
+			response.withContentType(contentType);
 			if (response.getBody() instanceof InputStream) writeInputStream(response);
 			else writeObject(response);
 			os.flush();
 		}
+	}
+
+	static boolean isTextContent(String content) {
+		return content.contains("text") || content.contains("xml") || content.contains("json");
 	}
 
 	private void writeObject(Response response) throws IOException {

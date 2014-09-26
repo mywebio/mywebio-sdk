@@ -17,7 +17,10 @@ public class Response {
 
 	private Object body;
 
+	private String charset;
+
 	private Response(StatusCode statusCode) {
+		this.charset = "UTF-8";
 		this.statusCode = statusCode;
 	}
 
@@ -126,6 +129,15 @@ public class Response {
 
 	public Response withChunks() {
 		return withUpdatedHeader(Headers.RESPONSE.TRANSFER_ENC, "chunked");
+	}
+
+	public Response withCharset(String charset) {
+		this.charset = charset;
+		return this;
+	}
+
+	public String getCharset() {
+		return charset;
 	}
 
 	public StatusCode getStatusCode() {
