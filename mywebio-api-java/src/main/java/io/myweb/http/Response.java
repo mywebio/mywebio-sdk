@@ -1,5 +1,6 @@
 package io.myweb.http;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.File;
@@ -115,6 +116,11 @@ public class Response {
 	}
 
 	public Response withBody(JSONObject jsonObject) {
+		this.body = jsonObject;
+		return withContentType(MimeTypes.MIME_APPLICATION_JSON);
+	}
+
+	public Response withBody(JSONArray jsonObject) {
 		this.body = jsonObject;
 		return withContentType(MimeTypes.MIME_APPLICATION_JSON);
 	}
