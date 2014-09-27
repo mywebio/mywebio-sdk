@@ -3,12 +3,19 @@ package io.myweb;
 import android.content.Context;
 import android.net.LocalSocket;
 import android.util.Log;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONTokener;
+
 import io.myweb.http.Cookie;
 import io.myweb.http.Cookies;
 import io.myweb.http.Headers;
 import io.myweb.http.Method;
 import io.myweb.http.Request;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -97,7 +104,7 @@ public abstract class Endpoint {
 		return actualParams;
 	}
 
-	private String urlNoQueryParams(String url) {
+	protected String urlNoQueryParams(String url) {
 		int i = url.indexOf("?");
 		String result;
 		if (i == -1) {
@@ -108,19 +115,25 @@ public abstract class Endpoint {
 		return result;
 	}
 
-	private Map<String, String> decodeQueryString(String queryParamsStr) {
+	protected Map<String, String> decodeQueryString(String queryParamsStr) {
 		String[] nameAndValues = queryParamsStr.split("&");
 		Map<String, String> result = new HashMap<String, String>();
 		for (String nameAndVal : nameAndValues) {
 			if (!"".equals(nameAndVal)) {
-				String[] nv = nameAndVal.split("=");
-				result.put(nv[0], nv[1]);
+				int idx = nameAndVal.indexOf("=");
+				try {
+					if(idx>0)
+					result.put(nameAndVal.substring(0,idx),
+							URLDecoder.decode(nameAndVal.substring(idx+1),"UTF-8"));
+				} catch (UnsupportedEncodingException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 		return result;
 	}
 
-	private String queryParams(String url) {
+	protected String queryParams(String url) {
 		int i = url.indexOf("?");
 		String queryParams;
 		if (i == -1) {
@@ -131,23 +144,27 @@ public abstract class Endpoint {
 		return queryParams;
 	}
 
-	private Object convert(String val, String typeName) {
-		Object result;
-		if ("int".equals(typeName) || Integer.class.getName().equals(typeName)) {
-			result = Integer.parseInt(val);
-		} else {
-			result = val;
+	public static Object convert(String val, String typeName) {
+		if(!String.class.getName().equals(typeName)) {
+			try {
+				Object obj = new JSONTokener(val).nextValue();
+				if(obj.equals(JSONObject.NULL)) return null;
+				if(classForName(typeName).isAssignableFrom(obj.getClass())) return obj;
+			} catch (JSONException e) {
+				e.printStackTrace();
+			} catch (ClassNotFoundException e) {
+				e.printStackTrace();
+			}
 		}
-		return result;
+		return val;
 	}
 
-	private Class<?> classForName(String typeName) throws ClassNotFoundException {
-		String classToLoad;
-		if ("int".equals(typeName)) {
-			classToLoad = "[I";
-		} else {
-			classToLoad = typeName;
-		}
-		return Class.forName(classToLoad);
+	public static Class<?> classForName(String typeName) throws ClassNotFoundException {
+		if ("int".equals(typeName)) return Integer.class;
+		if ("long".equals(typeName)) return Long.class;
+		if ("float".equals(typeName)) return Float.class;
+		if ("double".equals(typeName)) return Double.class;
+		if ("boolean".equals(typeName)) return Boolean.class;
+		return Class.forName(typeName);
 	}
 }

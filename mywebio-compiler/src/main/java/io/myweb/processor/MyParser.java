@@ -15,13 +15,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-public class MywebParser extends AnnotationMessagerAware {
+public class MyParser extends AnnotationMessagerAware {
 
-	private final MywebValidator mywebValidator;
+	private final MyValidator myValidator;
 
-	public MywebParser(Messager messager, MywebValidator mywebValidator) {
+	public MyParser(Messager messager, MyValidator myValidator) {
 		super(messager);
-		this.mywebValidator = mywebValidator;
+		this.myValidator = myValidator;
 	}
 
 	public ParsedMethod parse(ExecutableElement ee) {
@@ -53,7 +53,7 @@ public class MywebParser extends AnnotationMessagerAware {
             for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry : am.getElementValues().entrySet()) {
                 if ("value".equals(entry.getKey().getSimpleName().toString())) {
                     httpUri = entry.getValue().getValue().toString();
-                    mywebValidator.validateAnnotation(httpMethod, destMethodRetType, destMethod, params, httpUri, ee, am);
+                    myValidator.validateAnnotation(httpMethod, destMethodRetType, destMethod, params, httpUri, ee, am);
                 }
             }
         }
@@ -75,7 +75,7 @@ public class MywebParser extends AnnotationMessagerAware {
     }
 
     private String extractProducesAnnotation(AnnotationMirror am) {
-        String produces = MimeTypes.MIME_TEXT_PLAIN;
+        String produces = MimeTypes.MIME_TEXT_HTML;
         String annotationName = am.getAnnotationType().toString();
         if (Produces.class.getName().equals(annotationName)) {
             for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry : am.getElementValues().entrySet()) {

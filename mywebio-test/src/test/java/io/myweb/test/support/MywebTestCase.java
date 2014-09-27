@@ -1,6 +1,6 @@
 package io.myweb.test.support;
 
-import io.myweb.processor.MywebioAnnotationProcessor;
+import io.myweb.processor.MyAnnotationProcessor;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,7 +33,7 @@ public abstract class MywebTestCase {
 
 	private final List<String> compilerOptions = new ArrayList<String>();
 
-	private List<? extends Processor> processors = asList(new MywebioAnnotationProcessor());
+	private List<? extends Processor> processors = asList(new MyAnnotationProcessor());
 
 	public MywebTestCase() {
 		constructCompilerOptions();

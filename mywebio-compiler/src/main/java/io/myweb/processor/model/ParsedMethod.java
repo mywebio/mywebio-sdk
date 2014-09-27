@@ -2,11 +2,37 @@ package io.myweb.processor.model;
 
 import com.google.common.base.Joiner;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONTokener;
+
 import java.util.*;
 
+import io.myweb.Endpoint;
 import io.myweb.http.Method;
 
 public class ParsedMethod {
+	public static final String MINUS_DEFAULT = "-1";
+	public static final String ZERO_LENGTH_DEFAULT = "";
+	public static final String EMPTY_DEFAULT = "[]";
+	public static final String NULL_DEFAULT = "null";
+	public static final String FALSE_DEFAULT = "false";
+	public static Map<String,String> DEFAULT_VALUES;
+
+	static {
+		Map<String, String> m = new HashMap<String, String>(10);
+		m.put(Integer.class.getName(), MINUS_DEFAULT);
+		m.put(Long.class.getName(), MINUS_DEFAULT);
+		m.put(Float.class.getName(), MINUS_DEFAULT);
+		m.put(Double.class.getName(), MINUS_DEFAULT);
+		m.put(String.class.getName(), ZERO_LENGTH_DEFAULT);
+		m.put(Boolean.class.getName(), FALSE_DEFAULT);
+		m.put(Object.class.getName(), NULL_DEFAULT);
+		m.put(JSONArray.class.getName(), EMPTY_DEFAULT);
+		m.put(JSONObject.class.getName(), NULL_DEFAULT);
+		DEFAULT_VALUES = Collections.unmodifiableMap(m);
+	}
 
 	private final String destClass;
 	private final String destMethod;
@@ -65,7 +91,7 @@ public class ParsedMethod {
 		StringBuilder patternSb = new StringBuilder();
 		List<GroupMapping> groupMapping = new LinkedList<GroupMapping>();
 		if (pathSplit.length == 0) {
-			patternSb.append("/");
+			patternSb.append("[/?]");
 		} else {
 			int curGroup = 1; // group indexing in regex starts from 1
 			for (String pathElm : pathSplit) {
@@ -77,7 +103,7 @@ public class ParsedMethod {
 					curGroup++;
 				} else if (pathElm.startsWith("*")) {
 					groupMapping.add(new GroupMapping(pathElm.substring(1), curGroup));
-					patternSb.append("/(.*?)");
+					patternSb.append("[/?](.*?)");
 					curGroup++;
 				} else {
 					patternSb.append("/").append(pathElm);
@@ -93,12 +119,48 @@ public class ParsedMethod {
 		List<DefaultQueryParams> result = new LinkedList<DefaultQueryParams>();
 		for (String nameAndVal : nameAndValues) {
 			if (!"".equals(nameAndVal)) {
-				String[] nv = nameAndVal.split("=");
-				String nvNoColon = nv[0].replaceFirst(":", "");
-				result.add(new DefaultQueryParams(nvNoColon, nv[1]));
+				String name, value;
+				int idx = nameAndVal.indexOf("=");
+				if (idx<0) {
+					name = nameAndVal;
+					value = "";
+				} else {
+					name = nameAndVal.substring(0, idx);
+					value = nameAndVal.substring(idx + 1, nameAndVal.length());
+				}
+				if(name.startsWith(":")) name = name.substring(1);
+				ParsedParam param = getParsedParamByName(name);
+				if (param != null) {
+					String typeName = toComplexTypeName(param.getTypeName());
+					if (value.length()==0) {
+						value = DEFAULT_VALUES.get(typeName);
+					} else if (!typeName.equals(String.class.getName())) {
+						// check if default value type is OK
+						try {
+							Object obj = new JSONTokener(value).nextValue();
+							if (!Endpoint.classForName(typeName).isAssignableFrom(obj.getClass())) {
+								throw new RuntimeException("Default value (" + value +
+										") for parameter " + name + " is not assignable!");
+							}
+						} catch (JSONException e) {
+							throw new RuntimeException("Invalid default value (" +
+									value + ") for parameter " + name + "!",e);
+						} catch (ClassNotFoundException e) {
+							throw new RuntimeException(e.getMessage(),e);
+						}
+					}
+				}
+				result.add(new DefaultQueryParams(name, value));
 			}
 		}
 		return result;
+	}
+
+	private ParsedParam getParsedParamByName(String name) {
+		for (ParsedParam param: params) {
+			if (param.getName().equals(name)) return param;
+		}
+		return null;
 	}
 
 	private String queryParams(String url) {
@@ -140,14 +202,12 @@ public class ParsedMethod {
 		return "(" + toComplexTypeName(param.getTypeName()) + ")" + "ap[" + param.getId() + "].getVal()";
 	}
 
-	private String toComplexTypeName(String typeName) {
-		// TODO add support for more types
-		String result;
-		if ("int".equals(typeName)) {
-			result = "java.lang.Integer";
-		} else {
-			result = typeName;
-		}
-		return result;
+	private static String toComplexTypeName(String typeName) {
+		if ("int".equals(typeName)) return Integer.class.getName();
+		if ("long".equals(typeName)) return Long.class.getName();
+		if ("float".equals(typeName)) return Float.class.getName();
+		if ("double".equals(typeName)) return Double.class.getName();
+		if ("boolean".equals(typeName)) return Boolean.class.getName();
+		return typeName;
 	}
 }

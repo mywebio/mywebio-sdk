@@ -26,4 +26,8 @@ public class AnnotationMessagerAware {
 	protected void error(String msg) {
 		messager.printMessage(Diagnostic.Kind.ERROR, msg);
 	}
+
+	protected void warning(String msg) {
+		messager.printMessage(Diagnostic.Kind.WARNING, msg);
+	}
 }

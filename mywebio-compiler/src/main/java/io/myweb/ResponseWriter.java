@@ -1,5 +1,6 @@
 package io.myweb;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import io.myweb.http.Headers;
@@ -94,6 +95,10 @@ public class ResponseWriter {
 		write(Response.ok().withId(id).withBody(json));
 	}
 
+	public void write(String id, JSONArray json) throws IOException {
+		write(Response.ok().withId(id).withBody(json));
+	}
+
 	public void write(String id, File file) throws IOException {
 		write(Response.ok().withId(id).withFile(file));
 	}
@@ -111,7 +116,12 @@ public class ResponseWriter {
 		byte[] buf = new byte[BUFFER_LENGTH];
 		long total = 0;
 		while (true) {
-			int r = from.read(buf);
+			int r = -1;
+			try {
+				r = from.read(buf);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 			if (r == -1 || Thread.interrupted()) {
 				if (chunkEncode) to.write("0\r\n\r\n".getBytes());
 				break;

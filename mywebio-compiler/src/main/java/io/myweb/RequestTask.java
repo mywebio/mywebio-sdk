@@ -41,22 +41,31 @@ public class RequestTask implements Runnable {
 	private void writeErrorResponse(String requestId, String msg) {
 		try {
 			ResponseWriter rw = new ResponseWriter(MimeTypes.MIME_TEXT_HTML, socket.getOutputStream());
-			rw.write(Response.internalError().withId(requestId).withBody(msg));
+			rw.write(Response.internalError().withId(requestId).withBody(preformatted(msg)));
 			rw.close();
 		} catch (IOException err) {
 			Log.e(TAG, "Error while writing error response " + err, err);
 		}
 	}
 
+	private static String preformatted(String text) {
+		return "<pre>"+text+"</pre>";
+	}
+
 	@Override
 	public void run() {
-		String fileName = null;
 		String requestId = null;
 		boolean keepAlive = true;
 		try {
 			PushbackInputStream inputStream = new PushbackInputStream(socket.getInputStream(),BUFFER_SIZE);
 			while (keepAlive) {
-				Request request = readRequest(inputStream);
+				Request request = null;
+				try {
+					request = readRequest(inputStream);
+				} catch (IOException e) {
+					Log.d(TAG, e.getMessage());
+					break;
+				}
 				if (request != null) {
 					requestId = request.getId();
 					findAndInvokeEndpoint(request);
@@ -65,7 +74,7 @@ public class RequestTask implements Runnable {
 				} else keepAlive = false;
 			}
 		} catch (ClassNotFoundException e) {
-			writeNotFoundResponse(requestId, fileName);
+			writeNotFoundResponse(requestId, e.getMessage());
 		} catch (Exception e) {
 			Log.e(TAG, "Internal error " + e, e);
 			writeErrorResponse(requestId, Log.getStackTraceString(e));
@@ -105,7 +114,6 @@ public class RequestTask implements Runnable {
 	private void closeConnection() {
 		if (socket != null) {
 			try {
-				socket.shutdownOutput();
 				socket.close();
 			} catch (IOException e) {
 				Log.e(TAG, "Error occurred while closing connection " + e);

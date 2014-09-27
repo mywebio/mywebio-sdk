@@ -6,8 +6,10 @@ import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
 import io.myweb.http.Method;
+import io.myweb.http.Request;
 import io.myweb.processor.model.ParsedParam;
 import org.apache.commons.lang3.StringUtils;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import javax.annotation.processing.Messager;
@@ -21,15 +23,29 @@ import static com.google.common.collect.Collections2.transform;
 import static com.google.common.collect.Iterables.filter;
 import static com.google.common.collect.Iterables.size;
 
-public class MywebValidator extends AnnotationMessagerAware {
+public class MyValidator extends AnnotationMessagerAware {
 
     private final static String TAB = "    ";
     private static final String CONSOLE_COLOR_ORANGE = "\u001B[33m";
     private static final String CONSOLE_COLOR_RESET = "\u001B[0m";
     private static final String CONSOLE_COLOR_RED = "\u001B[31m";
 
-    public MywebValidator(Messager messager) {
+	private static final String[] TYPE_NAMES = {
+			String.class.getName(), "int", "long", "double", "float", "boolean",
+			Integer.class.getName(), Long.class.getName(), Float.class.getName(),
+			Double.class.getName(), Boolean.class.getName(), JSONObject.class.getName(),
+			JSONArray.class.getName(), Object.class.getName() // the Object is for json values
+	};
+
+    public MyValidator(Messager messager) {
 		super(messager);
+	}
+
+	public static boolean isTypeNameAllowed(String typeName) {
+		for (String t: TYPE_NAMES) {
+			if (t.equals(typeName)) return true;
+		}
+		return false;
 	}
 
 	public void validateAnnotation(Method httpMethod, String destMethodRetType, String destMethod, List<ParsedParam> params, String httpUri, ExecutableElement ee, AnnotationMirror am) {
@@ -38,11 +54,11 @@ public class MywebValidator extends AnnotationMessagerAware {
 		int paramsInMethod = size(filter(params, new Predicate<ParsedParam>() {
 			@Override
 			public boolean apply(ParsedParam param) {
-				return String.class.getName().equals(param.getTypeName()) || "int".equals(param.getTypeName());
+				return isTypeNameAllowed(param.getTypeName());
 			}
 		}));
 		if (paramsInAnnotation != paramsInMethod) {
-			getMessager().printMessage(Diagnostic.Kind.ERROR, "Annotation does not apply to given method (details above)", ee, am);
+			getMessager().printMessage(Diagnostic.Kind.ERROR, "This annotation requires different set of parameters for the method (details below)", ee, am);
 			String errorMsg = buildErrorMsg(httpMethod, httpUri, destMethodRetType, destMethod, params);
 			getMessager().printMessage(Diagnostic.Kind.ERROR, errorMsg);
 			throw new RuntimeException();
@@ -105,7 +121,7 @@ public class MywebValidator extends AnnotationMessagerAware {
 		appendSpaces(sb, beginOffset);
 		String[] uriSplit = httpUri.split("/");
 		for (String pathElem : uriSplit) {
-			if (pathElem.startsWith(":")) {
+			if (pathElem.startsWith(":") || pathElem.startsWith("*")) {
 				String paramName = pathElem.substring(1);
 				if (isPathParamCorrect(paramName, params)) {
 					appendSpaces(sb, 2 + paramName.length()); // NAME + "/:"
@@ -141,15 +157,16 @@ public class MywebValidator extends AnnotationMessagerAware {
 		String[] pathElems = httpUri.split("/");
 		boolean methodParamCorrect = false;
 		for (String pathElem : pathElems) {
-			if (pathElem.startsWith(":")) {
+			if (pathElem.startsWith(":") || pathElem.startsWith("*")) {
 				String paramName = pathElem.substring(1);
 				if (paramName.equals(param.getName())) {
 					methodParamCorrect = true;
 				}
 			}
 		}
+		// TODO warn if more then one Context or Request
         if (Context.class.getName().equals(param.getTypeName()) ||
-                JSONObject.class.getName().equals(param.getTypeName())) {
+		        Request.class.getName().equals(param.getTypeName())) {
 			methodParamCorrect = true;
 		}
 		return methodParamCorrect;
