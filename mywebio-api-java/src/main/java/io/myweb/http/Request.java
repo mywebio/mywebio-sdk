@@ -5,7 +5,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.net.URLDecoder;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -19,6 +23,7 @@ public class Request {
 	private final Headers headers;
 	private final Cookies cookies;
 	private Object body;
+	private Map<String,String> parameterMap = null;
 
 	private Request(Method method, URI uri, String protocolVersion, Headers headers, Cookies cookies) {
 		this.method = method;
@@ -123,6 +128,46 @@ public class Request {
 	public Request withId(String id) {
 		getHeaders().update(Headers.X.MYWEB_ID, id);
 		return this;
+	}
+
+	public Map<String, String> getParameterMap() {
+		if (parameterMap == null) {
+			if (Method.POST.equals(method)) {
+				parameterMap = decodeQueryString(getBodyAsString());
+			} else {
+				parameterMap = decodeQueryString(queryParams(uri.toString()));
+			}
+		}
+		return parameterMap;
+	}
+
+	private static Map<String, String> decodeQueryString(String queryParamsStr) {
+		String[] nameAndValues = queryParamsStr.split("&");
+		Map<String, String> result = new HashMap<String, String>();
+		for (String nameAndVal : nameAndValues) {
+			if (!"".equals(nameAndVal)) {
+				int idx = nameAndVal.indexOf("=");
+				try {
+					if(idx>0)
+						result.put(nameAndVal.substring(0,idx),
+								URLDecoder.decode(nameAndVal.substring(idx + 1), "UTF-8"));
+				} catch (UnsupportedEncodingException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return result;
+	}
+
+	private static String queryParams(String url) {
+		int i = url.indexOf("?");
+		String queryParams;
+		if (i == -1) {
+			queryParams = "";
+		} else {
+			queryParams = url.substring(i + 1);
+		}
+		return queryParams;
 	}
 
 	public static Request parse(String req) {

@@ -81,12 +81,7 @@ public abstract class Endpoint {
 
 	protected ActualParam[] actualParams(String uri, Request request, FormalParam[] formalParams, Map<String, String> defaultQueryParams, Map<String, Integer> groupMap, Context ctx) throws Exception {
 		String urlNoQueryParams = urlNoQueryParams(uri);
-		Map<String, String> paramsMap;
-		if (Method.POST.equals(httpMethod())) {
-			paramsMap = decodeQueryString(request.getBodyAsString());
-		} else {
-			paramsMap = decodeQueryString(queryParams(uri));
-		}
+		Map<String, String> paramsMap = request.getParameterMap();
 		Matcher m = matcher(urlNoQueryParams);
 		ActualParam[] actualParams = new ActualParam[formalParams.length];
 		if (m.matches()) {
@@ -135,35 +130,6 @@ public abstract class Endpoint {
 			result = url.substring(0, i);
 		}
 		return result;
-	}
-
-	protected Map<String, String> decodeQueryString(String queryParamsStr) {
-		String[] nameAndValues = queryParamsStr.split("&");
-		Map<String, String> result = new HashMap<String, String>();
-		for (String nameAndVal : nameAndValues) {
-			if (!"".equals(nameAndVal)) {
-				int idx = nameAndVal.indexOf("=");
-				try {
-					if(idx>0)
-					result.put(nameAndVal.substring(0,idx),
-							URLDecoder.decode(nameAndVal.substring(idx+1),"UTF-8"));
-				} catch (UnsupportedEncodingException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-		return result;
-	}
-
-	protected String queryParams(String url) {
-		int i = url.indexOf("?");
-		String queryParams;
-		if (i == -1) {
-			queryParams = "";
-		} else {
-			queryParams = url.substring(i + 1);
-		}
-		return queryParams;
 	}
 
 	public static Object convert(String val, String typeName) {
