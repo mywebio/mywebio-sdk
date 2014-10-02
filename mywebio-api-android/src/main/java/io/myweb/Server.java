@@ -6,8 +6,14 @@ import android.net.LocalSocket;
 import android.util.Log;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public class Server implements Runnable {
 
@@ -21,17 +27,56 @@ public class Server implements Runnable {
 
 	private ExecutorService workerExecutorService;
 
-	private List<? extends Endpoint> endpoints;
+	private final Map<Endpoint.MethodAndUri, Class> endpointRegistry;
 
-	public Server(Context context) {
+	private final AssetLengthInfo assetLengthInfo;
+
+	private final List<? extends Endpoint> endpoints;
+
+	public Server(Context context, Map<Endpoint.MethodAndUri, Class> registry, AssetLengthInfo info) {
 		this.context = context;
+		this.endpointRegistry = registry;
+		assetLengthInfo = info;
+		this.endpoints = createEndpoints();
 		this.workerExecutorService = new ThreadPoolExecutor(2, 16, 60, TimeUnit.SECONDS,
 				new SynchronousQueue<Runnable>(), ThreadFactories.newWorkerThreadFactory());
 	}
 
+	public Context getContext() {
+		return context;
+	}
+
+	public long getAssetLength(String path) {
+		return assetLengthInfo.getAssetLength(path);
+	}
+
+	public Map<Endpoint.MethodAndUri, Class> getEndpointRegistry() {
+		return endpointRegistry;
+	}
+
+
+	private List<? extends Endpoint> createEndpoints() {
+		List<Endpoint> list = new LinkedList<Endpoint>();
+		for (Class c: endpointRegistry.values()) {
+			try {
+				Endpoint ep = (Endpoint) c.getConstructor(Server.class).newInstance(this);
+				System.out.println(ep.httpMethod().toString()+" "+ep.originalPath()+" instantiated!");
+				list.add(ep);
+			} catch (InstantiationException e) {
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				e.printStackTrace();
+			} catch (InvocationTargetException e) {
+				e.printStackTrace();
+			} catch (NoSuchMethodException e) {
+				e.printStackTrace();
+			}
+		}
+		return list;
+	}
+
 	@Override
 	public void run() {
-		instantiateAndStoreEndpoints(context);
 		openLocalServerSocket(context.getPackageName());
 		mainLoop();
 		Log.i(TAG, "Server socket has been shutdown. Exiting normally.");
@@ -66,10 +111,6 @@ public class Server implements Runnable {
 		Log.d(TAG, "send buffer size " + socket.getSendBufferSize());
 		RequestTask worker = new RequestTask(socket, endpoints);
 		workerExecutorService.execute(worker);
-	}
-
-	private void instantiateAndStoreEndpoints(Context ctx) {
-		endpoints = EndpointContainer.instantiateEndpoints(ctx);
 	}
 
 	private void shutdownAllTasks() {

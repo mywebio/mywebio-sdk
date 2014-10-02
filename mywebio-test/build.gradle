@@ -15,6 +15,9 @@ dependencies {
     compile (project(':mywebio-api-java')) {
         exclude group: 'com.google.android', module: 'android'
     }
+	compile (project(':mywebio-api-android')) {
+		exclude group: 'com.google.android', module: 'android'
+	}
     compile (project(':mywebio-compiler')) {
         exclude group: 'com.google.android', module: 'android'
     }

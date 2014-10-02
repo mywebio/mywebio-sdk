@@ -1,4 +1,5 @@
 include ':mywebio-api-java',
+		':mywebio-api-android',
         ':mywebio-api',
         ':mywebio-compiler',
         ':mywebio-examples',

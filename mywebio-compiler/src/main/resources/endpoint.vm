@@ -22,8 +22,8 @@ import io.myweb.http.*;
 
 public class $parsedMethod.generatedClassName extends Endpoint {
 
-    public ${parsedMethod.generatedClassName}(Context context) {
-        super(context);
+    public ${parsedMethod.generatedClassName}(Server srv) {
+        super(srv);
     }
 
     protected Method httpMethod() {
@@ -68,9 +68,9 @@ public class $parsedMethod.generatedClassName extends Endpoint {
     }
 
 	@Override
-	public void invoke(String uri, Request request, LocalSocket localSocket) throws Exception {
+	public void invoke(String uri, Request request, OutputStream os) throws Exception {
 		ActualParam[] ap = actualParams(uri, request, formalParams(), defaulQueryParams(), groupMap(), getContext());
-		ResponseWriter rw = new ResponseWriter("${parsedMethod.produces}", localSocket.getOutputStream());
+		ResponseWriter rw = new ResponseWriter("${parsedMethod.produces}", os);
 		final ${parsedMethod.destMethodRetType} respFromUserCode = new ${parsedMethod.destClass}().${parsedMethod.destMethod}($parsedMethod.paramsJavaSrc);
 		rw.write(request.getId(), respFromUserCode);
 		rw.close();

@@ -136,7 +136,7 @@ public class RequestTask implements Runnable {
 		}
 		if (endpoint == null)
 			throw new ClassNotFoundException("Endpoint class for " + uri + " not found!");
-		endpoint.invoke(effectiveUri, request, socket);
+		endpoint.invoke(effectiveUri, request, socket.getOutputStream());
 	}
 
 	private Endpoint findEndpoint(Method method, String uri) {

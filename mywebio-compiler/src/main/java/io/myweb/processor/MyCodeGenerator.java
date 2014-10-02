@@ -17,7 +17,9 @@ import org.apache.velocity.runtime.RuntimeConstants;
 import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 
 import javax.annotation.processing.ProcessingEnvironment;
+import javax.tools.JavaFileManager;
 import javax.tools.JavaFileObject;
+import javax.tools.StandardLocation;
 
 import java.io.*;
 import java.util.List;
@@ -30,6 +32,7 @@ import static org.apache.commons.lang3.StringUtils.substringBeforeLast;
 
 public class MyCodeGenerator extends ProcessingEnvAware {
 	public static final String PKG_PREFIX = "io.myweb.";
+	private String sourceCodePath = "";
 
 	public MyCodeGenerator(ProcessingEnvironment processingEnvironment) {
 		super(processingEnvironment);
@@ -40,11 +43,9 @@ public class MyCodeGenerator extends ProcessingEnvAware {
 		if (!providers.isEmpty()) {
 			generateProviders(ve, providers);
 		} else {
-			String sourceCodePath = copySourcesFromResources();
 			generateEndpoints(ve, parsedMethods);
 			generateAssetsInfo(ve, sourceCodePath);
-			generateAppInfoEndpoint(ve, parsedMethods);
-			generateEndpointContainer(ve, parsedMethods);
+			generateService(ve, parsedMethods);
 		}
 	}
 
@@ -62,6 +63,12 @@ public class MyCodeGenerator extends ProcessingEnvAware {
 			ctx.put("parsedMethod", pm);
 			generateFromTemplate(ve, ctx, PKG_PREFIX + pm.getGeneratedClassName(), "endpoint.vm");
 		}
+	}
+
+	private void generateService(VelocityEngine ve, List<ParsedMethod> parsedMethods) {
+		VelocityContext ctx = new VelocityContext();
+		ctx.put("endpoints", parsedMethods);
+		generateFromTemplate(ve, ctx, PKG_PREFIX + "Service");
 	}
 
 	private VelocityEngine instantiateVelocityEngine() {
@@ -88,29 +95,10 @@ public class MyCodeGenerator extends ProcessingEnvAware {
 		generateAssetInfo(ve, assetFiles.toList());
 	}
 
-	private void generateAppInfoEndpoint(VelocityEngine ve, List<ParsedMethod> parsedMethods) {
-		VelocityContext ctx = new VelocityContext();
-		ctx.put("methods", parsedMethods);
-		ctx.put("esc", new StringEscapeUtils());
-		generateFromTemplate(ve, ctx, PKG_PREFIX + "AppInfoEndpoint");
-	}
-
-	private void generateEndpointContainer(VelocityEngine ve, List<ParsedMethod> parsedMethods) {
-		VelocityContext ctx = new VelocityContext();
-		List<String> endpoints = transform(parsedMethods, new Function<ParsedMethod, String>() {
-			@Override
-			public String apply(ParsedMethod pm) {
-				return PKG_PREFIX + pm.getGeneratedClassName();
-			}
-		});
-		ctx.put("endpoints", endpoints);
-		generateFromTemplate(ve, ctx, PKG_PREFIX + "EndpointContainer");
-	}
-
 	private void generateAssetInfo(VelocityEngine ve, List<AssetFile> assetFiles) {
 		VelocityContext ctx = new VelocityContext();
 		ctx.put("assetFiles", assetFiles);
-		generateFromTemplate(ve, ctx, PKG_PREFIX + "AssetInfo");
+		generateFromTemplate(ve, ctx, PKG_PREFIX + "MyAssetInfo");
 	}
 
 	private void generateFromTemplate(VelocityEngine ve, VelocityContext ctx, String classToGenerate) {
@@ -121,7 +109,10 @@ public class MyCodeGenerator extends ProcessingEnvAware {
 		Template t = ve.getTemplate(templateName);
 		Writer w = null;
 		try {
-			OutputStream os = getProcessingEnv().getFiler().createSourceFile(classToGenerate).openOutputStream();
+			OutputStream os = null;
+			JavaFileObject sourceFile = getProcessingEnv().getFiler().createSourceFile(classToGenerate);
+			updateSourceCodePath(sourceFile, classToGenerate);
+			os = sourceFile.openOutputStream();
 			w = new PrintWriter(os);
 		} catch (IOException e) {
 			error("Cannot create file: " + e.toString());
@@ -134,54 +125,14 @@ public class MyCodeGenerator extends ProcessingEnvAware {
 		}
 	}
 
-	private String classNameFromResourcePath(String resourePath) {
-		String noTrailingSlash = resourePath.substring(1);
-		String noJava = noTrailingSlash.replace(".java", "");
-		return noJava.replaceAll("/", ".");
-	}
-
-	/**
-	 * @return absolute path of directory where files was saved
-	 */
-	private String copySourcesFromResources() {
-		String prefix = "/io/myweb/";
-		String[] files = new String[]{
-				prefix + "AssetEndpoint.java",
-				prefix + "Endpoint.java",
-				prefix + "FormalParam.java",
-				prefix + "ActualParam.java",
-				prefix + "RequestTask.java",
-				prefix + "ResponseWriter.java",
-				prefix + "Server.java",
-				prefix + "Service.java",
-				prefix + "ThreadFactories.java",
-		};
-		String basePath = "";
-		for (String file : files) {
-			basePath = copySourceFromResources(file);
-		}
-		return basePath;
-	}
-
-	/**
-	 * @param resourcePath
-	 * @return absolute path of directory where file was saved
-	 */
-	private String copySourceFromResources(String resourcePath) {
-		try {
-			String className = classNameFromResourcePath(resourcePath);
-			InputStream is = this.getClass().getResourceAsStream(resourcePath);
-			JavaFileObject sourceFile = getProcessingEnv().getFiler().createSourceFile(className);
+	private void updateSourceCodePath(JavaFileObject sourceFile, String classToGenerate) {
+		if (sourceCodePath.length()==0) {
 			String fullPath = sourceFile.toUri().getPath();
-			String basePath = fullPath.replace(resourcePath, "");
-			OutputStream os = sourceFile.openOutputStream();
-			ByteStreams.copy(is, os);
-			os.close();
-			is.close();
-			return basePath;
-		} catch (IOException e) {
-			warning(e.toString());
+			fullPath = fullPath.substring(0,fullPath.lastIndexOf("/"));
+			String resourcePath = classToGenerate.replace(".","/");
+			resourcePath = resourcePath.substring(0,resourcePath.lastIndexOf("/"));
+			sourceCodePath = fullPath.replace(resourcePath, "");
+			System.out.println("Source code path: "+sourceCodePath);
 		}
-		return "";
 	}
 }

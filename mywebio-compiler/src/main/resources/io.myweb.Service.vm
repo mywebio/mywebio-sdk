@@ -1,0 +1,63 @@
+#* @vtlvariable name="endpoints" type="java.util.List<io.myweb.processor.model.ParsedMethod>" *#
+package io.myweb;
+
+import android.content.Intent;
+import android.os.IBinder;
+import android.util.Log;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import io.myweb.http.Method;
+
+public class Service extends android.app.Service {
+
+	public static final String TAG = Service.class.getName();
+
+	private static final Map<Endpoint.MethodAndUri, Class> endpointRegistry;
+
+	static {
+		HashMap<Endpoint.MethodAndUri, Class> reg = new HashMap<Endpoint.MethodAndUri, Class>();
+		reg.put(new Endpoint.MethodAndUri(Method.GET, AppInfoEndpoint.SERVICES_JSON), AppInfoEndpoint.class);
+		reg.put(new Endpoint.MethodAndUri(Method.GET, "/"), AssetEndpoint.class);
+#foreach( $parsedMethod in $endpoints )
+		reg.put(new Endpoint.MethodAndUri(Method.$parsedMethod.httpMethod, "$parsedMethod.httpUri"), ${parsedMethod.generatedClassName}.class);
+#end
+		endpointRegistry = Collections.unmodifiableMap(reg);
+	}
+
+	private ExecutorService executorService;
+
+	private Server server;
+
+	@Override
+	public int onStartCommand(Intent intent, int flags, int startId) {
+		Log.d(TAG, "Received intent from server");
+		return android.app.Service.START_NOT_STICKY;
+	}
+
+	@Override
+	public void onCreate() {
+		super.onCreate();
+		Log.d(TAG, "Creating web service");
+		executorService = Executors.newSingleThreadExecutor(ThreadFactories.newServerThreadFactory());
+		server = new Server(this, endpointRegistry, new MyAssetInfo());
+		executorService.submit(server);
+	}
+
+	@Override
+	public void onDestroy() {
+		Log.d(TAG, "Destroying web service");
+		server.shutdown();
+		executorService.shutdown();
+	}
+
+	@Override
+	public IBinder onBind(Intent intent) {
+		return null;
+	}
+
+}

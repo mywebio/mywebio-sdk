@@ -1,7 +1,6 @@
 package io.myweb;
 
 import android.content.Context;
-import android.net.LocalSocket;
 import android.util.Log;
 
 import org.json.JSONException;
@@ -14,6 +13,7 @@ import io.myweb.http.Headers;
 import io.myweb.http.Method;
 import io.myweb.http.Request;
 
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.HashMap;
@@ -23,16 +23,38 @@ import java.util.regex.Pattern;
 
 public abstract class Endpoint {
 
-	private Context context;
+	public static class MethodAndUri {
+		private final Method method;
+		private final String uri;
 
-	public Endpoint(Context context) {
-		this.context = context;
+		public MethodAndUri(Method method, String uri) {
+			this.method = method;
+			this.uri = uri;
+		}
+
+		public Method getMethod() {
+			return method;
+		}
+
+		public String getUri() {
+			return uri;
+		}
 	}
 
-	public abstract void invoke(String uri, Request request, LocalSocket localSocket) throws Exception;
+	private Server server;
+
+	public Endpoint(Server server) {
+		this.server = server;
+	}
+
+	public abstract void invoke(String uri, Request request, OutputStream os) throws Exception;
+
+	protected Server getServer() {
+		return server;
+	}
 
 	protected Context getContext() {
-		return context;
+		return server.getContext();
 	}
 
 	protected abstract Pattern getPattern();

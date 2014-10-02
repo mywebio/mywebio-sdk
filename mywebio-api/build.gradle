@@ -15,6 +15,7 @@ buildscript {
 
 dependencies {
     compile project(':mywebio-api-java')
+	compile project(':mywebio-api-android')
 }
 
 android {

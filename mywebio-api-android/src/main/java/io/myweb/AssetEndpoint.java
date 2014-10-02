@@ -2,8 +2,6 @@ package io.myweb;
 
 import android.content.Context;
 import android.content.res.AssetManager;
-import android.net.LocalSocket;
-import android.util.Log;
 
 import io.myweb.http.Method;
 import io.myweb.http.MimeTypes;
@@ -17,8 +15,8 @@ public class AssetEndpoint extends Endpoint {
 
 	public static final String MYWEB_ASSETS_DIR = "myweb";
 
-	public AssetEndpoint(Context context) {
-		super(context);
+	public AssetEndpoint(Server srv) {
+		super(srv);
 	}
 
 	@Override
@@ -38,15 +36,15 @@ public class AssetEndpoint extends Endpoint {
 
 	@Override
 	public boolean match(Method method, String uri) {
-		Log.d("AssetEndpoint", "trying to match: " + uri);
+//		Log.d("AssetEndpoint", "trying to match: " + uri);
 		if (Method.GET == method) {
 			AssetManager assetManager = getContext().getAssets();
 			try {
 				assetManager.open(MYWEB_ASSETS_DIR + uri).close();
-				Log.d("AssetEndpoint", "matched: " + uri);
+//				Log.d("AssetEndpoint", "matched: " + uri);
 				return true;
 			} catch (IOException e) {
-				Log.d("AssetEndpoint", "not matched: " + uri + " (" + e + ")");
+//				Log.d("AssetEndpoint", "not matched: " + uri + " (" + e + ")");
 				return false;
 			}
 		}
@@ -54,16 +52,16 @@ public class AssetEndpoint extends Endpoint {
 	}
 
 	@Override
-	public void invoke(String uri, Request request, LocalSocket localSocket) {
+	public void invoke(String uri, Request request, OutputStream os) {
 		AssetManager assetManager = getContext().getAssets();
 		try {
-			ResponseWriter rw = new ResponseWriter(MimeTypes.getMimeType(uri), localSocket.getOutputStream());
+			ResponseWriter rw = new ResponseWriter(MimeTypes.getMimeType(uri), os);
 			InputStream is = assetManager.open(MYWEB_ASSETS_DIR + uri);
-			long length = AssetInfo.getAssetLengths().get(uri);
+			long length = getServer().getAssetLength(uri);
 			rw.write(Response.ok().withId(request.getId()).withLength(length).withBody(is));
 			rw.close();
 		} catch (IOException e) {
-			Log.e("AssetEndpoint", "error during invoke", e);
+//			Log.e("AssetEndpoint", "error during invoke", e);
 		}
 	}
 }
