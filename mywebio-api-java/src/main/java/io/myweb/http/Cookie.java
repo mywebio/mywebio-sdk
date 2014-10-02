@@ -77,7 +77,7 @@ public class Cookie {
 	}
 
 	public static Cookie parse(String cookieStr) {
-		String[] nv = cookieStr.split("=");
+		String[] nv = cookieStr.split("=", 2);
 		if (nv.length == 2) {
 			String value = nv[1].trim();
 			String decodedVal = null;
