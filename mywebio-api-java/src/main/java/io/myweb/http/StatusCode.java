@@ -48,6 +48,10 @@ public enum StatusCode {
 		this.message = message;
 	}
 
+	public String getMessage() {
+		return message;
+	}
+
 	@Override
 	public String toString() {
 		return "HTTP/1.1 " + code + " " + message + "\r\n";
