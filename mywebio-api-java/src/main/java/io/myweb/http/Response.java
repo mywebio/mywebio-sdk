@@ -4,10 +4,8 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
 
 public class Response {
@@ -35,6 +33,10 @@ public class Response {
 
 	public static Response notFound() {
 		return Response.newWithStatusCode(StatusCode.NOT_FOUND).withClose();
+	}
+
+	public static Response error(HttpException ex) {
+		return Response.newWithStatusCode(ex.getStatusCode()).withClose();
 	}
 
 	public static Response methodNotAllowed() {

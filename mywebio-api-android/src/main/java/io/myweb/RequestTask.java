@@ -25,23 +25,11 @@ public class RequestTask implements Runnable {
 	}
 
 	private static final int BUFFER_SIZE = 512;
-	//	private static final int REQUEST_ID_HEADER_LENGTH = 37; // 36 characters of UUID + 1 character "\n"
-	private static final String FILE_NOT_FOUND = "File %s not found";
 
-	private void writeNotFoundResponse(String requestId, String fileName) {
+	private void writeErrorResponse(String requestId, HttpException ex) {
 		try {
 			ResponseWriter rw = new ResponseWriter(MimeTypes.MIME_TEXT_HTML, socket.getOutputStream());
-			rw.write(Response.notFound().withId(requestId).withBody(String.format(FILE_NOT_FOUND, fileName)));
-			rw.close();
-		} catch (IOException err) {
-			Log.e(TAG, "Error while writing not found response " + err, err);
-		}
-	}
-
-	private void writeErrorResponse(String requestId, String msg) {
-		try {
-			ResponseWriter rw = new ResponseWriter(MimeTypes.MIME_TEXT_HTML, socket.getOutputStream());
-			rw.write(Response.internalError().withId(requestId).withBody(preformatted(msg)));
+			rw.write(Response.error(ex).withId(requestId).withBody(preformatted(Log.getStackTraceString(ex))));
 			rw.close();
 		} catch (IOException err) {
 			Log.e(TAG, "Error while writing error response " + err, err);
@@ -57,14 +45,18 @@ public class RequestTask implements Runnable {
 		String requestId = null;
 		boolean keepAlive = true;
 		try {
-			PushbackInputStream inputStream = new PushbackInputStream(socket.getInputStream(),BUFFER_SIZE);
+			PushbackInputStream inputStream;
+			try {
+				inputStream = new PushbackInputStream(socket.getInputStream(), BUFFER_SIZE);
+			} catch (IOException e) {
+				throw new HttpBadRequestException(e.getMessage(), e);
+			}
 			while (keepAlive) {
-				Request request = null;
+				Request request;
 				try {
 					request = readRequest(inputStream);
 				} catch (IOException e) {
-					Log.d(TAG, e.getMessage());
-					break;
+					throw new HttpBadRequestException(e.getMessage(), e);
 				}
 				if (request != null) {
 					requestId = request.getId();
@@ -73,11 +65,11 @@ public class RequestTask implements Runnable {
 					keepAlive = request.isKeptAlive();
 				} else keepAlive = false;
 			}
-		} catch (ClassNotFoundException e) {
-			writeNotFoundResponse(requestId, e.getMessage());
-		} catch (Exception e) {
-			Log.e(TAG, "Internal error " + e, e);
-			writeErrorResponse(requestId, Log.getStackTraceString(e));
+		} catch (HttpException e) {
+			Log.e(TAG, "Error " + e, e);
+			writeErrorResponse(requestId, e);
+		} catch (Throwable t) {
+			writeErrorResponse(requestId, new HttpInternalErrorException(t.getMessage(), t));
 		} finally {
 			closeConnection();
 		}
@@ -121,7 +113,7 @@ public class RequestTask implements Runnable {
 		}
 	}
 
-	public void findAndInvokeEndpoint(final Request request) throws Exception {
+	public void findAndInvokeEndpoint(final Request request) throws HttpException, IOException {
 		String uri = request.getURI().toString();
 		String effectiveUri = uri;
 		Endpoint endpoint = findEndpoint(request.getMethod(), effectiveUri);
@@ -135,8 +127,12 @@ public class RequestTask implements Runnable {
 			endpoint = findEndpoint(request.getMethod(), effectiveUri);
 		}
 		if (endpoint == null)
-			throw new ClassNotFoundException("Endpoint class for " + uri + " not found!");
-		endpoint.invoke(effectiveUri, request, socket.getOutputStream());
+			throw new HttpNotFoundException("Not found " + uri);
+		else {
+			ResponseWriter rw = new ResponseWriter(endpoint.produces(), socket.getOutputStream());
+			endpoint.invoke(effectiveUri, request, rw);
+			rw.close();
+		}
 	}
 
 	private Endpoint findEndpoint(Method method, String uri) {

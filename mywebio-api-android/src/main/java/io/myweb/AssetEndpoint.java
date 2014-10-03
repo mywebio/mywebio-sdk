@@ -1,10 +1,8 @@
 package io.myweb;
 
-import android.content.Context;
 import android.content.res.AssetManager;
 
 import io.myweb.http.Method;
-import io.myweb.http.MimeTypes;
 import io.myweb.http.Request;
 import io.myweb.http.Response;
 
@@ -52,16 +50,10 @@ public class AssetEndpoint extends Endpoint {
 	}
 
 	@Override
-	public void invoke(String uri, Request request, OutputStream os) {
+	public void invoke(String uri, Request request, ResponseWriter rw) throws IOException {
 		AssetManager assetManager = getContext().getAssets();
-		try {
-			ResponseWriter rw = new ResponseWriter(MimeTypes.getMimeType(uri), os);
-			InputStream is = assetManager.open(MYWEB_ASSETS_DIR + uri);
-			long length = getServer().getAssetLength(uri);
-			rw.write(Response.ok().withId(request.getId()).withLength(length).withBody(is));
-			rw.close();
-		} catch (IOException e) {
-//			Log.e("AssetEndpoint", "error during invoke", e);
-		}
+		InputStream is = assetManager.open(MYWEB_ASSETS_DIR + uri);
+		long length = getServer().getAssetLength(uri);
+		rw.write(Response.ok().withId(request.getId()).withContentTypeFrom(uri).withLength(length).withBody(is));
 	}
 }

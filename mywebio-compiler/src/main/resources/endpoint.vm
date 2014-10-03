@@ -26,6 +26,11 @@ public class $parsedMethod.generatedClassName extends Endpoint {
         return "$parsedMethod.httpUri";
     }
 
+    @Override
+    public String produces() {
+        return "${parsedMethod.produces}";
+    }
+
     private FormalParam[] formalParams() {
         FormalParam[] formalParams =  new FormalParam[$parsedMethod.parsedParams.size()];
 #foreach( $param in $parsedMethod.parsedParams )
@@ -60,11 +65,15 @@ public class $parsedMethod.generatedClassName extends Endpoint {
     }
 
 	@Override
-	public void invoke(String uri, Request request, OutputStream os) throws Exception {
-		ActualParam[] ap = actualParams(uri, request, formalParams(), defaulQueryParams(), groupMap(), getContext());
-		ResponseWriter rw = new ResponseWriter("${parsedMethod.produces}", os);
-		final ${parsedMethod.destMethodRetType} respFromUserCode = new ${parsedMethod.destClass}().${parsedMethod.destMethod}($parsedMethod.paramsJavaSrc);
-		rw.write(request.getId(), respFromUserCode);
-		rw.close();
+	public void invoke(String uri, Request request, ResponseWriter rw) throws HttpException, IOException {
+		try {
+			ActualParam[] ap = actualParams(uri, request, formalParams(), defaulQueryParams(), groupMap(), getContext());
+			final ${parsedMethod.destMethodRetType} respFromUserCode = new ${parsedMethod.destClass}().${parsedMethod.destMethod}($parsedMethod.paramsJavaSrc);
+			rw.write(request.getId(), respFromUserCode);
+		} catch (Throwable e) {
+			if (e instanceof HttpException) throw (HttpException) e;
+			if (e instanceof IOException) throw (IOException) e;
+			throw new HttpInternalErrorException(e.getMessage(), e); // wrap up
+		}
 	}
 }

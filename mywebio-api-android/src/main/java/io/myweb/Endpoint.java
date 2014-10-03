@@ -7,16 +7,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
-import io.myweb.http.Cookie;
-import io.myweb.http.Cookies;
-import io.myweb.http.Headers;
-import io.myweb.http.Method;
-import io.myweb.http.Request;
+import io.myweb.http.*;
 
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.util.HashMap;
+import java.io.IOException;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -47,7 +40,11 @@ public abstract class Endpoint {
 		this.server = server;
 	}
 
-	public abstract void invoke(String uri, Request request, OutputStream os) throws Exception;
+	public String produces() {
+		return null;
+	}
+
+	public abstract void invoke(String uri, Request request, ResponseWriter rw) throws HttpException, IOException;
 
 	protected Server getServer() {
 		return server;
@@ -79,7 +76,7 @@ public abstract class Endpoint {
 
 	protected abstract Method httpMethod();
 
-	protected ActualParam[] actualParams(String uri, Request request, FormalParam[] formalParams, Map<String, String> defaultQueryParams, Map<String, Integer> groupMap, Context ctx) throws Exception {
+	protected ActualParam[] actualParams(String uri, Request request, FormalParam[] formalParams, Map<String, String> defaultQueryParams, Map<String, Integer> groupMap, Context ctx) throws HttpException {
 		String urlNoQueryParams = urlNoQueryParams(uri);
 		Map<String, String> paramsMap = request.getParameterMap();
 		Matcher m = matcher(urlNoQueryParams);
@@ -87,7 +84,12 @@ public abstract class Endpoint {
 		if (m.matches()) {
 			for (FormalParam fp : formalParams) {
 				int fpId = fp.getId();
-				Class<?> fpClazz = classForName(fp.getTypeName());
+				Class<?> fpClazz;
+				try {
+					fpClazz = classForName(fp.getTypeName());
+				} catch (ClassNotFoundException e) {
+					throw new HttpServiceUnavailableException(e.getMessage(), e);
+				}
 				String fpName = fp.getName();
 				if (groupMap.containsKey(fpName)) {
 					int urlGroupIdx = groupMap.get(fpName);
@@ -116,7 +118,7 @@ public abstract class Endpoint {
 				}
 			}
 		} else {
-			throw new Exception("couldn't match URI: '" + uri + "' with pattern '" + getPattern() + "' (BTW, this shouldn't happen...)");
+			throw new HttpServiceUnavailableException("couldn't match URI: '" + uri + "' with pattern '" + getPattern() + "' (BTW, this shouldn't happen...)");
 		}
 		return actualParams;
 	}
