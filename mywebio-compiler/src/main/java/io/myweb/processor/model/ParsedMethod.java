@@ -41,8 +41,11 @@ public class ParsedMethod {
 	private final Method httpMethod;
 	private final String httpUri;
 	private final String produces;
+	private final ServiceParam service;
 
-	public ParsedMethod(String destClass, String destMethod, String destMethodRetType, List<ParsedParam> params, Method httpMethod, String httpUri, String produces) {
+	public ParsedMethod(String destClass, String destMethod, String destMethodRetType,
+	                    List<ParsedParam> params, Method httpMethod, String httpUri,
+	                    String produces, ServiceParam service) {
 		this.destClass = destClass;
 		this.destMethod = destMethod;
 		this.destMethodRetType = destMethodRetType;
@@ -50,6 +53,7 @@ public class ParsedMethod {
 		this.httpMethod = httpMethod;
 		this.httpUri = httpUri;
 		this.produces = produces;
+		this.service = service;
 	}
 
 	public String getDestClassSimple() {
@@ -82,6 +86,18 @@ public class ParsedMethod {
 
 	public String getHttpUri() {
 		return httpUri;
+	}
+
+	public String getProduces() {
+		return produces;
+	}
+
+	public ServiceParam getService() {
+		return service;
+	}
+
+	public boolean isServicePresent() {
+		return service != null;
 	}
 
 	public GeneratedPattern getGeneratedPattern() {
@@ -185,10 +201,6 @@ public class ParsedMethod {
 		return pattern;
 	}
 
-	public String getProduces() {
-		return produces;
-	}
-
 	public String getParamsJavaSrc() {
 		String[] p = new String[params.size()];
 		int i = 0;
@@ -210,4 +222,5 @@ public class ParsedMethod {
 		if ("boolean".equals(typeName)) return Boolean.class.getName();
 		return typeName;
 	}
+
 }

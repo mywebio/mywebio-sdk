@@ -51,7 +51,6 @@ public class MyAnnotationProcessor extends AbstractProcessor {
 		try {
 			List<Provider> providers = new LinkedList<Provider>();
 			for (TypeElement annotation : annotations) {
-//				System.out.println("Processing annotation: " + annotation.getQualifiedName());
 				for (Element el : roundEnv.getElementsAnnotatedWith(annotation)) {
 					if (el.getKind().equals(ElementKind.CLASS)) {
 						processProviders(annotation, (TypeElement) el, providers);
@@ -69,11 +68,12 @@ public class MyAnnotationProcessor extends AbstractProcessor {
 			mCodeGenerator.generateCode(parsedMethods, providers);
 			return true;
 		} catch (Exception e) {
-			error("error(s) found - details below: " + e);
+			error("error(s) found - details above: " + e.getMessage());
 		}
 		return false;
 	}
 
+	@SuppressWarnings("unchecked")
 	private void processProviders(TypeElement annotation, TypeElement ce, List<Provider> providers) {
 		if (!ContentProvider.class.getName().equals(annotation.getQualifiedName().toString()))
 			return;

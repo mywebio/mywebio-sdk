@@ -44,8 +44,7 @@ public class CaptureCameraActivity extends Activity implements LocalService.Conn
 			}
 		});
 
-		streamingConnection = StreamingService.createConnection(this).withConnectionListener(this);
-		streamingConnection.open();
+		streamingConnection = StreamingService.connection(this).withListener(this);
 	}
 
 	@Override

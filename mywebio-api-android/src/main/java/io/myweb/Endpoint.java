@@ -50,6 +50,14 @@ public abstract class Endpoint {
 		return server;
 	}
 
+	protected String getServiceName() { // overriden in subclasses
+		return null;
+	}
+
+	protected Object getServiceObject() { // overriden in subclasses
+		return null;
+	}
+
 	protected Context getContext() {
 		return server.getContext();
 	}
@@ -91,7 +99,9 @@ public abstract class Endpoint {
 					throw new HttpServiceUnavailableException(e.getMessage(), e);
 				}
 				String fpName = fp.getName();
-				if (groupMap.containsKey(fpName)) {
+				if (fpName.equals(getServiceName())) {
+					actualParams[fpId] = new ActualParam(fpClazz, getServiceObject());
+				} else if (groupMap.containsKey(fpName)) {
 					int urlGroupIdx = groupMap.get(fpName);
 					String val = m.group(urlGroupIdx);
 					Object convertedVal = convert(val, fp.getTypeName());

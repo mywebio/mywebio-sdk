@@ -1,15 +1,22 @@
 package io.myweb;
 
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.net.LocalServerSocket;
 import android.net.LocalSocket;
+import android.os.IBinder;
 import android.util.Log;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -33,6 +40,82 @@ public class Server implements Runnable {
 
 	private final List<? extends Endpoint> endpoints;
 
+	private final Map<String, InternalServiceConnection> serviceMap;
+
+	private class InternalServiceConnection implements ServiceConnection {
+		private static final int TIMEOUT = 60000;
+		private final Context context;
+		private CountDownLatch serviceConnected = new CountDownLatch(1);
+		private volatile IBinder service;
+		private InternalCancelableTask unbindTask;
+
+		private class InternalCancelableTask implements Runnable {
+			private boolean canceled = false;
+
+			@Override
+			public void run() {
+				synchronized (this) {
+					try {
+						wait(TIMEOUT);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+					if (!canceled) context.unbindService(InternalServiceConnection.this);
+				}
+			}
+
+			public synchronized void cancel() {
+				canceled = true;
+				notify();
+			}
+		}
+
+		public InternalServiceConnection(Context ctx, Class<?> c) {
+			this(ctx, new ComponentName(ctx.getPackageName(), c.getName()));
+		}
+
+		public InternalServiceConnection(Context ctx, ComponentName name) {
+			context = ctx;
+			serviceMap.put(name.getClassName(), this);
+			Intent intent = new Intent();
+			intent.setComponent(name);
+			context.bindService(intent, this, Context.BIND_AUTO_CREATE);
+		}
+
+		private void scheduleUnbindTask() {
+			if (unbindTask!=null) unbindTask.cancel();
+			unbindTask = new InternalCancelableTask();
+			workerExecutorService.submit(unbindTask);
+		}
+
+		@Override
+		public void onServiceConnected(ComponentName name, IBinder service) {
+			this.service = service;
+			serviceConnected.countDown();
+		}
+
+		@Override
+		public void onServiceDisconnected(ComponentName name) {
+			service = null;
+			serviceMap.remove(name.getClassName());
+			serviceConnected.countDown();
+		}
+
+		public Object getServiceObject() {
+			try {
+				serviceConnected.await();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			if (service != null) {
+				scheduleUnbindTask();
+				if (service instanceof LocalService.Binder)
+					return ((LocalService.Binder) service).getService();
+			}
+			return service;
+		}
+	}
+
 	public Server(Context context, Map<Endpoint.MethodAndUri, Class> registry, AssetLengthInfo info) {
 		this.context = context;
 		this.endpointRegistry = registry;
@@ -40,6 +123,7 @@ public class Server implements Runnable {
 		this.endpoints = createEndpoints();
 		this.workerExecutorService = new ThreadPoolExecutor(2, 16, 60, TimeUnit.SECONDS,
 				new SynchronousQueue<Runnable>(), ThreadFactories.newWorkerThreadFactory());
+		serviceMap = Collections.synchronizedMap(new HashMap<String, InternalServiceConnection>());
 	}
 
 	public Context getContext() {
@@ -54,6 +138,11 @@ public class Server implements Runnable {
 		return endpointRegistry;
 	}
 
+	public Object bindService(ComponentName name) {
+		InternalServiceConnection connection = serviceMap.get(name.getClassName());
+		if (connection == null) connection = new InternalServiceConnection(context, name);
+		return connection.getServiceObject(); // awaits connection
+	}
 
 	private List<? extends Endpoint> createEndpoints() {
 		List<Endpoint> list = new LinkedList<Endpoint>();

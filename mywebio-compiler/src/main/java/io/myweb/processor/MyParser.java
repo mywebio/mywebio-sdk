@@ -5,6 +5,7 @@ import io.myweb.http.Method;
 import io.myweb.http.MimeTypes;
 import io.myweb.processor.model.ParsedMethod;
 import io.myweb.processor.model.ParsedParam;
+import io.myweb.processor.model.ServiceParam;
 
 import javax.annotation.processing.Messager;
 import javax.lang.model.element.AnnotationMirror;
@@ -24,41 +25,59 @@ public class MyParser extends AnnotationMessagerAware {
 		this.myValidator = myValidator;
 	}
 
-	public ParsedMethod parse(ExecutableElement ee) {
+	public ParsedMethod parse(ExecutableElement ee) throws Exception {
         List<ParsedParam> parasedParams = extractMethodParams(ee);
         return extractParsedMethod(ee, parasedParams);
 	}
 
-    private ParsedMethod extractParsedMethod(ExecutableElement ee, List<ParsedParam> params) {
+    private ParsedMethod extractParsedMethod(ExecutableElement ee, List<ParsedParam> params) throws Exception {
         String destClass = ee.getEnclosingElement().toString();
         String destMethod = ee.getSimpleName().toString();
         String destMethodRetType = ee.getReturnType().toString();
-        Method httpMethod = Method.GET;
+        Method httpMethod = null;
         String httpUri = "/";
         String produces = MimeTypes.MIME_TEXT_PLAIN;
+	    ServiceParam service = null;
         List<? extends AnnotationMirror> annotationMirrors = ee.getAnnotationMirrors();
         for (AnnotationMirror am : annotationMirrors) {
-            // TODO verify if annotations aren't duplicated
-            httpMethod = extractHttpMethod(am);
-            httpUri = validateAndExtractHttpUri(am, httpMethod, destMethodRetType, destMethod, params, ee);
+	        Method m = extractHttpMethod(am);
+	        if (httpMethod==null) httpMethod = m;
+	        else if (m!=null) throw new IllegalArgumentException("Duplicate annotations @"+httpMethod.toString()+" and @"+m.toString()+" for method "+destClass+"."+destMethod+"()");
+	        if (httpMethod != null) httpUri = validateAndExtractHttpUri(am, httpMethod, destMethodRetType, destMethod, params, ee);
             produces = extractProducesAnnotation(am);
+	        if (service==null) service = validateAndExtractServiceAnnotation(params, am, ee);
         }
-        return new ParsedMethod(destClass, destMethod, destMethodRetType, params, httpMethod, httpUri, produces);
+        return new ParsedMethod(destClass, destMethod, destMethodRetType, params, httpMethod, httpUri, produces, service);
     }
 
-    private String validateAndExtractHttpUri(AnnotationMirror am, Method httpMethod, String destMethodRetType, String destMethod, List<ParsedParam> params, ExecutableElement ee) {
+	private ServiceParam validateAndExtractServiceAnnotation(List<ParsedParam> params, AnnotationMirror am, ExecutableElement ee) {
+		ServiceParam service = null;
+		String annotationName = am.getAnnotationType().toString();
+		if (BindService.class.getName().equals(annotationName)) {
+			String value = getAnnotationValue(am, "value");
+			service = myValidator.validateBindServiceAnnotation(value, params, ee, am);
+		}
+		return service;
+	}
+
+	private String validateAndExtractHttpUri(AnnotationMirror am, Method httpMethod, String destMethodRetType, String destMethod, List<ParsedParam> params, ExecutableElement ee) {
         String annotationName = am.getAnnotationType().toString();
         String httpUri = "/";
         if (isHttpMethodAnnotation(annotationName)) {
-            for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry : am.getElementValues().entrySet()) {
-                if ("value".equals(entry.getKey().getSimpleName().toString())) {
-                    httpUri = entry.getValue().getValue().toString();
-                    myValidator.validateAnnotation(httpMethod, destMethodRetType, destMethod, params, httpUri, ee, am);
-                }
-            }
+            httpUri = getAnnotationValue (am, "value");
+            myValidator.validateAnnotation(httpMethod, destMethodRetType, destMethod, params, httpUri, ee, am);
         }
         return httpUri;
     }
+
+	private String getAnnotationValue(AnnotationMirror am, String name) {
+		for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry : am.getElementValues().entrySet()) {
+			if (name.equals(entry.getKey().getSimpleName().toString())) {
+				return entry.getValue().getValue().toString();
+			}
+		}
+		return null;
+	}
 
     private boolean isHttpMethodAnnotation(String annotationName) {
         return GET.class.getName().equals(annotationName) || POST.class.getName().equals(annotationName)
@@ -67,7 +86,7 @@ public class MyParser extends AnnotationMessagerAware {
 
     private Method extractHttpMethod(AnnotationMirror am) {
         String annotationName = am.getAnnotationType().toString();
-        Method httpMethod = Method.GET;
+        Method httpMethod = null;
         if (isHttpMethodAnnotation(annotationName)) {
             httpMethod = Method.findByName(annotationName.substring(annotationName.lastIndexOf(".") + 1).trim());
         }

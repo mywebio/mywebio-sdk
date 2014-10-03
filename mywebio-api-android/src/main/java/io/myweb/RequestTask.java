@@ -60,7 +60,7 @@ public class RequestTask implements Runnable {
 				}
 				if (request != null) {
 					requestId = request.getId();
-					findAndInvokeEndpoint(request);
+					processRequest(request);
 					Log.i(TAG, "Sent response to Web IO Server");
 					keepAlive = request.isKeptAlive();
 				} else keepAlive = false;
@@ -113,7 +113,7 @@ public class RequestTask implements Runnable {
 		}
 	}
 
-	public void findAndInvokeEndpoint(final Request request) throws HttpException, IOException {
+	private void processRequest(final Request request) throws HttpException, IOException {
 		String uri = request.getURI().toString();
 		String effectiveUri = uri;
 		Endpoint endpoint = findEndpoint(request.getMethod(), effectiveUri);

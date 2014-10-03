@@ -32,7 +32,7 @@ public class StreamingService extends LocalService<Streaming> implements Streami
 		streaming = false;
 	}
 
-	public static Connection<Streaming> createConnection(Context ctx) {
+	public static Connection<Streaming> connection(Context ctx) {
 		return new Connection<Streaming>(ctx, StreamingService.class);
 	}
 
@@ -129,7 +129,7 @@ public class StreamingService extends LocalService<Streaming> implements Streami
 
 		// Step 2: Set source
 		mediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
-		mediaRecorder.setAudioSource(MediaRecorder.AudioSource.DEFAULT);
+		mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
 
 		// Step 3: Set a CamcorderProfile (requires API Level 8 or higher)
 		CamcorderProfile profile = CamcorderProfile.get(CamcorderProfile.QUALITY_720P);

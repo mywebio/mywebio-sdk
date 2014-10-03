@@ -1,6 +1,8 @@
 package io.myweb.processor;
 
 import javax.annotation.processing.Messager;
+import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.Element;
 import javax.tools.Diagnostic;
 
 public class AnnotationMessagerAware {
@@ -27,7 +29,15 @@ public class AnnotationMessagerAware {
 		messager.printMessage(Diagnostic.Kind.ERROR, msg);
 	}
 
+	protected void error(String msg, Element ee, AnnotationMirror am) {
+		messager.printMessage(Diagnostic.Kind.ERROR, msg, ee, am);
+	}
+
 	protected void warning(String msg) {
 		messager.printMessage(Diagnostic.Kind.WARNING, msg);
+	}
+
+	protected void warning(String msg, Element ee, AnnotationMirror am) {
+		messager.printMessage(Diagnostic.Kind.WARNING, msg, ee, am);
 	}
 }

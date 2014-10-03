@@ -8,6 +8,8 @@ import com.google.common.base.Predicate;
 import io.myweb.http.Method;
 import io.myweb.http.Request;
 import io.myweb.processor.model.ParsedParam;
+import io.myweb.processor.model.ServiceParam;
+
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -15,7 +17,6 @@ import org.json.JSONObject;
 import javax.annotation.processing.Messager;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.ExecutableElement;
-import javax.tools.Diagnostic;
 import java.util.Collection;
 import java.util.List;
 
@@ -58,11 +59,54 @@ public class MyValidator extends AnnotationMessagerAware {
 			}
 		}));
 		if (paramsInAnnotation != paramsInMethod) {
-			getMessager().printMessage(Diagnostic.Kind.ERROR, "This annotation requires different set of parameters for the method (details below)", ee, am);
-			String errorMsg = buildErrorMsg(httpMethod, httpUri, destMethodRetType, destMethod, params);
-			getMessager().printMessage(Diagnostic.Kind.ERROR, errorMsg);
+			error("This annotation requires different set of parameters for the method (details below)", ee, am);
+			error(buildErrorMsg(httpMethod, httpUri, destMethodRetType, destMethod, params));
 			throw new RuntimeException();
 		}
+	}
+
+	public ServiceParam validateBindServiceAnnotation(String value, List<ParsedParam> params, ExecutableElement ee, AnnotationMirror am) {
+		try {
+			int idx = value.indexOf(":");
+			if (idx < 0) {
+				throw new RuntimeException("Parameter name prefixed by colon (e.g. :service) is required for @BindService annotation");
+			}
+			String componentName = value.substring(0, idx).trim();
+			if (componentName.contains("/")) { // parse
+				String[] parts = componentName.split("/");
+				if (parts.length != 2 || !isPackageName(parts[0]) ||
+						!parts[1].startsWith(".") || !isPackageName(parts[1].substring(1))) {
+					throw new RuntimeException("Invalid service name: " + componentName + ". Name in the form \"package.name/.ClassName\" is required.");
+				}
+			} else if (!isPackageName(componentName)) {
+				throw new RuntimeException("Invalid service class name: " + componentName);
+			}
+			String parameterName = value.substring(idx).trim().substring(1);
+			// check for match in method parameters
+			boolean matched = false;
+			for (ParsedParam p : params) {
+				if (p.getName().equals(parameterName)) {
+					matched = true;
+					break;
+				}
+			}
+			if (!matched) {
+				throw new RuntimeException("@BindService parameter name \"" + parameterName + "\" does not match any parameter names of the method");
+			}
+			return new ServiceParam(parameterName, componentName);
+		} catch (RuntimeException e) {
+			error(e.getMessage(), ee, am);
+			throw e;
+		}
+	}
+
+	private static boolean isPackageName(String name) {
+		String[] parts = name.split(".");
+		for (String part: parts) {
+			if (part.length() == 0) return false;
+			if (!part.matches("[^\\d+]\\w+")) return false;
+		}
+		return true;
 	}
 
 	private String buildErrorMsg(Method httpMethod, String httpUri, String destMethodRetType, String destMethod, List<ParsedParam> params) {

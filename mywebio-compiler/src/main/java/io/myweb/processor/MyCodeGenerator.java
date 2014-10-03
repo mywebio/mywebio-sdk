@@ -132,7 +132,6 @@ public class MyCodeGenerator extends ProcessingEnvAware {
 			String resourcePath = classToGenerate.replace(".","/");
 			resourcePath = resourcePath.substring(0,resourcePath.lastIndexOf("/"));
 			sourceCodePath = fullPath.replace(resourcePath, "");
-			System.out.println("Source code path: "+sourceCodePath);
 		}
 	}
 }

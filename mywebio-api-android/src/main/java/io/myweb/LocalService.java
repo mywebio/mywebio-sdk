@@ -61,6 +61,8 @@ public class LocalService<T> extends Service {
 		public Connection(Context ctx, Class<?> serviceClass) {
 			this.ctx = ctx;
 			this.serviceClass = serviceClass;
+			Intent intent = new Intent(ctx, serviceClass);
+			ctx.bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
 		}
 
 		public void close() {
@@ -73,20 +75,14 @@ public class LocalService<T> extends Service {
 			}
 		}
 
-		public void open() {
-			Intent intent = new Intent(ctx, serviceClass);
-			ctx.bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
-		}
-
 		public T getService() {
 			return service;
 		}
 
-		public Connection<T> withConnectionListener(ConnectionListener<T> listener) {
+		public Connection<T> withListener(ConnectionListener<T> listener) {
 			connListener = listener;
 			return this;
 		}
-
 	}
 
 	private final IBinder localBinder;

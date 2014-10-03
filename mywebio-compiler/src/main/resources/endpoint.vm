@@ -14,55 +14,71 @@ import io.myweb.http.*;
 
 public class $parsedMethod.generatedClassName extends Endpoint {
 
-    public ${parsedMethod.generatedClassName}(Server srv) {
-        super(srv);
-    }
+	public ${parsedMethod.generatedClassName}(Server srv) {
+		super(srv);
+	}
 
-    protected Method httpMethod() {
-        return Method.$parsedMethod.httpMethod;
-    }
+	protected Method httpMethod() {
+		return Method.$parsedMethod.httpMethod;
+	}
 
-    protected String originalPath() {
-        return "$parsedMethod.httpUri";
-    }
+	protected String originalPath() {
+		return "$parsedMethod.httpUri";
+	}
 
-    @Override
-    public String produces() {
-        return "${parsedMethod.produces}";
-    }
+	@Override
+	public String produces() {
+		return "${parsedMethod.produces}";
+	}
 
-    private FormalParam[] formalParams() {
-        FormalParam[] formalParams =  new FormalParam[$parsedMethod.parsedParams.size()];
+	private FormalParam[] formalParams() {
+		FormalParam[] formalParams =  new FormalParam[$parsedMethod.parsedParams.size()];
 #foreach( $param in $parsedMethod.parsedParams )
-        formalParams[$param.id] = new FormalParam($param.id, "$param.typeName", "$param.name");
+		formalParams[$param.id] = new FormalParam($param.id, "$param.typeName", "$param.name");
 #end
-        return formalParams;
-    }
+		return formalParams;
+	}
 
 #set( $generatedPattern = $parsedMethod.generatedPattern )
 
-    private Map<String, Integer> groupMap() {
-        Map<String, Integer> groupMap = new HashMap<String, Integer>();
+	private Map<String, Integer> groupMap() {
+		Map<String, Integer> groupMap = new HashMap<String, Integer>();
 #foreach( $gm in $generatedPattern.groupMappings )
-        groupMap.put("$gm.name", $gm.idx);
+		groupMap.put("$gm.name", $gm.idx);
 #end
-        return groupMap;
-    }
+		return groupMap;
+	}
 
-    private Map<String, String> defaulQueryParams() {
-        Map<String, String> defaultQueryParams = new HashMap<String, String>();
+	private Map<String, String> defaulQueryParams() {
+		Map<String, String> defaultQueryParams = new HashMap<String, String>();
 #foreach( $dqp in $parsedMethod.defaultQueryParams)
-        defaultQueryParams.put("$dqp.name", "$dqp.val");
+		defaultQueryParams.put("$dqp.name", "$dqp.val");
 #end
-        return defaultQueryParams;
-    }
+		return defaultQueryParams;
+	}
 
-    private Pattern pattern = Pattern.compile("$generatedPattern.pattern");
+	private Pattern pattern = Pattern.compile("$generatedPattern.pattern");
 
-    @Override
-    protected Pattern getPattern() {
-        return pattern;
-    }
+	@Override
+	protected Pattern getPattern() {
+	return pattern;
+	}
+
+#if ($parsedMethod.servicePresent)
+	@Override
+	protected String getServiceName() {
+		return "$parsedMethod.service.parameterName";
+	}
+
+	@Override
+	protected Object getServiceObject() {
+#if ($parsedMethod.service.remote)
+		return getServer().bindService(android.content.ComponentName.unflattenFromString("$parsedMethod.service.componentName");
+#else
+		return getServer().bindService(new android.content.ComponentName(getContext(), ${parsedMethod.service.componentName}.class));
+#end
+	}
+#end
 
 	@Override
 	public void invoke(String uri, Request request, ResponseWriter rw) throws HttpException, IOException {
