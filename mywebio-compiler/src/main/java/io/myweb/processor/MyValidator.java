@@ -99,6 +99,11 @@ public class MyValidator extends AnnotationMessagerAware {
 			if (!matched) {
 				throw new RuntimeException("@BindService parameter name \"" + parameterName + "\" does not match any parameter names of the method");
 			}
+			if (!componentName.contains(".")) { // no package
+				String packageName = ee.getEnclosingElement().toString();
+				packageName = packageName.substring(0, packageName.lastIndexOf(".")+1);
+				componentName = packageName + componentName;
+			}
 			return new ServiceParam(parameterName, componentName);
 		} catch (RuntimeException e) {
 			error(e.getMessage(), ee, am);
