@@ -16,13 +16,15 @@ import java.util.regex.Pattern;
 
 public abstract class Endpoint {
 
-	public static class MethodAndUri {
+	public static class Info {
 		private final Method method;
 		private final String uri;
+		private final Class implementingClass;
 
-		public MethodAndUri(Method method, String uri) {
+		public Info(Method method, String uri, Class implementingClass) {
 			this.method = method;
 			this.uri = uri;
+			this.implementingClass = implementingClass;
 		}
 
 		public Method getMethod() {
@@ -31,6 +33,10 @@ public abstract class Endpoint {
 
 		public String getUri() {
 			return uri;
+		}
+
+		public Class getImplementingClass() {
+			return implementingClass;
 		}
 	}
 

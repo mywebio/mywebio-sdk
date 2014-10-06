@@ -47,7 +47,7 @@ public class AppInfoEndpoint extends Endpoint {
 		json.put("id", pkgName());
 		json.put("name", appName());
 		JSONArray resources = new JSONArray();
-		for (MethodAndUri key : getServer().getEndpointRegistry().keySet()) {
+		for (Info key : getServer().getEndpointList()) {
 			JSONObject jsonRes = new JSONObject();
 			jsonRes.put("method", key.getMethod().toString());
 			jsonRes.put("url", key.getUri());

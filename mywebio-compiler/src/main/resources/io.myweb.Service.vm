@@ -6,8 +6,8 @@ import android.os.IBinder;
 import android.util.Log;
 
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -17,16 +17,16 @@ public class Service extends android.app.Service {
 
 	public static final String TAG = Service.class.getName();
 
-	private static final Map<Endpoint.MethodAndUri, Class> endpointRegistry;
+	private static final List<Endpoint.Info> endpointList;
 
 	static {
-		HashMap<Endpoint.MethodAndUri, Class> reg = new HashMap<Endpoint.MethodAndUri, Class>();
-		reg.put(new Endpoint.MethodAndUri(Method.GET, AppInfoEndpoint.SERVICES_JSON), AppInfoEndpoint.class);
-		reg.put(new Endpoint.MethodAndUri(Method.GET, "/"), AssetEndpoint.class);
+		List<Endpoint.Info> el = new ArrayList<Endpoint.Info>();
+		el.add(new Endpoint.Info(Method.GET, AppInfoEndpoint.SERVICES_JSON, AppInfoEndpoint.class));
+		el.add(new Endpoint.Info(Method.GET, "/", AssetEndpoint.class));
 #foreach( $parsedMethod in $endpoints )
-		reg.put(new Endpoint.MethodAndUri(Method.$parsedMethod.httpMethod, "$parsedMethod.httpUri"), ${parsedMethod.generatedClassName}.class);
+		el.add(new Endpoint.Info(Method.$parsedMethod.httpMethod, "$parsedMethod.httpUri", ${parsedMethod.generatedClassName}.class));
 #end
-		endpointRegistry = Collections.unmodifiableMap(reg);
+		endpointList = Collections.unmodifiableList(el);
 	}
 
 	private ExecutorService executorService;
@@ -44,7 +44,7 @@ public class Service extends android.app.Service {
 		super.onCreate();
 		Log.d(TAG, "Creating web service");
 		executorService = Executors.newSingleThreadExecutor(ThreadFactories.newServerThreadFactory());
-		server = new Server(this, endpointRegistry, new MyAssetInfo());
+		server = new Server(this, endpointList, new MyAssetInfo());
 		executorService.submit(server);
 	}
 

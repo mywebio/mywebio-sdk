@@ -34,7 +34,7 @@ public class Server implements Runnable {
 
 	private ExecutorService workerExecutorService;
 
-	private final Map<Endpoint.MethodAndUri, Class> endpointRegistry;
+	private final List<Endpoint.Info> endpointList;
 
 	private final AssetLengthInfo assetLengthInfo;
 
@@ -116,9 +116,9 @@ public class Server implements Runnable {
 		}
 	}
 
-	public Server(Context context, Map<Endpoint.MethodAndUri, Class> registry, AssetLengthInfo info) {
+	public Server(Context context, List<Endpoint.Info> endpointList, AssetLengthInfo info) {
 		this.context = context;
-		this.endpointRegistry = registry;
+		this.endpointList = endpointList;
 		assetLengthInfo = info;
 		this.endpoints = createEndpoints();
 		this.workerExecutorService = new ThreadPoolExecutor(2, 16, 60, TimeUnit.SECONDS,
@@ -134,8 +134,8 @@ public class Server implements Runnable {
 		return assetLengthInfo.getAssetLength(path);
 	}
 
-	public Map<Endpoint.MethodAndUri, Class> getEndpointRegistry() {
-		return endpointRegistry;
+	public List<Endpoint.Info> getEndpointList() {
+		return endpointList;
 	}
 
 	public Object bindService(ComponentName name) {
@@ -146,9 +146,9 @@ public class Server implements Runnable {
 
 	private List<? extends Endpoint> createEndpoints() {
 		List<Endpoint> list = new LinkedList<Endpoint>();
-		for (Class c: endpointRegistry.values()) {
+		for (Endpoint.Info info: endpointList) {
 			try {
-				Endpoint ep = (Endpoint) c.getConstructor(Server.class).newInstance(this);
+				Endpoint ep = (Endpoint) info.getImplementingClass().getConstructor(Server.class).newInstance(this);
 				System.out.println(ep.httpMethod().toString()+" "+ep.originalPath()+" instantiated!");
 				list.add(ep);
 			} catch (InstantiationException e) {
