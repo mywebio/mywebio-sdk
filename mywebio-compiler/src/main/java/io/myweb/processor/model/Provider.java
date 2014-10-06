@@ -18,8 +18,10 @@ public class Provider {
 	}
 
 	private String generateClassName() {
+		// Uppercase first letter
+		String capitalName = name.substring(0,1).toUpperCase()+name.substring(1);
 		// replace all non-literal characters with underscore
-		return className+"_"+name.replaceAll("[[^a-z]&&[^A-Z]&&[^0-9]&&[^_]]","_");
+		return className+capitalName.replaceAll("[[^a-z]&&[^A-Z]&&[^0-9]&&[^_]]","_");
 	}
 
 	public String getName() {
