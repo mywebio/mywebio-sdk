@@ -18,7 +18,9 @@ public class LocationExample {
 		if (provider.length()==0) {
 			JSONObject loc = new JSONObject();
 			for (String p : lm.getAllProviders()) {
-				loc.put(p, getLocationFromProvider(p));
+				JSONObject provAccuracy = new JSONObject();
+				provAccuracy.put("accuracy", lm.getProvider(p).getAccuracy());
+				loc.put(p, provAccuracy);
 			}
 			return loc;
 		}
@@ -31,7 +33,7 @@ public class LocationExample {
 		if (l!=null) {
 			jl.put("provider", provider);
 			jl.put("longitude", l.getLongitude());
-			jl.put("latitude", l.getLongitude());
+			jl.put("latitude", l.getLatitude());
 			jl.put("time", l.getTime());
 			if (l.hasAccuracy()) jl.put("accuracy", l.getAccuracy());
 			if (l.hasAltitude()) jl.put("altitude", l.getAltitude());
