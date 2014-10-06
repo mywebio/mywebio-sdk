@@ -10,7 +10,7 @@ import io.myweb.api.GET;
 import io.myweb.http.Response;
 
 public class VibratorExample {
-	@GET("/vibrator/*toggle?pattern=[500,1000]&repeat=0")
+	@GET("/vibrator/*toggle?:pattern=[500,1000]&:repeat=0")
 	public Response vibrator(Context context, String toggle, JSONArray pattern, int repeat) throws JSONException {
 		Vibrator v = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
 		if (!v.hasVibrator()) return Response.serviceUnavailable();
@@ -27,5 +27,6 @@ public class VibratorExample {
 		for (int i=0; i<la.length; i++) {
 			la[i] = ja.getLong(i);
 		}
+		return la;
 	}
 }
