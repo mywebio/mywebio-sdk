@@ -107,7 +107,7 @@ public class ParsedMethod {
 		StringBuilder patternSb = new StringBuilder();
 		List<GroupMapping> groupMapping = new LinkedList<GroupMapping>();
 		if (pathSplit.length == 0) {
-			patternSb.append("[/?]");
+			patternSb.append("[/]?");
 		} else {
 			int curGroup = 1; // group indexing in regex starts from 1
 			for (String pathElm : pathSplit) {
@@ -119,10 +119,10 @@ public class ParsedMethod {
 					curGroup++;
 				} else if (pathElm.startsWith("*")) {
 					groupMapping.add(new GroupMapping(pathElm.substring(1), curGroup));
-					patternSb.append("[/?](.*?)");
+					patternSb.append("[/]?(.*?)");
 					curGroup++;
 				} else {
-					patternSb.append("/").append(pathElm);
+					patternSb.append("[/]?").append(pathElm);
 				}
 			}
 		}

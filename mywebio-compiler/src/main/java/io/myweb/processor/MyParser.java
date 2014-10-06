@@ -41,9 +41,11 @@ public class MyParser extends AnnotationMessagerAware {
         List<? extends AnnotationMirror> annotationMirrors = ee.getAnnotationMirrors();
         for (AnnotationMirror am : annotationMirrors) {
 	        Method m = extractHttpMethod(am);
-	        if (httpMethod==null) httpMethod = m;
+	        if (httpMethod==null) {
+		        httpMethod = m;
+		        httpUri = validateAndExtractHttpUri(am, httpMethod, destMethodRetType, destMethod, params, ee);
+	        }
 	        else if (m!=null) throw new IllegalArgumentException("Duplicate annotations @"+httpMethod.toString()+" and @"+m.toString()+" for method "+destClass+"."+destMethod+"()");
-	        if (httpMethod != null) httpUri = validateAndExtractHttpUri(am, httpMethod, destMethodRetType, destMethod, params, ee);
             produces = extractProducesAnnotation(am);
 	        if (service==null) service = validateAndExtractServiceAnnotation(params, am, ee);
         }
