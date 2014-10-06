@@ -15,6 +15,7 @@ repositories {
 }
 
 dependencies {
+	compile 'com.google.code.gson:gson:2.3'
     compile project(':mywebio-api')
     apt project(':mywebio-compiler')
 }
