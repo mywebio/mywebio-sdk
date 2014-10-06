@@ -17,7 +17,7 @@ import io.myweb.LocalService;
 
 public class StreamingService extends LocalService<Streaming> implements Streaming, MediaRecorder.OnErrorListener {
 	private static final String LOG_TAG = CaptureCamera.class.getSimpleName();
-	public static final int BUFFER_SIZE = 16 * 10000;
+	public static final int BUFFER_SIZE = 32 * 1024;
 	public static final int SO_TIMEOUT = 5000;
 	private static final int HIDDEN_MPEG_TS = 8;
 	private MediaRecorder mediaRecorder;

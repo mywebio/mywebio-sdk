@@ -11,8 +11,8 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import io.myweb.api.*;
+import io.myweb.http.HttpServiceUnavailableException;
 import io.myweb.http.MimeTypes;
-import io.myweb.http.Response;
 
 public class CaptureCamera implements InputStreamListener {
 	private static final String LOG_TAG = CaptureCamera.class.getSimpleName();
@@ -20,29 +20,21 @@ public class CaptureCamera implements InputStreamListener {
 	private CountDownLatch streamReady = new CountDownLatch(1);
 
 	@GET("/camera")
-	@BindService("io.myweb.camera.StreamingService :service")
-	public Response camera(Context ctx, Streaming service) {
-		if (!hasCameraHardware(ctx)) return Response.serviceUnavailable();
+	@BindService("StreamingService")
+	@Produces(MimeTypes.MIME_VIDEO_MPEG)
+	public InputStream camera(Context ctx, Streaming streamingService) throws HttpServiceUnavailableException {
+		if (!hasCameraHardware(ctx)) throw new HttpServiceUnavailableException("No camera hardware!");
+
+		streamingService.setInputStreamListener(this);
 
 		Intent captureIntent = new Intent(ctx, CaptureCameraActivity.class);
 		captureIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK+Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
 		ctx.startActivity(captureIntent);
 
-		service.setInputStreamListener(this);
-
-		// wait for InputStream
-		try {
-			streamReady.await(10, TimeUnit.SECONDS);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-
-		if (is == null) {
-			return Response.serviceUnavailable();
-		}
+		if (!waitForInputStream(10)) throw new HttpServiceUnavailableException("No input from the camera!");
 
 		Log.d(LOG_TAG, "Web streaming ...");
-		return Response.ok().withContentType(MimeTypes.MIME_VIDEO_MPEG).withBody(is);
+		return is;
 	}
 
 	private boolean hasCameraHardware(Context context) {
@@ -53,6 +45,15 @@ public class CaptureCamera implements InputStreamListener {
 			// no camera on this device
 			return false;
 		}
+	}
+
+	private boolean waitForInputStream(int seconds) {
+		try {
+			streamReady.await(seconds, TimeUnit.SECONDS);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		return is != null;
 	}
 
 	@Override
