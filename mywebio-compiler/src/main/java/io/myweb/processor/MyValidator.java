@@ -67,11 +67,17 @@ public class MyValidator extends AnnotationMessagerAware {
 
 	public ServiceParam validateBindServiceAnnotation(String value, List<ParsedParam> params, ExecutableElement ee, AnnotationMirror am) {
 		try {
+			String parameterName, componentName;
 			int idx = value.indexOf(":");
 			if (idx < 0) {
-				throw new RuntimeException("Parameter name prefixed by colon (e.g. :service) is required for @BindService annotation");
+				// no parameter name specified, try to guess by convention
+				componentName = value.trim();
+				parameterName = value.substring(value.lastIndexOf(".")+1);
+				parameterName = parameterName.substring(0,1).toLowerCase()+parameterName.substring(1);
+			} else {
+				componentName = value.substring(0, idx).trim();
+				parameterName = value.substring(idx).trim().substring(1);
 			}
-			String componentName = value.substring(0, idx).trim();
 			if (componentName.contains("/")) { // parse
 				String[] parts = componentName.split("/");
 				if (parts.length != 2 || !isPackageName(parts[0]) ||
@@ -81,7 +87,7 @@ public class MyValidator extends AnnotationMessagerAware {
 			} else if (!isPackageName(componentName)) {
 				throw new RuntimeException("Invalid service class name: " + componentName);
 			}
-			String parameterName = value.substring(idx).trim().substring(1);
+
 			// check for match in method parameters
 			boolean matched = false;
 			for (ParsedParam p : params) {
