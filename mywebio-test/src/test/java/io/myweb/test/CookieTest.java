@@ -17,12 +17,12 @@ import static org.junit.Assert.assertThat;
 
 public class CookieTest extends MywebTestCase {
 
-	public static final String GET_1 = "123456789012345678901234567890123456\n" +
+	public static final String GET_1 =
 			"GET /setCookie?name=COOKIE_NAME&value=cookieValue HTTP/1.1\r\n" +
 			"Host: localhost\r\n" +
 			"Connection: Keep-Alive\r\n\r\n";
 
-	public static final String GET_2 = "123456789012345678901234567890123456\n" +
+	public static final String GET_2 =
 			"GET /acceptCookie?cookieName=COOKIE_NAME HTTP/1.1\r\n" +
 			"Host: localhost\r\n" +
 			"Cookie: COOKIE_NAME=cookieValue\r\n" +

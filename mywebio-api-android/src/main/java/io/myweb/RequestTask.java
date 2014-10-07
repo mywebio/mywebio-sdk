@@ -93,14 +93,7 @@ public class RequestTask implements Runnable {
 				sb.append(result);
 			}
 		}
-		//TODO old behaviour, first line contains request id
-		String[] lines = sb.toString().split("\n", 2);
-		if (lines.length==2) {
-			Request result = Request.parse(lines[1]).withId(lines[0].trim()).withBody(is);
-			Log.d(TAG, "Finish read request from server");
-			return result;
-		}
-		return null; // no request
+		return Request.parse(sb.toString()).withBody(is);
 	}
 
 	private void closeConnection() {

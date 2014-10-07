@@ -126,7 +126,7 @@ public class Request {
 	}
 
 	public Request withId(String id) {
-		getHeaders().update(Headers.X.MYWEB_ID, id);
+		if (id != null) getHeaders().update(Headers.X.MYWEB_ID, id);
 		return this;
 	}
 

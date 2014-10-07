@@ -39,12 +39,6 @@ public class ResponseWriter {
 
 	public void write(Response response) throws IOException {
 		if (!closed && response!=null) {
-			// TODO old behaviour, remove after new server deployment
-			try {
-				writeRequestId(response.getHeaders().findFirst(Headers.X.MYWEB_ID).getValue());
-			} catch (NullPointerException ex) {
-				ex.printStackTrace();
-			}
 			String contentType = response.getContentType();
 			if (contentType == null) contentType = produces;
 			// if content type is text, make sure charset is specified

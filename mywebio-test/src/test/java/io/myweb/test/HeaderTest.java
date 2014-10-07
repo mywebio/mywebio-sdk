@@ -17,7 +17,7 @@ import static org.junit.Assert.assertThat;
 
 public class HeaderTest extends MywebTestCase {
 
-	public static final String GET_1 = "123456789012345678901234567890123456\n" +
+	public static final String GET_1 =
 			"GET /headertest HTTP/1.1\r\n" +
 			"Host: localhost\r\n" +
 			"Cookie: a=1; b=2\r\n" +

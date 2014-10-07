@@ -19,12 +19,12 @@ import static org.junit.Assert.assertThat;
 
 public class WowFirstWorkingTest extends MywebTestCase {
 
-	public static final String GET_1 = "123456789012345678901234567890123456\n" +
+	public static final String GET_1 =
 			"GET /test HTTP/1.1\r\n" +
 			"Host: localhost\r\n" +
 			"Connection: Keep-Alive\r\n";
 
-	public static final String POST_1 = "123456789012345678901234567890123456\n" +
+	public static final String POST_1 =
 			"POST /testpost HTTP/1.1\r\n" +
 			"Host: localhost\r\n" +
 			"Connection: Keep-Alive\r\n\r\n" +

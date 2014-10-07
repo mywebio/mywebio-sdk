@@ -75,7 +75,8 @@ public class Response {
 	}
 
 	public Response withId(String id) {
-		return withUpdatedHeader(Headers.X.MYWEB_ID, id);
+		if (id != null) withUpdatedHeader(Headers.X.MYWEB_ID, id);
+		return this;
 	}
 
 	public Response withKeepAlive() {
