@@ -23,7 +23,7 @@ public class HeaderTest extends MywebTestCase {
 			"Cookie: a=1; b=2\r\n" +
 			"Connection: Keep-Alive\r\n\r\n";
 
-	@Test
+	@Test(timeout = 1000)
 	public void headersShouldBeDecoded() throws IOException {
 		// given
 		Service service = new Service();

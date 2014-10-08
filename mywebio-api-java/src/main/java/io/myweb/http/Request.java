@@ -22,7 +22,9 @@ public class Request {
 	private final String protocolVersion;
 	private final Headers headers;
 	private final Cookies cookies;
-	private Object body;
+	private String stringBody;
+	private JSONObject jsonBody;
+	private InputStream body;
 	private Map<String,String> parameterMap = null;
 
 	private Request(Method method, URI uri, String protocolVersion, Headers headers, Cookies cookies) {
@@ -31,6 +33,10 @@ public class Request {
 		this.protocolVersion = protocolVersion;
 		this.headers = headers;
 		this.cookies = cookies;
+	}
+
+	public boolean hasBeenProcessed() {
+		return (stringBody != null || jsonBody != null);
 	}
 
 	public long getContentLenght() {
@@ -80,25 +86,21 @@ public class Request {
 	}
 
 	public String getBodyAsString() {
-		if (body instanceof String) return (String) body;
-		else if (body instanceof InputStream) {
-			body = inputToString((InputStream) body);
-		}
-		if (body!=null) return body.toString();
-		return null;
+		if (stringBody != null) return stringBody;
+		if (jsonBody !=null) return jsonBody.toString();
+		stringBody = inputToString(body, getContentLenght());
+		return stringBody;
 	}
 
 	public JSONObject getBodyAsJSON() {
-		if (body instanceof JSONObject) return (JSONObject) body;
-		else if (body instanceof InputStream) {
-			try {
-				body = new JSONObject(new JSONTokener(new InputStreamReader((InputStream) body)));
-				return (JSONObject) body;
-			} catch (JSONException e) {
-				e.printStackTrace();
-			}
+		if (jsonBody != null) return jsonBody;
+		try {
+			if (stringBody != null) return new JSONObject(stringBody);
+			jsonBody = new JSONObject(inputToString(body, getContentLenght()));
+		} catch (JSONException ex) {
+			ex.printStackTrace();
 		}
-		return null;
+		return jsonBody;
 	}
 
 	public String getId() {
@@ -116,12 +118,12 @@ public class Request {
 	}
 
 	public Request withBody(String s) {
-		body = s;
+		stringBody = s;
 		return this;
 	}
 
 	public Request withBody(JSONObject json) {
-		body = json;
+		jsonBody = json;
 		return this;
 	}
 
@@ -170,12 +172,12 @@ public class Request {
 		return queryParams;
 	}
 
-	public static Request parse(String req) {
-		if (req == null) return null;
+	public static Request parse(String req) throws HttpBadRequestException {
+		if (req == null || req.length() == 0) return null;
 		String[] lines = req.split("\\r\\n", 2);
 		String[] segments = lines[0].split(" ");
 		Method method = Method.findByName(segments[0]);
-		if (method == null) throw new RuntimeException("Invalid HTTP method: " + segments[0]);
+		if (method == null) throw new HttpBadRequestException("Invalid HTTP method: " + segments[0]);
 		URI uri = URI.create(segments[1]);
 		String protocolVersion = segments[2];
 		Headers headers = Headers.parse(lines[1]);
@@ -183,16 +185,22 @@ public class Request {
 		return new Request(method, uri, protocolVersion, headers, cookies);
 	}
 
-	private static String inputToString(final InputStream is) {
+	private static String inputToString(final InputStream is, long maxLength) {
+		if (maxLength <= 0) return "";
 		final char[] buffer = new char[BUFFER_LENGTH];
 		final StringBuilder out = new StringBuilder();
 		try {
+			long totalRead = 0;
 			final Reader in = new InputStreamReader(is);
 			try {
-				while (true) {
-					int bytesRead = in.read(buffer, 0, buffer.length);
+				while (totalRead < maxLength) {
+					long bytesToRead = maxLength - totalRead;
+					int len = BUFFER_LENGTH;
+					if (len > bytesToRead) len = (int) bytesToRead;
+					int bytesRead = in.read(buffer, 0, len);
 					if (bytesRead < 0) break;
 					out.append(buffer, 0, bytesRead);
+					totalRead += bytesRead;
 				}
 			}
 			finally {

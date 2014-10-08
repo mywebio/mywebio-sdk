@@ -60,9 +60,11 @@ public class RequestTask implements Runnable {
 				}
 				if (request != null) {
 					requestId = request.getId();
-					processRequest(request);
+					processRequest(request.withBody(inputStream));
 					Log.i(TAG, "Sent response to Web IO Server");
 					keepAlive = request.isKeptAlive();
+					// make sure request body has been read
+					if (keepAlive && !request.hasBeenProcessed()) request.getBodyAsString();
 				} else keepAlive = false;
 			}
 		} catch (HttpException e) {
@@ -75,7 +77,7 @@ public class RequestTask implements Runnable {
 		}
 	}
 
-	private Request readRequest(PushbackInputStream is) throws IOException {
+	private Request readRequest(PushbackInputStream is) throws IOException, HttpBadRequestException {
 		int length;
 		byte[] buffer = new byte[BUFFER_SIZE];
 		StringBuilder sb = new StringBuilder();
@@ -86,18 +88,23 @@ public class RequestTask implements Runnable {
 			if (idx >= 0) {
 				sb.append(result.substring(0, idx));
 				idx += 4;
-				int len = buffer.length - idx;
+				int len = length - idx;
 				if (len>0) is.unread(buffer, idx, len);
 				break;
 			} else {
 				sb.append(result);
 			}
 		}
-		return Request.parse(sb.toString()).withBody(is);
+		return Request.parse(sb.toString());
 	}
 
 	private void closeConnection() {
 		if (socket != null) {
+			try {
+				socket.getOutputStream().close();
+			} catch (IOException e) {
+				// ignore any errors when closing output stream
+			}
 			try {
 				socket.close();
 			} catch (IOException e) {

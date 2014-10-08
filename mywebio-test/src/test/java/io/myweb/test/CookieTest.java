@@ -28,7 +28,7 @@ public class CookieTest extends MywebTestCase {
 			"Cookie: COOKIE_NAME=cookieValue\r\n" +
 			"Connection: Keep-Alive\r\n\r\n";
 
-	@Test
+	@Test(timeout = 1000)
 	public void cookieShouldBeReturned() throws IOException, InterruptedException {
 		// given
 		Service service = new Service();
@@ -50,7 +50,7 @@ public class CookieTest extends MywebTestCase {
 		assertThat(response, containsString(expectedBody));
 	}
 
-	@Test
+	@Test(timeout = 1000)
 	public void cookieShouldBeAccepted() throws IOException, InterruptedException {
 		// given
 		Service service = new Service();
