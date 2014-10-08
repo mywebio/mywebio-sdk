@@ -29,7 +29,6 @@ public class ResponseWriter {
 
 	public void close() throws IOException {
 		os.flush();
-		os.close();
 		closed = true;
 	}
 
