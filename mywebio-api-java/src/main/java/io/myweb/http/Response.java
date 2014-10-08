@@ -28,7 +28,7 @@ public class Response {
 	}
 
 	public static Response ok() {
-		return Response.newWithStatusCode(StatusCode.OK).withKeepAlive();
+		return Response.newWithStatusCode(StatusCode.OK);
 	}
 
 	public static Response notFound() {
