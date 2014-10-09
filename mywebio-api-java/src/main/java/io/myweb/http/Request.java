@@ -1,10 +1,9 @@
 package io.myweb.http;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLDecoder;
@@ -13,10 +12,10 @@ import java.util.Map;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONTokener;
 
 public class Request {
 	public static final int BUFFER_LENGTH = 32 * 1024;
+	public static final int IN_MEMORY_LIMIT = 2 * 1024 * 1024; // 2 MB
 	private final Method method;
 	private final URI uri;
 	private final String protocolVersion;
@@ -24,8 +23,11 @@ public class Request {
 	private final Cookies cookies;
 	private String stringBody;
 	private JSONObject jsonBody;
+	private byte[] cachedBody;
+	private File fileBody;
 	private InputStream body;
 	private Map<String,String> parameterMap = null;
+	private long contentLength = -1;
 
 	private Request(Method method, URI uri, String protocolVersion, Headers headers, Cookies cookies) {
 		this.method = method;
@@ -35,15 +37,16 @@ public class Request {
 		this.cookies = cookies;
 	}
 
-	public boolean hasBeenProcessed() {
-		return (stringBody != null || jsonBody != null);
+	public boolean isCached() {
+		return (cachedBody != null);
 	}
 
 	public long getContentLenght() {
-		if (headers == null) return -1;
-		String lenStr = headers.get(Headers.REQUEST.CONTENT_LEN);
-		if (lenStr == null) return -1;
-		return Long.parseLong(lenStr);
+		if (contentLength < 0 && headers != null) {
+			String lenStr = headers.get(Headers.REQUEST.CONTENT_LEN);
+			if (lenStr != null) contentLength = Long.parseLong(lenStr);
+		}
+		return contentLength;
 	}
 
 	public boolean isKeptAlive() {
@@ -71,32 +74,36 @@ public class Request {
 		return cookies;
 	}
 
-	public InputStream getBodyAsInputStream() {
-		if (body instanceof InputStream) {
-			InputStream is = (InputStream) body;
-			try {
-				is.reset();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			return is;
-		} else {
-			return new ByteArrayInputStream(body.toString().getBytes());
+	public InputStream getBody() {
+		if (cachedBody != null) {
+			return new ByteArrayInputStream(cachedBody);
 		}
+		// As for now make sure we will give out body as InputStream only once
+		// TODO create filter for input stream to monitor how many bytes has been read
+		InputStream is = body;
+		body = null;
+		return is;
 	}
 
 	public String getBodyAsString() {
 		if (stringBody != null) return stringBody;
-		if (jsonBody !=null) return jsonBody.toString();
-		stringBody = inputToString(body, getContentLenght());
+		if (jsonBody != null) {
+			stringBody = jsonBody.toString();
+		} else {
+			if (cachedBody != null) stringBody = new String(cachedBody);
+		}
 		return stringBody;
 	}
 
 	public JSONObject getBodyAsJSON() {
 		if (jsonBody != null) return jsonBody;
 		try {
-			if (stringBody != null) return new JSONObject(stringBody);
-			jsonBody = new JSONObject(inputToString(body, getContentLenght()));
+			if (stringBody != null) {
+				jsonBody = new JSONObject(stringBody);
+			} else {
+				if (cachedBody != null)
+					jsonBody = new JSONObject(getBodyAsString());
+			}
 		} catch (JSONException ex) {
 			ex.printStackTrace();
 		}
@@ -109,11 +116,16 @@ public class Request {
 		return null;
 	}
 
-	public Request withBody(InputStream is) {
-		if(is.markSupported()) {
-			is.mark(BUFFER_LENGTH);
+	public Request withBody(InputStream is) throws IOException {
+		// always read body
+		if (getContentLenght() > 0) {
+			body = is;
+			if (getContentLenght() <= IN_MEMORY_LIMIT) {
+				cachedBody = new byte[(int) getContentLenght()];
+				readBody(cachedBody);
+			}
+			body = null; // TODO think how to handle chunked requests
 		}
-		body = is;
 		return this;
 	}
 
@@ -185,31 +197,32 @@ public class Request {
 		return new Request(method, uri, protocolVersion, headers, cookies);
 	}
 
-	private static String inputToString(final InputStream is, long maxLength) {
-		if (maxLength <= 0) return "";
-		final char[] buffer = new char[BUFFER_LENGTH];
-		final StringBuilder out = new StringBuilder();
-		try {
-			long totalRead = 0;
-			final Reader in = new InputStreamReader(is);
-			try {
-				while (totalRead < maxLength) {
-					long bytesToRead = maxLength - totalRead;
-					int len = BUFFER_LENGTH;
-					if (len > bytesToRead) len = (int) bytesToRead;
-					int bytesRead = in.read(buffer, 0, len);
-					if (bytesRead < 0) break;
-					out.append(buffer, 0, bytesRead);
-					totalRead += bytesRead;
-				}
-			}
-			finally {
-				in.close();
+	public long readBody() throws IOException {
+		return readBody(null);
+	}
+
+	public long readBody(final byte[] target) throws IOException {
+		long len = getContentLenght();
+		if (target != null && target.length < len) len = target.length;
+		return readBody(target, len);
+	}
+
+	public long readBody(final byte[] target, long maxLength) throws IOException {
+		if (maxLength <= 0 || body == null) return -1;
+		long totalRead = 0;
+		while (totalRead < maxLength) {
+			long bytesToRead = maxLength - totalRead;
+			int len = BUFFER_LENGTH;
+			if (len > bytesToRead) len = (int) bytesToRead;
+			if (target != null) {
+				int bytesRead = body.read(target, (int) totalRead, len);
+				if (bytesRead < 0) break;
+				totalRead += bytesRead;
+			} else {
+				long bytesSkipped = body.skip(maxLength);
+				totalRead += bytesSkipped;
 			}
 		}
-		catch (IOException ex) {
-			ex.printStackTrace();
-		}
-		return out.toString();
+		return totalRead;
 	}
 }
