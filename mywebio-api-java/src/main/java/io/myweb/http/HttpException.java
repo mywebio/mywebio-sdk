@@ -1,6 +1,6 @@
 package io.myweb.http;
 
-public class HttpException extends Exception {
+public class HttpException extends RuntimeException {
 	private final StatusCode statusCode;
 
 	public HttpException(StatusCode statusCode) {
