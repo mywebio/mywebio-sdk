@@ -72,8 +72,8 @@ public class RequestTask implements Runnable {
 		} catch (HttpException e) {
 			Log.e(TAG, "Error " + e, e);
 			writeErrorResponse(requestId, e);
-		} catch (Throwable t) {
-			writeErrorResponse(requestId, new HttpInternalErrorException(t.getMessage(), t));
+		} catch (IOException e) {
+			writeErrorResponse(requestId, new HttpInternalErrorException(e.getMessage(), e));
 		} finally {
 			closeConnection();
 		}
@@ -132,11 +132,20 @@ public class RequestTask implements Runnable {
 			throw new HttpNotFoundException("Not found " + uri);
 		else {
 			ResponseWriter rw = new ResponseWriter(endpoint.produces(), socket.getOutputStream());
-			Request filteredRequest = filterBefore(effectiveUri, request);
-			Response response = endpoint.invoke(effectiveUri, filteredRequest);
-			response = filterAfter(effectiveUri, response);
-			rw.write(response);
-			rw.close();
+			Response response = null;
+			try {
+				Request filteredRequest = filterBefore(effectiveUri, request);
+				response = endpoint.invoke(effectiveUri, filteredRequest);
+				response = filterAfter(effectiveUri, response);
+				rw.write(response);
+			} catch (Throwable t) {
+				if (response != null) response.onError(t);
+				if (t instanceof HttpException) throw (HttpException) t;
+				if (t instanceof IOException) throw (IOException) t;
+				throw new HttpInternalErrorException(t.getMessage(), t);
+			} finally {
+				rw.close(response);
+			}
 		}
 	}
 

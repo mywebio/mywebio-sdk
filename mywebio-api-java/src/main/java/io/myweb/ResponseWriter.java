@@ -27,8 +27,13 @@ public class ResponseWriter {
 	}
 
 	public void close() throws IOException {
+		close(null);
+	}
+
+	public synchronized void close(Response r) throws IOException {
 		os.flush();
 		closed = true;
+		if (r != null) r.onClose();
 	}
 
 	public boolean isClosed() {
@@ -73,35 +78,6 @@ public class ResponseWriter {
 		os.write(response.toString().getBytes());
 		copy(is, os, chunked);
 		is.close();
-	}
-
-	public void write(String id, InputStream is) throws IOException {
-		write(Response.ok().withId(id).withBody(is));
-	}
-
-	public void write(String id, String text) throws IOException {
-		write(Response.ok().withId(id).withBody(text));
-	}
-
-	public void write(String id, JSONObject json) throws IOException {
-		write(Response.ok().withId(id).withBody(json));
-	}
-
-	public void write(String id, JSONArray json) throws IOException {
-		write(Response.ok().withId(id).withBody(json));
-	}
-
-	public void write(String id, File file) throws IOException {
-		write(Response.ok().withId(id).withBody(file));
-	}
-
-	public void write(String id, Response resp) throws IOException {
-		write(resp.withId(id));
-	}
-
-	//TODO old behaviour
-	private void writeRequestId(String reqId) throws IOException {
-		os.write((reqId + "\n").getBytes());
 	}
 
 	private long copy(InputStream from, OutputStream to, boolean chunkEncode) throws IOException {

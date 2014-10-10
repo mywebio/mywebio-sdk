@@ -19,6 +19,9 @@ public class Response {
 
 	private String charset;
 
+	private OnCloseListener onCloseListener;
+	private OnErrorListener onErrorListener;
+
 	private Response(StatusCode statusCode) {
 		this.charset = "UTF-8";
 		this.statusCode = statusCode;
@@ -172,6 +175,22 @@ public class Response {
 
 	public String getContentType() {
 		return getHeaders().get(Headers.RESPONSE.CONTENT_TYPE);
+	}
+
+	public synchronized void setOnCloseListener(OnCloseListener listener) {
+		onCloseListener = listener;
+	}
+
+	public synchronized void setOnErrorListener(OnErrorListener listener) {
+		onErrorListener = listener;
+	}
+
+	public synchronized void onClose() {
+		if (onCloseListener != null) onCloseListener.onClose(this);
+	}
+
+	public synchronized void onError(Throwable cause) {
+		if (onErrorListener != null) onErrorListener.onError(this, cause);
 	}
 
 	@Override
