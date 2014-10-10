@@ -35,7 +35,7 @@ public class MyCodeGenerator extends ProcessingEnvAware {
 
 	public static class EscTool {
 		public String java(String str) {
-			return str.replaceAll("\\\\","\\\\");
+			return str.replaceAll("\\\\","\\\\\\\\");
 		}
 	}
 
