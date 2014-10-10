@@ -12,14 +12,17 @@ import io.myweb.processor.velocity.VelocityLogger;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
+import org.apache.velocity.context.Context;
 import org.apache.velocity.runtime.RuntimeConstants;
 import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
+
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.tools.JavaFileObject;
 
 import java.io.*;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import static com.google.common.io.Files.fileTreeTraverser;
 import static com.google.common.io.Files.isFile;
@@ -29,6 +32,12 @@ import static org.apache.commons.lang3.StringUtils.substringBeforeLast;
 public class MyCodeGenerator extends ProcessingEnvAware {
 	public static final String PKG_PREFIX = "io.myweb.";
 	private String sourceCodePath = "";
+
+	public static class EscTool {
+		public String java(String str) {
+			return str.replaceAll("\\\\","\\\\");
+		}
+	}
 
 	public MyCodeGenerator(ProcessingEnvironment processingEnvironment) {
 		super(processingEnvironment);
@@ -48,7 +57,7 @@ public class MyCodeGenerator extends ProcessingEnvAware {
 
 	private void generateFilters(VelocityEngine ve, List<ParsedFilter> filters) {
 		for (ParsedFilter filter : filters) {
-			VelocityContext ctx = new VelocityContext();
+			Context ctx = createContext();
 			ctx.put("filter", filter);
 			generateFromTemplate(ve, ctx, PKG_PREFIX + filter.getGeneratedClassName(), "filter.vm");
 		}
@@ -56,7 +65,7 @@ public class MyCodeGenerator extends ProcessingEnvAware {
 
 	private void generateProviders(VelocityEngine ve, List<Provider> providers) {
 		for (Provider provider : providers) {
-			VelocityContext ctx = new VelocityContext();
+			Context ctx = createContext();
 			ctx.put("provider", provider);
 			generateFromTemplate(ve, ctx, PKG_PREFIX + provider.getGeneratedClassName(), "provider.vm");
 		}
@@ -64,14 +73,14 @@ public class MyCodeGenerator extends ProcessingEnvAware {
 
 	private void generateEndpoints(VelocityEngine ve, List<ParsedMethod> parsedMethods) {
 		for (ParsedMethod pm : parsedMethods) {
-			VelocityContext ctx = new VelocityContext();
+			Context ctx = createContext();
 			ctx.put("parsedMethod", pm);
 			generateFromTemplate(ve, ctx, PKG_PREFIX + pm.getGeneratedClassName(), "endpoint.vm");
 		}
 	}
 
 	private void generateService(VelocityEngine ve, List<ParsedMethod> parsedMethods, List<ParsedFilter> filters) {
-		VelocityContext ctx = new VelocityContext();
+		Context ctx = createContext();
 		ctx.put("endpoints", parsedMethods);
 		ctx.put("filters", filters);
 		generateFromTemplate(ve, ctx, PKG_PREFIX + "Service");
@@ -84,6 +93,12 @@ public class MyCodeGenerator extends ProcessingEnvAware {
 		ve.setProperty("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());
 		ve.init();
 		return ve;
+	}
+
+	private VelocityContext createContext() {
+		VelocityContext velocityContext = new VelocityContext();
+		velocityContext.put("esc", new EscTool());
+		return velocityContext;
 	}
 
 	private void generateAssetsInfo(VelocityEngine ve, String sourceCodePath) {
@@ -102,16 +117,16 @@ public class MyCodeGenerator extends ProcessingEnvAware {
 	}
 
 	private void generateAssetInfo(VelocityEngine ve, List<AssetFile> assetFiles) {
-		VelocityContext ctx = new VelocityContext();
+		Context ctx = createContext();
 		ctx.put("assetFiles", assetFiles);
 		generateFromTemplate(ve, ctx, PKG_PREFIX + "MyAssetInfo");
 	}
 
-	private void generateFromTemplate(VelocityEngine ve, VelocityContext ctx, String classToGenerate) {
+	private void generateFromTemplate(VelocityEngine ve, Context ctx, String classToGenerate) {
 		generateFromTemplate(ve, ctx, classToGenerate, classToGenerate + ".vm");
 	}
 
-	private void generateFromTemplate(VelocityEngine ve, VelocityContext ctx, String classToGenerate, String templateName) {
+	private void generateFromTemplate(VelocityEngine ve, Context ctx, String classToGenerate, String templateName) {
 		Template t = ve.getTemplate(templateName);
 		Writer w = null;
 		try {

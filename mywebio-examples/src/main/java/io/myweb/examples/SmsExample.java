@@ -11,13 +11,13 @@ import io.myweb.http.Response;
 @ContentProvider(value = "sms", methods = {Method.GET, Method.POST})
 public class SmsExample {
 
-	@Before("/sms*")
+	@Before("/sms.*")
 	public Request before(Request r) {
 		System.out.println("Before: "+r.getURI().toString());
 		return r;
 	}
 
-	@After("/sms*")
+	@After("/sms.*")
 	public Response after(Response r) {
 		System.out.println("After: "+r.getContentType());
 		return r;

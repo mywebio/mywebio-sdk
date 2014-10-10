@@ -8,7 +8,7 @@ import io.myweb.http.Response;
 
 public class $filter.generatedClassName extends Filter {
 #if ($filter.before)
-	private Pattern beforePattern = Pattern.compile("$filter.value");
+	private Pattern beforePattern = Pattern.compile("$esc.java($filter.value)");
 	@Override
 	public boolean matchBefore(String uri) {
 		return beforePattern.matcher(uri).matches();
@@ -19,7 +19,7 @@ public class $filter.generatedClassName extends Filter {
 		return new ${filter.destClass}().${filter.destMethod}(request);
 	}
 #else
-	private Pattern afterPattern = Pattern.compile("$filter.value");
+	private Pattern afterPattern = Pattern.compile("$esc.java($filter.value)");
 
 	@Override
 	public boolean matchAfter(String uri) {

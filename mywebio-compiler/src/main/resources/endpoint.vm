@@ -57,7 +57,7 @@ public class $parsedMethod.generatedClassName extends Endpoint {
 		return defaultQueryParams;
 	}
 
-	private Pattern pattern = Pattern.compile("$generatedPattern.pattern");
+	private Pattern pattern = Pattern.compile("$esc.java($generatedPattern.pattern)");
 
 	@Override
 	protected Pattern getPattern() {
