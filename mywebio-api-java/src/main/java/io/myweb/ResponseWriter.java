@@ -1,8 +1,5 @@
 package io.myweb;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-
 import io.myweb.http.MimeTypes;
 import io.myweb.http.Response;
 
@@ -31,9 +28,11 @@ public class ResponseWriter {
 	}
 
 	public synchronized void close(Response r) throws IOException {
-		os.flush();
-		closed = true;
-		if (r != null) r.onClose();
+		if (!isClosed()) {
+			os.flush();
+			closed = true;
+			if (r != null) r.onClose();
+		}
 	}
 
 	public boolean isClosed() {
@@ -41,7 +40,7 @@ public class ResponseWriter {
 	}
 
 	public void write(Response response) throws IOException {
-		if (!closed && response!=null) {
+		if (!isClosed() && response!=null) {
 			String contentType = response.getContentType();
 			if (contentType == null) contentType = produces;
 			// if content type is text, make sure charset is specified
@@ -51,7 +50,6 @@ public class ResponseWriter {
 			response.withContentType(contentType);
 			if (response.getBody() instanceof InputStream) writeInputStream(response);
 			else writeObject(response);
-			os.flush();
 		}
 	}
 
