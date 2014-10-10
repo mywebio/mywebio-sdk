@@ -104,7 +104,7 @@ public class Response {
 		return withContentType(MimeTypes.getMimeType(filename));
 	}
 
-	public Response withFile(File file) throws FileNotFoundException {
+	public Response withBody(File file) throws FileNotFoundException {
 		return withBody(new FileInputStream(file)).withLength(file.length()).withContentType(file.getName());
 	}
 
@@ -126,6 +126,10 @@ public class Response {
 	public Response withBody(JSONArray jsonObject) {
 		this.body = jsonObject;
 		return withContentType(MimeTypes.MIME_APPLICATION_JSON);
+	}
+
+	public Response withBody(Response r) {
+		return r;
 	}
 
 	public Response withLength(long length) {

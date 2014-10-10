@@ -33,6 +33,10 @@ public class AnnotationMessagerAware {
 		messager.printMessage(Diagnostic.Kind.ERROR, msg, ee, am);
 	}
 
+	protected void error(String msg, Element ee) {
+		messager.printMessage(Diagnostic.Kind.ERROR, msg, ee);
+	}
+
 	protected void warning(String msg) {
 		messager.printMessage(Diagnostic.Kind.WARNING, msg);
 	}

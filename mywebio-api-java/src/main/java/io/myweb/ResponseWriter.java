@@ -3,7 +3,6 @@ package io.myweb;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import io.myweb.http.Headers;
 import io.myweb.http.MimeTypes;
 import io.myweb.http.Response;
 
@@ -93,7 +92,7 @@ public class ResponseWriter {
 	}
 
 	public void write(String id, File file) throws IOException {
-		write(Response.ok().withId(id).withFile(file));
+		write(Response.ok().withId(id).withBody(file));
 	}
 
 	public void write(String id, Response resp) throws IOException {

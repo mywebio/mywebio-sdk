@@ -50,7 +50,7 @@ public abstract class Endpoint {
 		return null;
 	}
 
-	public abstract void invoke(String uri, Request request, ResponseWriter rw) throws HttpException, IOException;
+	public abstract Response invoke(String uri, Request request) throws HttpException, IOException;
 
 	protected Server getServer() {
 		return server;

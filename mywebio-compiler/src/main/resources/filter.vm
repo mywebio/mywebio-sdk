@@ -1,0 +1,34 @@
+#* @vtlvariable name="filter" type="io.myweb.processor.model.ParsedFilter" *#
+package io.myweb;
+
+import java.util.regex.Pattern;
+
+import io.myweb.http.Request;
+import io.myweb.http.Response;
+
+public class $filter.generatedClassName extends Filter {
+#if ($filter.before)
+	private Pattern beforePattern = Pattern.compile("$filter.value");
+	@Override
+	public boolean matchBefore(String uri) {
+		return beforePattern.matcher(uri).matches();
+	}
+
+	@Override
+	public Request before(Request request) {
+		return new ${filter.destClass}().${filter.destMethod}(request);
+	}
+#else
+	private Pattern afterPattern = Pattern.compile("$filter.value");
+
+	@Override
+	public boolean matchAfter(String uri) {
+		return afterPattern.matcher(uri).matches();
+	}
+
+	@Override
+	public Response after(Response response) {
+		return new ${filter.destClass}().${filter.destMethod}(response);
+	}
+#end
+}

@@ -50,10 +50,10 @@ public class AssetEndpoint extends Endpoint {
 	}
 
 	@Override
-	public void invoke(String uri, Request request, ResponseWriter rw) throws IOException {
+	public Response invoke(String uri, Request request) throws IOException {
 		AssetManager assetManager = getContext().getAssets();
 		InputStream is = assetManager.open(MYWEB_ASSETS_DIR + uri);
 		long length = getServer().getAssetLength(uri);
-		rw.write(Response.ok().withId(request.getId()).withContentTypeFrom(uri).withLength(length).withBody(is));
+		return Response.ok().withId(request.getId()).withContentTypeFrom(uri).withLength(length).withBody(is);
 	}
 }

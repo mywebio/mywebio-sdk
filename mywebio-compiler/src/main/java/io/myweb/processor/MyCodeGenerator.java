@@ -2,14 +2,13 @@ package io.myweb.processor;
 
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
-import com.google.common.io.ByteStreams;
 
 import io.myweb.processor.model.AssetFile;
+import io.myweb.processor.model.ParsedFilter;
 import io.myweb.processor.model.ParsedMethod;
 import io.myweb.processor.model.Provider;
 import io.myweb.processor.velocity.VelocityLogger;
 
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
@@ -17,14 +16,11 @@ import org.apache.velocity.runtime.RuntimeConstants;
 import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 
 import javax.annotation.processing.ProcessingEnvironment;
-import javax.tools.JavaFileManager;
 import javax.tools.JavaFileObject;
-import javax.tools.StandardLocation;
 
 import java.io.*;
 import java.util.List;
 
-import static com.google.common.collect.Lists.transform;
 import static com.google.common.io.Files.fileTreeTraverser;
 import static com.google.common.io.Files.isFile;
 import static org.apache.commons.lang3.StringUtils.substringAfter;
@@ -38,14 +34,23 @@ public class MyCodeGenerator extends ProcessingEnvAware {
 		super(processingEnvironment);
 	}
 
-	public void generateCode(List<ParsedMethod> parsedMethods, List<Provider> providers) {
+	public void generateCode(List<ParsedMethod> parsedMethods, List<Provider> providers, List<ParsedFilter> filters) {
 		VelocityEngine ve = instantiateVelocityEngine();
 		if (!providers.isEmpty()) {
 			generateProviders(ve, providers);
 		} else {
 			generateEndpoints(ve, parsedMethods);
+			generateFilters(ve, filters);
 			generateAssetsInfo(ve, sourceCodePath);
-			generateService(ve, parsedMethods);
+			generateService(ve, parsedMethods, filters);
+		}
+	}
+
+	private void generateFilters(VelocityEngine ve, List<ParsedFilter> filters) {
+		for (ParsedFilter filter : filters) {
+			VelocityContext ctx = new VelocityContext();
+			ctx.put("filter", filter);
+			generateFromTemplate(ve, ctx, PKG_PREFIX + filter.getGeneratedClassName(), "filter.vm");
 		}
 	}
 
@@ -65,9 +70,10 @@ public class MyCodeGenerator extends ProcessingEnvAware {
 		}
 	}
 
-	private void generateService(VelocityEngine ve, List<ParsedMethod> parsedMethods) {
+	private void generateService(VelocityEngine ve, List<ParsedMethod> parsedMethods, List<ParsedFilter> filters) {
 		VelocityContext ctx = new VelocityContext();
 		ctx.put("endpoints", parsedMethods);
+		ctx.put("filters", filters);
 		generateFromTemplate(ve, ctx, PKG_PREFIX + "Service");
 	}
 

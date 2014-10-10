@@ -81,11 +81,11 @@ public class $parsedMethod.generatedClassName extends Endpoint {
 #end
 
 	@Override
-	public void invoke(String uri, Request request, ResponseWriter rw) throws HttpException, IOException {
+	public Response invoke(String uri, Request request) throws HttpException, IOException {
 		try {
 			ActualParam[] ap = actualParams(uri, request, formalParams(), defaulQueryParams(), groupMap(), getContext());
 			final ${parsedMethod.destMethodRetType} respFromUserCode = new ${parsedMethod.destClass}().${parsedMethod.destMethod}($parsedMethod.paramsJavaSrc);
-			rw.write(request.getId(), respFromUserCode);
+			return Response.ok().withBody(respFromUserCode).withId(request.getId());
 		} catch (Throwable e) {
 			if (e instanceof HttpException) throw (HttpException) e;
 			if (e instanceof IOException) throw (IOException) e;

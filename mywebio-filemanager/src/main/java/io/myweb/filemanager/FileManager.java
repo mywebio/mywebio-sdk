@@ -33,7 +33,7 @@ public class FileManager {
 	}
 
 	private Response fileContent(File file) throws FileNotFoundException {
-		return Response.ok().withFile(file);
+		return Response.ok().withBody(file);
 	}
 
 	private Response dirJsonPage(String dir, File file) throws JSONException {

@@ -5,8 +5,12 @@ import android.content.Context;
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
+
+import io.myweb.api.Before;
 import io.myweb.http.Method;
 import io.myweb.http.Request;
+import io.myweb.http.Response;
+import io.myweb.processor.model.ParsedFilter;
 import io.myweb.processor.model.ParsedParam;
 import io.myweb.processor.model.ServiceParam;
 
@@ -17,6 +21,9 @@ import org.json.JSONObject;
 import javax.annotation.processing.Messager;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.VariableElement;
+
+import java.io.InvalidObjectException;
 import java.util.Collection;
 import java.util.List;
 
@@ -63,6 +70,30 @@ public class MyValidator extends AnnotationMessagerAware {
 			error(buildErrorMsg(httpMethod, httpUri, destMethodRetType, destMethod, params));
 			throw new RuntimeException();
 		}
+	}
+
+	public ParsedFilter validateFilterAnnotation(String value, boolean isBefore, ExecutableElement ee) {
+		String destClass = ee.getEnclosingElement().toString();
+		String destMethod = ee.getSimpleName().toString();
+		// validate parameters and return type
+		String className = Response.class.getName();
+		if (isBefore) className = Request.class.getName();
+		String destMethodRetType = ee.getReturnType().toString();
+		List<? extends VariableElement> parameters = ee.getParameters();
+		if (!className.equals(destMethodRetType)) {
+			error(destMethod+"() method should return "+className, ee);
+			throw new RuntimeException();
+		}
+		if (parameters.size() != 1) {
+			error(destMethod+"() method has to have one parameter of type "+className, ee);
+			throw new RuntimeException();
+		}
+		String paramType = parameters.get(0).asType().toString().replaceFirst("class ", "");
+		if (!className.equals(paramType)) {
+			error(destMethod+"() method parameter is not of type "+className, parameters.get(0));
+			throw new RuntimeException();
+		}
+		return new ParsedFilter(value, destClass, destMethod, isBefore);
 	}
 
 	public ServiceParam validateBindServiceAnnotation(String value, List<ParsedParam> params, ExecutableElement ee, AnnotationMirror am) {

@@ -18,10 +18,12 @@ public class RequestTask implements Runnable {
 	private final LocalSocket socket;
 
 	private final List<? extends Endpoint> endpoints;
+	private final List<Filter> filters;
 
-	public RequestTask(LocalSocket socket, List<? extends Endpoint> endpoints) {
+	public RequestTask(LocalSocket socket, List<? extends Endpoint> endpoints, List<Filter> filters) {
 		this.socket = socket;
 		this.endpoints = endpoints;
+		this.filters = filters;
 	}
 
 	private static final int BUFFER_SIZE = 512;
@@ -130,9 +132,26 @@ public class RequestTask implements Runnable {
 			throw new HttpNotFoundException("Not found " + uri);
 		else {
 			ResponseWriter rw = new ResponseWriter(endpoint.produces(), socket.getOutputStream());
-			endpoint.invoke(effectiveUri, request, rw);
+			Request filteredRequest = filterBefore(effectiveUri, request);
+			Response response = endpoint.invoke(effectiveUri, filteredRequest);
+			response = filterAfter(effectiveUri, response);
+			rw.write(response);
 			rw.close();
 		}
+	}
+
+	private Response filterAfter(String effectiveUri, Response response) {
+		for (Filter filter: filters) {
+			if (filter.matchAfter(effectiveUri)) response = filter.after(response);
+		}
+		return response;
+	}
+
+	private Request filterBefore(String effectiveUri, Request request) {
+		for (Filter filter: filters) {
+			if (filter.matchBefore(effectiveUri)) request = filter.before(request);
+		}
+		return request;
 	}
 
 	private Endpoint findEndpoint(Method method, String uri) {

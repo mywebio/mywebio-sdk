@@ -122,7 +122,7 @@ public class ParsedMethod {
 					patternSb.append("[/]?(.*?)");
 					curGroup++;
 				} else {
-					patternSb.append("[/]?").append(pathElm);
+					patternSb.append("/").append(pathElm);
 				}
 			}
 		}

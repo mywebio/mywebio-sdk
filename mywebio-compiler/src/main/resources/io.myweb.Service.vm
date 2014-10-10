@@ -1,4 +1,5 @@
 #* @vtlvariable name="endpoints" type="java.util.List<io.myweb.processor.model.ParsedMethod>" *#
+#* @vtlvariable name="filters" type="java.util.List<io.myweb.processor.model.ParsedFilter>" *#
 package io.myweb;
 
 import android.content.Intent;
@@ -18,6 +19,7 @@ public class Service extends android.app.Service {
 	public static final String TAG = Service.class.getName();
 
 	private static final List<Endpoint.Info> endpointList;
+	private static final List<Filter> filterList;
 
 	static {
 		List<Endpoint.Info> el = new ArrayList<Endpoint.Info>();
@@ -27,6 +29,12 @@ public class Service extends android.app.Service {
 		el.add(new Endpoint.Info(Method.$parsedMethod.httpMethod, "$parsedMethod.httpUri", ${parsedMethod.generatedClassName}.class));
 #end
 		endpointList = Collections.unmodifiableList(el);
+
+		List<Filter> lf = new ArrayList<Filter>();
+#foreach( $parsedFilter in $filters )
+		lf.add(new ${parsedFilter.generatedClassName}());
+#end
+		filterList = Collections.unmodifiableList(lf);
 	}
 
 	private ExecutorService executorService;
@@ -44,7 +52,7 @@ public class Service extends android.app.Service {
 		super.onCreate();
 		Log.d(TAG, "Creating web service");
 		executorService = Executors.newSingleThreadExecutor(ThreadFactories.newServerThreadFactory());
-		server = new Server(this, endpointList, new MyAssetInfo());
+		server = new Server(this, endpointList, filterList, new MyAssetInfo());
 		executorService.submit(server);
 	}
 

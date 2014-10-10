@@ -36,6 +36,8 @@ public class Server implements Runnable {
 
 	private final List<Endpoint.Info> endpointList;
 
+	private final List<Filter> filterList;
+
 	private final AssetLengthInfo assetLengthInfo;
 
 	private final List<? extends Endpoint> endpoints;
@@ -116,9 +118,10 @@ public class Server implements Runnable {
 		}
 	}
 
-	public Server(Context context, List<Endpoint.Info> endpointList, AssetLengthInfo info) {
+	public Server(Context context, List<Endpoint.Info> endpointList, List<Filter> filterList, AssetLengthInfo info) {
 		this.context = context;
 		this.endpointList = endpointList;
+		this.filterList = filterList;
 		assetLengthInfo = info;
 		this.endpoints = createEndpoints();
 		this.workerExecutorService = new ThreadPoolExecutor(2, 16, 60, TimeUnit.SECONDS,
@@ -137,6 +140,8 @@ public class Server implements Runnable {
 	public List<Endpoint.Info> getEndpointList() {
 		return endpointList;
 	}
+
+	public List<Filter> getFilterList() { return filterList; }
 
 	public Object bindService(ComponentName name) {
 		InternalServiceConnection connection = serviceMap.get(name.getClassName());
@@ -198,7 +203,7 @@ public class Server implements Runnable {
 
 	private void handleMessage(LocalSocket socket) throws IOException {
 		Log.d(TAG, "send buffer size " + socket.getSendBufferSize());
-		RequestTask worker = new RequestTask(socket, endpoints);
+		RequestTask worker = new RequestTask(socket, endpoints, getFilterList());
 		workerExecutorService.execute(worker);
 	}
 

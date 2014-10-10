@@ -67,7 +67,7 @@ public class AppInfoEndpoint extends Endpoint {
 	}
 
 	@Override
-	public void invoke(String uri, Request request, ResponseWriter rw) throws HttpException, IOException {
-		rw.write(Response.ok().withId(request.getId()).withBody(getServicesJson()));
+	public Response invoke(String uri, Request request) throws HttpException, IOException {
+		return Response.ok().withId(request.getId()).withBody(getServicesJson());
 	}
 }
