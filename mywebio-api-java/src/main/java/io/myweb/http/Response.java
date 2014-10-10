@@ -3,6 +3,7 @@ package io.myweb.http;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -57,6 +58,14 @@ public class Response {
 
 	public Object getBody() {
 		return body;
+	}
+
+	public JSONObject getBodyAsJSONObject() {
+		return (JSONObject) body;
+	}
+
+	public JSONArray getBodyAsJSONArray() {
+		return (JSONArray) body;
 	}
 
 	public Headers getHeaders() {
@@ -116,6 +125,10 @@ public class Response {
 	public Response withBody(InputStream is) {
 		this.body = is;
 		return this;
+	}
+
+	public Response withBody(byte[] data) {
+		return this.withBody(new ByteArrayInputStream(data)).withLength(data.length);
 	}
 
 	public Response withBody(JSONObject jsonObject) {
