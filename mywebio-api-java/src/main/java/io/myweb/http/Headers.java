@@ -77,6 +77,7 @@ public class Headers {
 		public static final String STRICT_TRANS_SEC = "Strict-Transport-Security";
 		public static final String TRAILER = "Trailer";
 		public static final String TRANSFER_ENC = "Transfer-Encoding";
+		public static final String CONTENT_TRANSFER_ENC = "Content-Transfer-Encoding";
 		public static final String UPGRADE = REQUEST.UPGRADE;
 		public static final String VARY = "Vary";
 		public static final String VIA = REQUEST.VIA;
