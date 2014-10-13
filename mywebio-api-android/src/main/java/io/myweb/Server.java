@@ -193,7 +193,7 @@ public class Server implements Runnable {
 		while (!closed) {
 			try {
 				LocalSocket ls = serverSocket.accept();
-				Log.d(TAG, "new connection on local socket");
+//				Log.d(TAG, "new connection on local socket");
 				handleMessage(ls);
 			} catch (IOException e) {
 				Log.e(TAG, "Error while handling request by App: " + e, e);
@@ -202,7 +202,7 @@ public class Server implements Runnable {
 	}
 
 	private void handleMessage(LocalSocket socket) throws IOException {
-		Log.d(TAG, "send buffer size " + socket.getSendBufferSize());
+//		Log.d(TAG, "send buffer size " + socket.getSendBufferSize());
 		RequestTask worker = new RequestTask(socket, endpoints, getFilterList());
 		workerExecutorService.execute(worker);
 	}

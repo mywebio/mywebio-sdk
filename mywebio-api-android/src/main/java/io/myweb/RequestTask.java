@@ -63,7 +63,7 @@ public class RequestTask implements Runnable {
 				if (request != null) {
 					requestId = request.getId();
 					processRequest(request.withBody(inputStream));
-					Log.i(TAG, "Sent response to Web IO Server");
+//					Log.i(TAG, "Sent response to Web IO Server");
 					keepAlive = request.isKeptAlive();
 					// make sure request body has been read
 					if (keepAlive) request.readBody();
