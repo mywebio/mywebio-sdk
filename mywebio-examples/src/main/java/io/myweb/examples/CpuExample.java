@@ -9,6 +9,8 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import io.myweb.api.GET;
@@ -16,20 +18,47 @@ import io.myweb.api.GET;
 public class CpuExample {
 	private static int numCores = 0;
 
+	@GET("/cpuinfo")
+	public JSONObject cpuinfo() throws IOException, JSONException {
+		JSONObject result =  new JSONObject();
+		for (String line : getLinesFromFile("/proc/cpuinfo")) {
+			String[] val = line.split(":", 2);
+			if (val.length < 2) continue; // ignore empty lines
+			result.put(val[0].trim().replaceAll(" ","_"), val[1].trim());
+		}
+		return result;
+	}
+
 	@GET("/stat")
 	public JSONObject cpustat() throws IOException, JSONException {
 		JSONObject result =  new JSONObject();
 		result.put("available", getNumCores());
 		result.put("timestamp", System.currentTimeMillis());
-		BufferedReader buf = new BufferedReader(new FileReader("/proc/stat"));
-		String line = buf.readLine();
-		while (line.startsWith("cpu")) {
+		for (String line : getLinesFromFile("/proc/stat", Pattern.compile("cpu\\d*.*"))) {
 			processCpuLine(line, result);
-			line = buf.readLine();
 		}
-		buf.close();
 		return result;
 	}
+
+	private List<String> getLinesFromFile(String fileName) throws IOException {
+		return getLinesFromFile(fileName, null);
+	}
+
+	private List<String> getLinesFromFile(String fileName, Pattern reg) throws IOException {
+		ArrayList<String> lines = new ArrayList<String>();
+		BufferedReader buf = new BufferedReader(new FileReader(fileName));
+		try {
+			String line = null;
+			while ((line = buf.readLine()) != null) {
+				if (reg!=null && !reg.matcher(line).matches()) continue;
+				lines.add(line);
+			}
+		} finally {
+			buf.close();
+		}
+		return lines;
+	}
+
 
 	private void processCpuLine(String line, JSONObject target) throws JSONException {
 		String[] values = line.substring(5).trim().split("\\s+");
