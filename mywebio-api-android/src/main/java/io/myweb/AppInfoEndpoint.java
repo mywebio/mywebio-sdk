@@ -53,6 +53,7 @@ public class AppInfoEndpoint extends Endpoint {
 			jsonRes.put("url", key.getUri());
 			resources.put(jsonRes);
 		}
+		json.put("resources",resources);
 		return json;
 	}
 
