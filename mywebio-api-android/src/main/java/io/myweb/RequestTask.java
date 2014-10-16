@@ -6,6 +6,7 @@ import android.util.Log;
 import io.myweb.http.*;
 
 import java.io.*;
+import java.net.URI;
 import java.util.List;
 
 public class RequestTask implements Runnable {
@@ -115,36 +116,42 @@ public class RequestTask implements Runnable {
 		}
 	}
 
-	private void processRequest(final Request request) throws HttpException, IOException {
+	private void processRequest(Request request) throws HttpException, IOException {
 		String uri = request.getURI().toString();
 		String effectiveUri = uri;
-		Endpoint endpoint = findEndpoint(request.getMethod(), effectiveUri);
-		// TODO think how to handle better default requests (like "/index.html" on "/")
-		if (("/".equals(uri) || "".equals(uri)) && endpoint == null) {
-			effectiveUri = INDEX_HTML;
-			endpoint = findEndpoint(request.getMethod(), effectiveUri);
-		}
-		if (("/".equals(uri) || "".equals(uri)) && endpoint == null) {
-			effectiveUri = SERVICES_JSON;
-			endpoint = findEndpoint(request.getMethod(), effectiveUri);
-		}
-		if (endpoint == null)
-			throw new HttpNotFoundException("Not found " + uri);
-		else {
-			ResponseWriter rw = new ResponseWriter(endpoint.produces(), socket.getOutputStream());
-			Response response = null;
-			try {
-				Request filteredRequest = filterBefore(effectiveUri, request);
-				response = endpoint.invoke(effectiveUri, filteredRequest);
-				response = filterAfter(effectiveUri, response);
-				rw.write(response);
-			} catch (Throwable t) {
-				if (response != null) response.onError(t);
-				if (t instanceof HttpException) throw (HttpException) t;
-				if (t instanceof IOException) throw (IOException) t;
-				throw new HttpInternalErrorException(t.getMessage(), t);
-			} finally {
-				rw.close(response);
+		Response response = null;
+		while (response == null) {
+			Endpoint endpoint = findEndpoint(request.getMethod(), effectiveUri);
+			// TODO think how to handle better default requests (like "/index.html" on "/")
+			if (("/".equals(uri) || "".equals(uri)) && endpoint == null) {
+				effectiveUri = INDEX_HTML;
+				endpoint = findEndpoint(request.getMethod(), effectiveUri);
+			}
+			if (("/".equals(uri) || "".equals(uri)) && endpoint == null) {
+				effectiveUri = SERVICES_JSON;
+				endpoint = findEndpoint(request.getMethod(), effectiveUri);
+			}
+			if (endpoint == null) {
+				throw new HttpNotFoundException("Not found " + uri);
+			} else {
+				ResponseWriter rw = new ResponseWriter(endpoint.produces(), socket.getOutputStream());
+				try {
+					Request filteredRequest = filterBefore(effectiveUri, request);
+					if (filteredRequest.isRedirected()) {
+						request = filteredRequest.withRedirection(null);
+						continue;
+					}
+					response = endpoint.invoke(effectiveUri, filteredRequest);
+					response = filterAfter(effectiveUri, response);
+					rw.write(response);
+				} catch (Throwable t) {
+					if (response != null) response.onError(t);
+					if (t instanceof HttpException) throw (HttpException) t;
+					if (t instanceof IOException) throw (IOException) t;
+					throw new HttpInternalErrorException(t.getMessage(), t);
+				} finally {
+					rw.close(response);
+				}
 			}
 		}
 	}
@@ -158,7 +165,10 @@ public class RequestTask implements Runnable {
 
 	private Request filterBefore(String effectiveUri, Request request) {
 		for (Filter filter: filters) {
-			if (filter.matchBefore(effectiveUri)) request = filter.before(request);
+			if (filter.matchBefore(effectiveUri)) {
+				request = filter.before(request);
+				if (request.isRedirected()) break;
+			}
 		}
 		return request;
 	}

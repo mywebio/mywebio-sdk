@@ -17,7 +17,7 @@ public class Request {
 	public static final int BUFFER_LENGTH = 32 * 1024;
 	public static final int IN_MEMORY_LIMIT = 2 * 1024 * 1024; // 2 MB
 	private final Method method;
-	private final URI uri;
+	private URI uri;
 	private final String protocolVersion;
 	private final Headers headers;
 	private final Cookies cookies;
@@ -28,6 +28,7 @@ public class Request {
 	private InputStream body;
 	private Map<String,String> parameterMap = null;
 	private long contentLength = -1;
+	private boolean redirected = false;
 
 	private Request(Method method, URI uri, String protocolVersion, Headers headers, Cookies cookies) {
 		this.method = method;
@@ -142,6 +143,21 @@ public class Request {
 	public Request withId(String id) {
 		if (id != null) getHeaders().update(Headers.X.MYWEB_ID, id);
 		return this;
+	}
+
+	public Request withRedirection(URI u) {
+		if (u != null) {
+			getHeaders().update(Headers.REQUEST.ORIGIN, uri.toString());
+			redirected = true;
+			uri = u;
+		} else {
+			redirected = false;
+		}
+		return this;
+	}
+
+	public boolean isRedirected() {
+		return redirected;
 	}
 
 	public Map<String, String> getParameterMap() {
