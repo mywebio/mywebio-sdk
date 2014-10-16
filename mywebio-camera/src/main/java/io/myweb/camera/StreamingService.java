@@ -11,7 +11,6 @@ import android.util.Log;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
-import java.lang.reflect.Field;
 
 import io.myweb.LocalService;
 
@@ -132,7 +131,7 @@ public class StreamingService extends LocalService<Streaming> implements Streami
 		mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
 
 		// Step 3: Set a CamcorderProfile (requires API Level 8 or higher)
-		CamcorderProfile profile = CamcorderProfile.get(CamcorderProfile.QUALITY_720P);
+		CamcorderProfile profile = CamcorderProfile.get(CamcorderProfile.QUALITY_480P);
 //		profile.videoFrameRate = 25;
 //		Log.d(LOG_TAG, "Profile: "+dump(profile));
 		profile.fileFormat = HIDDEN_MPEG_TS;

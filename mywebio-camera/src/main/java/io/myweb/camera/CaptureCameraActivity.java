@@ -75,7 +75,7 @@ public class CaptureCameraActivity extends Activity implements LocalService.Conn
 			@Override
 			public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int width, int height) {
 				portraitMode = (width < height);
-				onCameraSurfaceTextureAvailable(surfaceTexture, 1280, 720);
+				onCameraSurfaceTextureAvailable(surfaceTexture, 640, 480);
 			}
 
 			@Override
