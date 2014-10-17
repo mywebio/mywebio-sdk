@@ -48,7 +48,7 @@ public class Server implements Runnable {
 		private static final int TIMEOUT = 60000;
 		private final Context context;
 		private CountDownLatch serviceConnected = new CountDownLatch(1);
-		private volatile IBinder service;
+		private volatile Object service;
 		private InternalCancelableTask unbindTask;
 
 		private class InternalCancelableTask implements Runnable {
@@ -92,7 +92,9 @@ public class Server implements Runnable {
 
 		@Override
 		public void onServiceConnected(ComponentName name, IBinder service) {
-			this.service = service;
+			if (service instanceof LocalService.Binder)
+				this.service =((LocalService.Binder) service).getService();
+			else this.service = service;
 			serviceConnected.countDown();
 		}
 
@@ -111,8 +113,6 @@ public class Server implements Runnable {
 			}
 			if (service != null) {
 				scheduleUnbindTask();
-				if (service instanceof LocalService.Binder)
-					return ((LocalService.Binder) service).getService();
 			}
 			return service;
 		}
