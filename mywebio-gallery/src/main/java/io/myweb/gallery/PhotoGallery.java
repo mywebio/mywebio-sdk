@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.provider.MediaStore;
 import io.myweb.api.GET;
 import io.myweb.api.Produces;
+import io.myweb.http.HttpNotFoundException;
 
 import java.io.*;
 
@@ -14,21 +15,19 @@ public class PhotoGallery {
 
 	@GET("/thumbs/:id")
 	@Produces("image/jpeg")
-	public InputStream thumbs(Context ctx, int id) {
+	public byte[] thumbs(Context ctx, int id) {
 		Bitmap thumbnail = MediaStore.Images.Thumbnails.getThumbnail(ctx.getContentResolver(), id, MediaStore.Images.Thumbnails.MICRO_KIND, null);
 		if (thumbnail != null) {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			thumbnail.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-			return new ByteArrayInputStream(baos.toByteArray());
+			return baos.toByteArray();
 		} else {
-			// TODO 404
-			return null;
+			throw new HttpNotFoundException("Thumbnail not found!");
 		}
 	}
 
 	@GET("/images/:id")
-	@Produces("image/jpeg")
-	public InputStream images(Context ctx, String id) throws FileNotFoundException {
+	public File images(Context ctx, String id) {
 		Uri contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
 		String[] projection = new String[] { MediaStore.Images.ImageColumns.DATA };
 		String selection = MediaStore.Images.ImageColumns._ID + " = ?";
@@ -38,11 +37,9 @@ public class PhotoGallery {
 		if (cursor.getCount() == 1) {
 			cursor.moveToNext();
 			String data = cursor.getString(dataIdx);
-			File img = new File(data);
-			return new BufferedInputStream(new FileInputStream(img), 32 * 1024);
+			return new File(data);
 		} else {
-			// TODO 404
-			return null;
+			throw new HttpNotFoundException("Image not found!");
 		}
 	}
 

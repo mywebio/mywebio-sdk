@@ -83,10 +83,15 @@ public class ResponseWriter {
 		long total = 0;
 		while (true) {
 			int r = -1;
-			try {
-				r = from.read(buf);
-			} catch (IOException e) {
-				e.printStackTrace();
+			boolean tryAgain = true;
+			while (tryAgain) {
+				try {
+					r = from.read(buf);
+				} catch (IOException e) {
+					if (e.getMessage().startsWith("Try again")) continue;
+					e.printStackTrace();
+				}
+				tryAgain = false;
 			}
 			if (r == -1 || Thread.interrupted()) {
 				if (chunkEncode) to.write("0\r\n\r\n".getBytes());
