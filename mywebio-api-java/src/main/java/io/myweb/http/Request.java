@@ -172,6 +172,9 @@ public class Request {
 	}
 
 	private static Map<String, String> decodeQueryString(String queryParamsStr) {
+		if (queryParamsStr == null) {
+			return new HashMap<String, String>();
+		}
 		String[] nameAndValues = queryParamsStr.split("&");
 		Map<String, String> result = new HashMap<String, String>();
 		for (String nameAndVal : nameAndValues) {
