@@ -14,8 +14,8 @@ import io.myweb.http.*;
 
 public class $parsedMethod.generatedClassName extends Endpoint {
 
-	public ${parsedMethod.generatedClassName}(Server srv) {
-		super(srv);
+	public ${parsedMethod.generatedClassName}(WebContext ctx) {
+		super(ctx);
 	}
 
 	protected Method httpMethod() {
@@ -61,7 +61,7 @@ public class $parsedMethod.generatedClassName extends Endpoint {
 
 	@Override
 	protected Pattern getPattern() {
-	return pattern;
+		return pattern;
 	}
 
 #if ($parsedMethod.servicePresent)
@@ -73,9 +73,9 @@ public class $parsedMethod.generatedClassName extends Endpoint {
 	@Override
 	protected Object getServiceObject() {
 #if ($parsedMethod.service.remote)
-		return getServer().bindService(android.content.ComponentName.unflattenFromString("$parsedMethod.service.componentName");
+		return getWebContext().bindService(android.content.ComponentName.unflattenFromString("$parsedMethod.service.componentName");
 #else
-		return getServer().bindService(new android.content.ComponentName(getContext(), ${parsedMethod.service.componentName}.class));
+		return getWebContext().bindService(new android.content.ComponentName(getContext(), ${parsedMethod.service.componentName}.class));
 #end
 	}
 #end
@@ -83,7 +83,7 @@ public class $parsedMethod.generatedClassName extends Endpoint {
 	@Override
 	public Response invoke(String uri, Request request) throws HttpException, IOException {
 		try {
-			ActualParam[] ap = actualParams(uri, request, formalParams(), defaulQueryParams(), groupMap(), getContext());
+			ActualParam[] ap = actualParams(uri, request, formalParams(), defaulQueryParams(), groupMap(), getWebContext().getContext());
 			final ${parsedMethod.destMethodRetType} respFromUserCode = new ${parsedMethod.destClass}().${parsedMethod.destMethod}($parsedMethod.paramsJavaSrc);
 			return Response.ok().withBody(respFromUserCode).withId(request.getId());
 		} catch (Throwable e) {

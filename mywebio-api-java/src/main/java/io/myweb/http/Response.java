@@ -63,12 +63,12 @@ public class Response {
 		return body;
 	}
 
-	public JSONObject getBodyAsJSONObject() {
-		return (JSONObject) body;
-	}
-
-	public JSONArray getBodyAsJSONArray() {
-		return (JSONArray) body;
+	public InputStream getBodyAsInputStream() {
+		if (body instanceof InputStream) {
+			return (InputStream) body;
+		} else {
+			return new ByteArrayInputStream(body.toString().getBytes());
+		}
 	}
 
 	public Headers getHeaders() {
@@ -157,7 +157,15 @@ public class Response {
 	}
 
 	public Response withChunks() {
-		return withUpdatedHeader(Headers.RESPONSE.TRANSFER_ENC, "chunked");
+		return withTransferEncoding("chunked");
+	}
+
+	public Response withIdentity() {
+		return withTransferEncoding("identity");
+	}
+
+	public Response withTransferEncoding(String value) {
+		return withUpdatedHeader(Headers.RESPONSE.TRANSFER_ENC, value);
 	}
 
 	public Response withCharset(String charset) {
@@ -177,6 +185,10 @@ public class Response {
 		return getHeaders().get(Headers.RESPONSE.CONTENT_TYPE);
 	}
 
+	public String getTransferEncoding() {
+		return getHeaders().get(Headers.RESPONSE.TRANSFER_ENC);
+	}
+
 	public synchronized void setOnCloseListener(OnCloseListener listener) {
 		onCloseListener = listener;
 	}
@@ -185,11 +197,11 @@ public class Response {
 		onErrorListener = listener;
 	}
 
-	public synchronized void onClose() {
+	public final synchronized void onClose() {
 		if (onCloseListener != null) onCloseListener.onClose(this);
 	}
 
-	public synchronized void onError(Throwable cause) {
+	public final synchronized void onError(Throwable cause) {
 		if (onErrorListener != null) onErrorListener.onError(this, cause);
 	}
 

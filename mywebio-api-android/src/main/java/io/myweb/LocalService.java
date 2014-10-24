@@ -19,6 +19,7 @@ public class LocalService<T> extends Service {
 		private WeakReference<T> srvc;
 
 		public Binder(T service) {
+			super();
 			srvc = new WeakReference<T>(service);
 		}
 
@@ -34,7 +35,6 @@ public class LocalService<T> extends Service {
 
 	public static class Connection<T> {
 		protected volatile T service;
-		protected Class<?> serviceClass;
 		protected Context ctx;
 		protected ConnectionListener<T> connListener;
 
@@ -60,7 +60,6 @@ public class LocalService<T> extends Service {
 
 		public Connection(Context ctx, Class<?> serviceClass) {
 			this.ctx = ctx;
-			this.serviceClass = serviceClass;
 			Intent intent = new Intent(ctx, serviceClass);
 			ctx.bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
 		}

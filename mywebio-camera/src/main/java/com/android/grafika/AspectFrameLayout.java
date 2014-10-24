@@ -96,7 +96,7 @@ public class AspectFrameLayout extends FrameLayout {
 			}
 		}
 
-		//Log.d(TAG, "set width=[" + MeasureSpec.toString(widthMeasureSpec) +
+		//Log.d(LOG_TAG, "set width=[" + MeasureSpec.toString(widthMeasureSpec) +
 		//        "] height=[" + View.MeasureSpec.toString(heightMeasureSpec) + "]");
 		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 	}

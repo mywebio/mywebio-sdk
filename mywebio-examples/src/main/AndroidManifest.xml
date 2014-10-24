@@ -17,8 +17,18 @@
         <service
             android:name=".SensorService"
             android:enabled="true"
-            android:exported="true" >
+            android:exported="false" >
         </service>
+
+        <activity
+            android:name=".MyWebActivity"
+            android:label="@string/title_activity_my_web"
+	        android:theme="@android:style/Theme.NoTitleBar">
+	        <intent-filter>
+		        <action android:name="android.intent.action.MAIN" />
+		        <category android:name="android.intent.category.LAUNCHER" />
+	        </intent-filter>
+        </activity>
     </application>
 
 </manifest>

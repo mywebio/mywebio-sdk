@@ -83,7 +83,7 @@ public class MyCodeGenerator extends ProcessingEnvAware {
 		Context ctx = createContext();
 		ctx.put("endpoints", parsedMethods);
 		ctx.put("filters", filters);
-		generateFromTemplate(ve, ctx, PKG_PREFIX + "Service");
+		generateFromTemplate(ve, ctx, PKG_PREFIX + "MyServices");
 	}
 
 	private VelocityEngine instantiateVelocityEngine() {

@@ -11,27 +11,21 @@ import java.util.List;
 
 public class RequestTask implements Runnable {
 
-	private static final String TAG = "myweb.io";
-
-	private static final String INDEX_HTML = "/index.html";
-	private static final String SERVICES_JSON = "/services.json";
+	private static final String TAG = RequestTask.class.getName();
 
 	private final LocalSocket socket;
+	private final RequestProcessor processor;
 
-	private final List<? extends Endpoint> endpoints;
-	private final List<Filter> filters;
-
-	public RequestTask(LocalSocket socket, List<? extends Endpoint> endpoints, List<Filter> filters) {
+	public RequestTask(LocalSocket socket, RequestProcessor processor) {
 		this.socket = socket;
-		this.endpoints = endpoints;
-		this.filters = filters;
+		this.processor = processor;
 	}
 
 	private static final int BUFFER_SIZE = 512;
 
 	private void writeErrorResponse(String requestId, HttpException ex) {
 		try {
-			ResponseWriter rw = new ResponseWriter(MimeTypes.MIME_TEXT_HTML, socket.getOutputStream());
+			ResponseWriter rw = new ResponseWriter(socket.getOutputStream());
 			rw.write(Response.error(ex).withId(requestId).withBody(preformatted(Log.getStackTraceString(ex))));
 			rw.close();
 		} catch (IOException err) {
@@ -63,8 +57,7 @@ public class RequestTask implements Runnable {
 				}
 				if (request != null) {
 					requestId = request.getId();
-					processRequest(request.withBody(inputStream));
-//					Log.i(TAG, "Sent response to Web IO Server");
+					writeResponse(processor.processRequest(request.withBody(inputStream)));
 					keepAlive = request.isKeptAlive();
 					// make sure request body has been read
 					if (keepAlive) request.readBody();
@@ -77,6 +70,15 @@ public class RequestTask implements Runnable {
 			writeErrorResponse(requestId, new HttpInternalErrorException(e.getMessage(), e));
 		} finally {
 			closeConnection();
+		}
+	}
+
+	private void writeResponse(Response response) throws IOException {
+		ResponseWriter rw = new ResponseWriter(socket.getOutputStream());
+		try {
+			rw.write(response);
+		} finally {
+			rw.close(response);
 		}
 	}
 
@@ -116,69 +118,4 @@ public class RequestTask implements Runnable {
 		}
 	}
 
-	private void processRequest(Request request) throws HttpException, IOException {
-		String uri = request.getURI().toString();
-		String effectiveUri = uri;
-		Response response = null;
-		while (response == null) {
-			Endpoint endpoint = findEndpoint(request.getMethod(), effectiveUri);
-			// TODO think how to handle better default requests (like "/index.html" on "/")
-			if (("/".equals(uri) || "".equals(uri)) && endpoint == null) {
-				effectiveUri = INDEX_HTML;
-				endpoint = findEndpoint(request.getMethod(), effectiveUri);
-			}
-			if (("/".equals(uri) || "".equals(uri)) && endpoint == null) {
-				effectiveUri = SERVICES_JSON;
-				endpoint = findEndpoint(request.getMethod(), effectiveUri);
-			}
-			if (endpoint == null) {
-				throw new HttpNotFoundException("Not found " + uri);
-			} else {
-				ResponseWriter rw = new ResponseWriter(endpoint.produces(), socket.getOutputStream());
-				try {
-					Request filteredRequest = filterBefore(effectiveUri, request);
-					if (filteredRequest.isRedirected()) {
-						request = filteredRequest.withRedirection(null);
-						continue;
-					}
-					response = endpoint.invoke(effectiveUri, filteredRequest);
-					response = filterAfter(effectiveUri, response);
-					rw.write(response);
-				} catch (Throwable t) {
-					if (response != null) response.onError(t);
-					if (t instanceof HttpException) throw (HttpException) t;
-					if (t instanceof IOException) throw (IOException) t;
-					throw new HttpInternalErrorException(t.getMessage(), t);
-				} finally {
-					rw.close(response);
-				}
-			}
-		}
-	}
-
-	private Response filterAfter(String effectiveUri, Response response) {
-		for (Filter filter: filters) {
-			if (filter.matchAfter(effectiveUri)) response = filter.after(response);
-		}
-		return response;
-	}
-
-	private Request filterBefore(String effectiveUri, Request request) {
-		for (Filter filter: filters) {
-			if (filter.matchBefore(effectiveUri)) {
-				request = filter.before(request);
-				if (request.isRedirected()) break;
-			}
-		}
-		return request;
-	}
-
-	private Endpoint findEndpoint(Method method, String uri) {
-		for (Endpoint endpoint : endpoints) {
-			if (endpoint.match(method, uri)) {
-				return endpoint;
-			}
-		}
-		return null;
-	}
 }

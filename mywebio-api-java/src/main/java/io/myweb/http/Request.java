@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
@@ -30,12 +31,16 @@ public class Request {
 	private long contentLength = -1;
 	private boolean redirected = false;
 
-	private Request(Method method, URI uri, String protocolVersion, Headers headers, Cookies cookies) {
+	public Request(String url) {
+		this(Method.GET, URI.create(url), "1.1", new Headers());
+	}
+
+	private Request(Method method, URI uri, String protocolVersion, Headers headers) {
 		this.method = method;
 		this.uri = uri;
 		this.protocolVersion = protocolVersion;
 		this.headers = headers;
-		this.cookies = cookies;
+		this.cookies = Cookies.parse(headers);
 	}
 
 	public boolean isCached() {
@@ -212,8 +217,7 @@ public class Request {
 		URI uri = URI.create(segments[1]);
 		String protocolVersion = segments[2];
 		Headers headers = Headers.parse(lines[1]);
-		Cookies cookies = Cookies.parse(headers);
-		return new Request(method, uri, protocolVersion, headers, cookies);
+		return new Request(method, uri, protocolVersion, headers);
 	}
 
 	public long readBody() throws IOException {

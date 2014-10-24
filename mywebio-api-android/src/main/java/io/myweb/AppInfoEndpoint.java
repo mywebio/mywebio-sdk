@@ -14,8 +14,8 @@ public class AppInfoEndpoint extends Endpoint {
 
 	private JSONObject servicesJson = null;
 
-	public AppInfoEndpoint(Server srv) {
-		super(srv);
+	public AppInfoEndpoint(WebContext ctx) {
+		super(ctx);
 	}
 
 	protected Method httpMethod() {
@@ -47,7 +47,7 @@ public class AppInfoEndpoint extends Endpoint {
 		json.put("id", pkgName());
 		json.put("name", appName());
 		JSONArray resources = new JSONArray();
-		for (Info key : getServer().getEndpointList()) {
+		for (Info key : getWebContext().getEndpointInfos()) {
 			JSONObject jsonRes = new JSONObject();
 			jsonRes.put("method", key.getMethod().toString());
 			jsonRes.put("url", key.getUri());

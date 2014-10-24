@@ -6,15 +6,16 @@ import io.myweb.http.Method;
 import io.myweb.http.Request;
 import io.myweb.http.Response;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.regex.Pattern;
 
 public class AssetEndpoint extends Endpoint {
 
 	public static final String MYWEB_ASSETS_DIR = "myweb";
 
-	public AssetEndpoint(Server srv) {
-		super(srv);
+	public AssetEndpoint(WebContext ctx) {
+		super(ctx);
 	}
 
 	@Override
@@ -53,7 +54,7 @@ public class AssetEndpoint extends Endpoint {
 	public Response invoke(String uri, Request request) throws IOException {
 		AssetManager assetManager = getContext().getAssets();
 		InputStream is = assetManager.open(MYWEB_ASSETS_DIR + uri);
-		long length = getServer().getAssetLength(uri);
+		long length = getWebContext().getAssetInfo().getAssetLength(uri);
 		return Response.ok().withId(request.getId()).withContentTypeFrom(uri).withLength(length).withBody(is);
 	}
 }

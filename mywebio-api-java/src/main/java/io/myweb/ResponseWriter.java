@@ -1,6 +1,5 @@
 package io.myweb;
 
-import io.myweb.http.MimeTypes;
 import io.myweb.http.Response;
 
 import java.io.*;
@@ -10,17 +9,11 @@ public class ResponseWriter {
 	public static final int BUFFER_LENGTH = 32 * 1024;
 
 	private final OutputStream os;
-	private final String produces;
 
 	private boolean closed = false;
 
-	public ResponseWriter(String produces, OutputStream os) throws IOException {
-		this.produces = produces;
-		this.os = os;
-	}
-
 	public ResponseWriter(OutputStream os) throws IOException {
-		this(MimeTypes.MIME_TEXT_HTML, os);
+		this.os = os;
 	}
 
 	public void close() throws IOException {
@@ -41,20 +34,9 @@ public class ResponseWriter {
 
 	public void write(Response response) throws IOException {
 		if (!isClosed() && response!=null) {
-			String contentType = response.getContentType();
-			if (contentType == null) contentType = produces;
-			// if content type is text, make sure charset is specified
-			if (!contentType.contains("charset=") && isTextContent(contentType)) {
-				contentType = contentType + "; charset=" + response.getCharset();
-			}
-			response.withContentType(contentType);
 			if (response.getBody() instanceof InputStream) writeInputStream(response);
 			else writeObject(response);
 		}
-	}
-
-	static boolean isTextContent(String content) {
-		return content.contains("text") || content.contains("xml") || content.contains("json");
 	}
 
 	private void writeObject(Response response) throws IOException {

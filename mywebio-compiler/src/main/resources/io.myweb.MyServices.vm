@@ -1,0 +1,16 @@
+#* @vtlvariable name="endpoints" type="java.util.List<io.myweb.processor.model.ParsedMethod>" *#
+#* @vtlvariable name="filters" type="java.util.List<io.myweb.processor.model.ParsedFilter>" *#
+package io.myweb;
+
+import io.myweb.http.Method;
+
+public class MyServices {
+	static {
+#foreach( $parsedMethod in $endpoints )
+		Service.addEndpointInfo(new Endpoint.Info(Method.$parsedMethod.httpMethod, "$parsedMethod.httpUri", ${parsedMethod.generatedClassName}.class));
+#end
+#foreach( $parsedFilter in $filters )
+		Service.addFilter(new ${parsedFilter.generatedClassName}());
+#end
+	}
+}

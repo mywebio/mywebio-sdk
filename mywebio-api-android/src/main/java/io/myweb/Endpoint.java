@@ -40,10 +40,14 @@ public abstract class Endpoint {
 		}
 	}
 
-	private Server server;
+	private WebContext webContext;
 
-	public Endpoint(Server server) {
-		this.server = server;
+	public Endpoint(WebContext context) {
+		webContext = context;
+	}
+
+	public WebContext getWebContext() {
+		return webContext;
 	}
 
 	public String produces() {
@@ -51,10 +55,6 @@ public abstract class Endpoint {
 	}
 
 	public abstract Response invoke(String uri, Request request) throws HttpException, IOException;
-
-	protected Server getServer() {
-		return server;
-	}
 
 	protected String getServiceName() { // overriden in subclasses
 		return null;
@@ -65,7 +65,7 @@ public abstract class Endpoint {
 	}
 
 	protected Context getContext() {
-		return server.getContext();
+		return webContext.getContext();
 	}
 
 	protected abstract Pattern getPattern();
@@ -80,7 +80,7 @@ public abstract class Endpoint {
 		boolean matched = httpMethod().equals(method) && m.matches();
 		if (matched) {
 			Log.d("Endpoint", "matched path " + httpMethod() + " " + originalPath() + " (pattern: " + getPattern() + ") request: " + method + " " + uri);
-		} else {
+//		} else {
 //			Log.d("Endpoint", "not matched path " + httpMethod() + " " + originalPath() + " (pattern: " + getPattern() + ") request: " + method + " " + uri);
 		}
 		return matched;
