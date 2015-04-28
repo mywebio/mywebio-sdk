@@ -1,6 +1,8 @@
 # MyWeb.io SDK and client library
 [![Build Status](https://travis-ci.org/mywebio/mywebio-sdk.svg)](https://travis-ci.org/mywebio/mywebio-sdk)
 
+In case you wonder why this project is not evolving anymore it's because we are building new startup over this technology. This project will move very soon to reon.io space. Keep the thumbs up.
+
 This library allows you to write web applications for Android.
 It works with Android application available on [Google Play](https://play.google.com/store/apps/details?id=io.myweb.server.alpha).
 
