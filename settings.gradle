@@ -1,4 +1,4 @@
-include ':mywebio-api-java',
+include ':mywebio-api-java', ':mywebio-contest-app', ':mywebio-contest',
 		':mywebio-api-android',
         ':mywebio-api',
         ':mywebio-compiler',
